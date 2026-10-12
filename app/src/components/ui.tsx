@@ -96,6 +96,7 @@ export function Nav() {
         <img src="/icon.svg" alt="" className="size-7" /> Advance
       </Link>
       <nav className="flex items-center gap-1 text-[15px] sm:gap-2">
+        <Link href="/agents" className="hidden rounded-full px-3 py-2 text-muted hover:text-ink sm:inline">Agents</Link>
         <Link href="/earn" className="rounded-full px-3 py-2 text-muted hover:text-ink">Earn</Link>
         <Link href="/app" className="rounded-full bg-ink px-4 py-2 text-paper">{session ? "My Advance" : "Sign in"}</Link>
       </nav>

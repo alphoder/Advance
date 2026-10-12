@@ -16,7 +16,7 @@ type Pool = {
   steady: number; boost: number; total: number; lentOut: number; cash: number; feesEarned: number; losses: number;
   utilisation: number; steadyPrice: number; boostPrice: number; advances: number; repayments: number; defaults: number;
 };
-type Position = { shares: number; value: number; earned: number };
+type Position = { shares: number; value: number; earned: number | null };
 type PoolResp = { pool: Pool; me?: { wallet: number; steady: Position; boost: Position } };
 
 export default function Earn() {
@@ -141,9 +141,13 @@ function TrancheCard({
         <div className="mt-4 rounded-2xl bg-paper p-4">
           <div className="text-[13px] text-muted">Your {name} savings</div>
           <div className="num text-4xl">{fmtUsd(pos.value, 4)}</div>
-          <div className={`text-[14px] ${pos.earned >= 0 ? "text-green" : "text-red"}`}>
-            {pos.earned >= 0 ? "You've earned " : "Down "}{fmtUsd(Math.abs(pos.earned), 6)} so far
-          </div>
+          {pos.earned === null ? (
+            <div className="text-[14px] text-muted">Includes shares bought on the market</div>
+          ) : (
+            <div className={`text-[14px] ${pos.earned >= 0 ? "text-green" : "text-red"}`}>
+              {pos.earned >= 0 ? "You've earned " : "Down "}{fmtUsd(Math.abs(pos.earned), 6)} so far
+            </div>
+          )}
         </div>
       )}
       {session && (

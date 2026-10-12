@@ -29,6 +29,9 @@ export const POST = handler(async (req) => {
     for (let i = 0; i < 5; i++) await demoClientPays(c.id, demoAccount(`merchant-${i}`).address, 10 + i);
   log.push("Demo clients: 5 payments each to other merchants");
 
+  // Pre-fund the client used by "Acme Studio pays…" so the demo payment is a single transaction.
+  await faucet(demoAccount("acme-studio").address, 10_000);
+
   const sam = demoAccount("sybil-sam");
   const salt = Date.now().toString();
   for (const h of ["a", "b"]) {

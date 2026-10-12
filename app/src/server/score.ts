@@ -1,6 +1,6 @@
 import { decodeEventLog, getAddress, isAddressEqual, zeroAddress, type Address, type Hex } from "viem";
 import { D, publicClient, USD } from "@/lib/chain";
-import { creditAbi, erc20Abi, factoryAbi } from "@/lib/abi";
+import { agentAbi, creditAbi, erc20Abi, factoryAbi } from "@/lib/abi";
 import { fetchLogs, addrTopic, type RawLog } from "./logs";
 import { labelsOf, relatedOf, nansenEnabled } from "./nansen";
 
@@ -191,6 +191,10 @@ async function compute(address: Address): Promise<ScoreResult> {
   if (credit.defaulted) reasons.push({ kind: "bad", text: "A previous advance was not repaid" });
   else if (credit.repayments) reasons.push({ kind: "good", text: `Repaid on Advance ${credit.repayments} time${credit.repayments > 1 ? "s" : ""}` });
   if (!linkedPayers.length && !credit.defaulted && credit.tier < 3) nextSteps.push(`Repay an advance in full to unlock up to ${fmt(usd([50n, 200n, 1000n, 5000n][credit.tier + 1] * USD))}`);
+  const agentId = D.agentAdapter !== zeroAddress
+    ? await publicClient.readContract({ address: D.agentAdapter, abi: agentAbi, functionName: "agentIdOf", args: [address] })
+    : 0n;
+  if (agentId > 0n) reasons.unshift({ kind: "good", text: `Registered AI agent #${agentId} (ERC-8004), earning onchain` });
   if (nansenEnabled()) reasons.push({ kind: "good", text: "Payers checked against Nansen labels and related wallets" });
 
   const hardDecline = linkedPayers.length > 0 || credit.defaulted;

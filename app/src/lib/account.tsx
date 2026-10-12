@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { createWalletClient, http, type Address, type WalletClient, type Account } from "viem";
 import { privateKeyToAccount, generatePrivateKey } from "viem/accounts";
-import { keccak256, concatHex, toHex, hexToBytes, type Hex } from "viem";
+import { keccak256, concatHex, toHex, hexToBytes, bytesToHex, type Hex } from "viem";
 import { HDKey } from "@scure/bip32";
 import { entropyToMnemonic, mnemonicToSeedSync } from "@scure/bip39";
 import { wordlist } from "@scure/bip39/wordlists/english.js";
@@ -18,6 +18,8 @@ type Session = {
   wallet: WalletClient<ReturnType<typeof http>, typeof chain, Account>;
   /** Second key from the same passkey (BIP-44 index 1): encrypts the credit file. Memory only. */
   encKey: Uint8Array;
+  /** Third key from the same passkey (index 2): the wallet of this user's AI agent. */
+  agentKey: Hex;
 };
 type Ctx = {
   session?: Session;
@@ -45,6 +47,7 @@ function deriveKey(prf: Uint8Array, index = 0): Uint8Array {
 
 /** Demo accounts have no passkey; derive their encryption key from the demo key instead. */
 const demoEncKey = (key: Hex) => hexToBytes(keccak256(concatHex([key, toHex("advance/enc")])));
+const demoAgentKey = (key: Hex) => keccak256(concatHex([key, toHex("advance/agent")]));
 
 function walletFor(account: Account) {
   return createWalletClient({ account, chain, transport: http(RPC_URL) });
@@ -53,7 +56,7 @@ function walletFor(account: Account) {
 function passkeySession(prf: Uint8Array): Session {
   const session = createSecp256k1SigningSession({ privateKey: deriveKey(prf) as Uint8Array<ArrayBuffer> });
   const account = toViemAccount(session);
-  return { address: account.address, kind: "passkey", wallet: walletFor(account), encKey: deriveKey(prf, 1) };
+  return { address: account.address, kind: "passkey", wallet: walletFor(account), encKey: deriveKey(prf, 1), agentKey: bytesToHex(deriveKey(prf, 2)) };
 }
 
 function friendly(e: unknown) {
@@ -88,7 +91,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     const demo = store.get(DEMO);
     if (demo) {
       const account = privateKeyToAccount(demo as `0x${string}`);
-      setSession({ address: account.address, kind: "demo", wallet: walletFor(account), encKey: demoEncKey(demo as Hex) });
+      setSession({ address: account.address, kind: "demo", wallet: walletFor(account), encKey: demoEncKey(demo as Hex), agentKey: demoAgentKey(demo as Hex) });
     }
     setHasPasskey(Boolean(store.get(CRED)));
     setReady(true);
@@ -143,7 +146,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     const key = (store.get(DEMO) as `0x${string}` | null) ?? generatePrivateKey();
     store.set(DEMO, key);
     const account = privateKeyToAccount(key);
-    const s: Session = { address: account.address, kind: "demo", wallet: walletFor(account), encKey: demoEncKey(key) };
+    const s: Session = { address: account.address, kind: "demo", wallet: walletFor(account), encKey: demoEncKey(key), agentKey: demoAgentKey(key) };
     setSession(s);
     setError(undefined);
     return s;
@@ -167,4 +170,5 @@ export function useAccount() {
   return ctx;
 }
 
-export { deriveKey };
+export { deriveKey, walletFor };
+export type { Session };

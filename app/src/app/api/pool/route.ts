@@ -64,8 +64,9 @@ export const GET = handler(async (req) => {
     pool,
     me: {
       wallet: usd(wallet),
-      steady: { shares: usd(sShares), value: steadyValue, earned: dust(steadyValue - net[0]) },
-      boost: { shares: usd(jShares), value: boostValue, earned: dust(boostValue - net[1]) },
+      // Earnings vs. net deposits. Shares bought on Kuru have no deposit record, so we don't guess a cost basis.
+      steady: { shares: usd(sShares), value: steadyValue, earned: net[0] > 0 ? dust(steadyValue - net[0]) : null },
+      boost: { shares: usd(jShares), value: boostValue, earned: net[1] > 0 ? dust(boostValue - net[1]) : null },
     },
   };
 });

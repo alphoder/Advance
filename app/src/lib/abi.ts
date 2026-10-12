@@ -95,3 +95,13 @@ export const kuruBookAbi = parseAbi([
 ]);
 /** Advance's Kuru market params (see contracts/script/KuruMarket.s.sol). */
 export const KURU = { pricePrecision: 10_000n, sizePrecision: 1_000_000n } as const;
+
+export const agentAbi = parseAbi([
+  "function linkAgent(uint256 agentId, address wallet) returns (address)",
+  "function agentIdOf(address) view returns (uint256)",
+]);
+export const identityRegistryAbi = parseAbi([
+  "event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)",
+  "function register(string tokenURI) returns (uint256)",
+]);
+export const ERC8004_REGISTRY = "0x8004A818BFB912233c491871b3d84c89A494BD9e" as const; // Monad testnet

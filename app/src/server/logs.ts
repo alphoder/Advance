@@ -22,7 +22,7 @@ const HYPERSYNC = `https://${CHAIN_ID}.hypersync.xyz/query`;
  * plain eth_getLogs on a local chain.
  */
 export async function fetchLogs(q: LogQuery): Promise<RawLog[]> {
-  if (IS_LOCAL) return rpcLogs(q);
+  if (IS_LOCAL || process.env.LOGS_VIA_RPC === "1") return rpcLogs(q); // LOGS_VIA_RPC: local forks only
   if (!TOKEN) throw new Error("ENVIO_API_TOKEN is required to read history on Monad");
   return hypersyncLogs(q);
 }

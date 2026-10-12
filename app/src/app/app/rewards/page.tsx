@@ -2,9 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { Snowflake, Star, Gift, X, CheckCircle, Target, Crown, Coins } from "@phosphor-icons/react";
+import { Snowflake, Star, Gift, X, CheckCircle, Target, Crown, Coins, MagnifyingGlass } from "@phosphor-icons/react";
 import { POINTS, POINT_VALUE, TIERS, EARN, MISSIONS, tierOf, nextTier, OWNED_START, OWNED_KEY, type OwnedCard } from "@/lib/rewards-data";
+import Link from "next/link";
 import { PageHeader } from "@/components/app/bits";
+import { useAccount } from "@/lib/account";
+import { useMaybeAppData } from "@/lib/app-data";
+import { fmtUsd } from "@/components/ui";
 import { TrustCards } from "@/components/trust-cards";
 import { AdvanceCard, GiftCard, CouponCard, Barcode, CopyCode, BRANDS, COUPONS, brand, makeCode, makePin, type Brand } from "@/components/rewards";
 
@@ -13,11 +17,18 @@ const STARTER = OWNED_START;
 const KEY = OWNED_KEY;
 const CATS = ["All", "Food", "Travel", "Rides", "Fun", "Learning"] as const;
 const EASE = [0.23, 1, 0.32, 1] as const;
-const TIER = tierOf(POINTS);
-const NEXT = nextTier(POINTS);
 
 export default function Rewards() {
   const [frozen, setFrozen] = useState(false);
+  const { session } = useAccount();
+  const act = useMaybeAppData()?.activity;
+  // the card only switches on once the account's income has been checked and a limit set
+  const verified = !!act && (act.credit.limit > 0 || act.credit.totalBorrowed > 0);
+  // points and missions also start at zero until the account is verified
+  const PTS = verified ? POINTS : 0;
+  const TIER = tierOf(PTS);
+  const NEXT = nextTier(PTS);
+  const cardName = session ? `${session.address.slice(0, 6)}…${session.address.slice(-4)}`.toUpperCase().replace("0X", "0x") : "YOUR NAME";
   const [cat, setCat] = useState<(typeof CATS)[number]>("All");
   const [buying, setBuying] = useState<Brand>();
   const [owned, setOwned] = useState<Owned[]>(STARTER);
@@ -42,16 +53,26 @@ export default function Rewards() {
       {/* Card + points */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
         <div className="rounded-3xl border border-line bg-panel/80 p-5 sm:p-7 lg:col-span-7">
-          <div className="mx-auto max-w-[440px]"><AdvanceCard frozen={frozen} /></div>
+          <div className="mx-auto max-w-[440px]"><AdvanceCard frozen={frozen} locked={!verified} name={cardName} limit={verified ? act!.credit.limit : 50} /></div>
           <div className="mx-auto mt-6 grid max-w-[440px] grid-cols-3 gap-2 text-center">
-            {[["Spendable", "$50.00"], ["Cashback this month", "$3.20"], ["Card", frozen ? "Frozen" : "Active"]].map(([k, v]) => (
+            {[
+              ["Wallet balance", verified ? fmtUsd(act!.balance) : "$0.00"],
+              ["Advance available", verified ? fmtUsd(act!.credit.available) : "$0.00"],
+              ["Card", !verified ? "Not active" : frozen ? "Frozen" : "Active"],
+            ].map(([k, v]) => (
               <div key={k} className="rounded-2xl bg-white/[0.03] px-2 py-3"><div className="text-[12px] text-muted">{k}</div><div className="num mt-0.5 font-mono text-[15px] font-semibold">{v}</div></div>
             ))}
           </div>
           <div className="mx-auto mt-3 flex max-w-[440px] gap-2">
-            <button onClick={() => setFrozen(!frozen)} className="press flex flex-1 items-center justify-center gap-2 rounded-xl border border-line-strong bg-white/[0.03] py-2.5 text-[14px] hover:bg-white/[0.07]">
-              <Snowflake className="size-4" /> {frozen ? "Unfreeze card" : "Freeze card"}
-            </button>
+            {verified ? (
+              <button onClick={() => setFrozen(!frozen)} className="press flex flex-1 items-center justify-center gap-2 rounded-xl border border-line-strong bg-white/[0.03] py-2.5 text-[14px] hover:bg-white/[0.07]">
+                <Snowflake className="size-4" /> {frozen ? "Unfreeze card" : "Freeze card"}
+              </button>
+            ) : (
+              <Link href="/app" className="press flex flex-1 items-center justify-center gap-2 rounded-xl border border-terra/50 bg-terra/10 py-2.5 text-[14px] text-terra hover:bg-terra/15">
+                <MagnifyingGlass className="size-4" weight="bold" /> Check my income
+              </Link>
+            )}
             <a href="#gift-cards" className="press flex flex-1 items-center justify-center gap-2 rounded-xl bg-terra py-2.5 text-[14px] font-medium text-[#1a0d08] hover:bg-terra-hi">
               <Gift className="size-4" weight="bold" /> Buy a gift card
             </a>
@@ -61,13 +82,13 @@ export default function Rewards() {
         <div className="flex flex-col gap-4 lg:col-span-5">
           <div className="rounded-3xl bg-monad p-6 text-white">
             <div className="flex items-center justify-between text-[13px] opacity-80"><span>Advance points</span><span className="flex items-center gap-1"><Star weight="fill" className="size-3.5" /> {TIER.name}</span></div>
-            <div className="num mt-1 font-mono text-5xl font-semibold">{POINTS.toLocaleString()}</div>
-            <div className="mt-4 h-2 overflow-hidden rounded-full bg-black/20"><motion.div className="h-full rounded-full bg-white" initial={{ width: 0 }} animate={{ width: `${NEXT ? (POINTS / NEXT.at) * 100 : 100}%` }} transition={{ duration: 0.9, ease: EASE, delay: 0.2 }} /></div>
-            <div className="mt-2 text-[13px] opacity-85">{NEXT ? `${(NEXT.at - POINTS).toLocaleString()} more points to ${NEXT.name}: ${NEXT.perks.slice(0, 2).join(", ").toLowerCase()}.` : "Top tier reached."}</div>
+            <div className="num mt-1 font-mono text-5xl font-semibold">{PTS.toLocaleString()}</div>
+            <div className="mt-4 h-2 overflow-hidden rounded-full bg-black/20"><motion.div className="h-full rounded-full bg-white" initial={{ width: 0 }} animate={{ width: `${NEXT ? (PTS / NEXT.at) * 100 : 100}%` }} transition={{ duration: 0.9, ease: EASE, delay: 0.2 }} /></div>
+            <div className="mt-2 text-[13px] opacity-85">{NEXT ? `${(NEXT.at - PTS).toLocaleString()} more points to ${NEXT.name}: ${NEXT.perks.slice(0, 2).join(", ").toLowerCase()}.` : "Top tier reached."}</div>
           </div>
           <div className="flex-1 rounded-3xl border border-line bg-panel/80 p-6">
             <div className="flex items-center gap-2 text-[14px] font-semibold"><Coins className="size-5 text-terra" weight="duotone" /> Your points are worth</div>
-            <div className="num mt-2 font-mono text-4xl font-semibold text-terra">${(POINTS * POINT_VALUE).toFixed(2)}</div>
+            <div className="num mt-2 font-mono text-4xl font-semibold text-terra">${(PTS * POINT_VALUE).toFixed(2)}</div>
             <div className="mt-1 text-[14px] text-muted">in gift cards. 100 points = $1, on top of each card&apos;s discount.</div>
             <a href="#earn" className="press mt-4 inline-flex items-center gap-1.5 rounded-xl border border-line-strong px-4 py-2 text-[14px] hover:bg-white/[0.05]"><Target className="size-4" /> How to earn more</a>
           </div>
@@ -84,7 +105,7 @@ export default function Rewards() {
         <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
           {TIERS.map((t, i) => {
             const cur = t.name === TIER.name;
-            const reached = POINTS >= t.at;
+            const reached = PTS >= t.at;
             return (
               <div key={t.name} className={`relative rounded-3xl p-5 ${cur ? "bg-monad text-white" : "border border-line bg-panel/80"} ${reached || cur ? "" : "opacity-90"}`}>
                 <div className="flex items-center justify-between">
@@ -92,7 +113,7 @@ export default function Rewards() {
                   <span className={`font-mono text-[12px] ${cur ? "opacity-80" : "text-faint"}`}>{t.at.toLocaleString()} pts</span>
                 </div>
                 {cur && <div className="mt-1 text-[12px] opacity-85">You are here</div>}
-                {!reached && <div className="mt-1 text-[12px] text-terra">{(t.at - POINTS).toLocaleString()} to go</div>}
+                {!reached && <div className="mt-1 text-[12px] text-terra">{(t.at - PTS).toLocaleString()} to go</div>}
                 <ul className={`mt-3 space-y-1.5 text-[13px] ${cur ? "opacity-90" : "text-muted"}`}>
                   {t.perks.map((p) => <li key={p} className="flex gap-1.5"><CheckCircle weight="fill" className={`mt-0.5 size-3.5 shrink-0 ${cur ? "" : reached ? "text-terra" : "text-faint"}`} />{p}</li>)}
                 </ul>
@@ -106,7 +127,7 @@ export default function Rewards() {
             <div className="flex items-center gap-2 text-[14px] font-semibold"><Target className="size-5 text-monad-hi" weight="duotone" /> Missions this month</div>
             <ul className="mt-4 space-y-4">
               {MISSIONS.map((m, i) => {
-                const done = m.done >= m.of;
+                const done = (verified ? m.done : 0) >= m.of;
                 return (
                   <li key={m.id}>
                     <div className="flex items-baseline justify-between gap-3 text-[14px]">
@@ -115,9 +136,9 @@ export default function Rewards() {
                     </div>
                     <div className="mt-1.5 flex items-center gap-3">
                       <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/[0.07]">
-                        <motion.div className={`h-full rounded-full ${done ? "bg-white/30" : "bg-monad"}`} initial={{ width: 0 }} whileInView={{ width: `${(m.done / m.of) * 100}%` }} viewport={{ once: true }} transition={{ duration: 0.8, ease: EASE, delay: i * 0.06 }} />
+                        <motion.div className={`h-full rounded-full ${done ? "bg-white/30" : "bg-monad"}`} initial={{ width: 0 }} whileInView={{ width: `${((verified ? m.done : 0) / m.of) * 100}%` }} viewport={{ once: true }} transition={{ duration: 0.8, ease: EASE, delay: i * 0.06 }} />
                       </div>
-                      <span className="w-16 text-right font-mono text-[12px] text-faint">{"money" in m ? `$${m.done}/$${m.of}` : `${m.done}/${m.of}`}</span>
+                      <span className="w-16 text-right font-mono text-[12px] text-faint">{"money" in m ? `$${verified ? m.done : 0}/$${m.of}` : `${verified ? m.done : 0}/${m.of}`}</span>
                     </div>
                   </li>
                 );

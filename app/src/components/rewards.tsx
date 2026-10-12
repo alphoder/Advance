@@ -60,7 +60,8 @@ export function GiftCard({ b, amount, className = "", style }: { b: Brand; amoun
 
 /* ---------------- Advance card (metal, tilts with the pointer) ---------------- */
 
-export function AdvanceCard({ frozen = false, name = "PRIYA SHARMA", className = "" }: { frozen?: boolean; name?: string; className?: string }) {
+/** A credit card on the advance line: it spends your Advance limit, repaid the same way (20% of client payments). */
+export function AdvanceCard({ frozen = false, locked = false, name = "PRIYA SHARMA", limit = 50, className = "" }: { frozen?: boolean; locked?: boolean; name?: string; limit?: number; className?: string }) {
   const reduce = useReducedMotion();
   const mx = useMotionValue(0.5);
   const my = useMotionValue(0.5);
@@ -79,7 +80,7 @@ export function AdvanceCard({ frozen = false, name = "PRIYA SHARMA", className =
         }}
         onPointerLeave={() => { mx.set(0.5); my.set(0.5); }}
         style={{ rotateX: rx, rotateY: ry, transformStyle: "preserve-3d" }}
-        className={`relative aspect-[1.586] w-full overflow-hidden rounded-[22px] text-white shadow-[0_40px_80px_-30px_rgb(131_110_249/0.55)] ring-1 ring-white/15 transition-[filter] duration-300 ${frozen ? "grayscale" : ""}`}
+        className={`relative aspect-[1.586] w-full overflow-hidden rounded-[22px] text-white shadow-[0_40px_80px_-30px_rgb(131_110_249/0.55)] ring-1 ring-white/15 transition-[filter] duration-300 ${frozen || locked ? "grayscale" : ""}`}
       >
         <div className="absolute inset-0 bg-[linear-gradient(135deg,#2c2550_0%,#171a26_45%,#12161d_70%,#3a1f1a_100%)]" />
         <div className="absolute inset-0 opacity-40 [background:repeating-linear-gradient(90deg,rgb(255_255_255/0.025)_0_1px,transparent_1px_3px)]" />
@@ -89,7 +90,7 @@ export function AdvanceCard({ frozen = false, name = "PRIYA SHARMA", className =
         <div className="absolute inset-0 flex flex-col justify-between p-[6.5%]">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-2 text-[clamp(15px,1.7vw,20px)] font-semibold tracking-tight"><img src="/icon.svg" alt="" className="size-[1.4em]" /> Advance</div>
-            <div className="text-right font-mono text-[10px] uppercase tracking-[0.2em] text-white/60">debit</div>
+            <div className="text-right font-mono text-[10px] uppercase tracking-[0.2em] text-white/60">credit<div className="mt-1 normal-case tracking-normal text-white/80">limit ${limit.toLocaleString()}</div></div>
           </div>
           <div className="flex items-center gap-3">
             <div className="relative h-[clamp(28px,3.4vw,40px)] w-[clamp(38px,4.6vw,54px)] rounded-md bg-[linear-gradient(135deg,#f3d27a,#b98a2c_55%,#f0cf7a)] shadow-inner">
@@ -111,7 +112,13 @@ export function AdvanceCard({ frozen = false, name = "PRIYA SHARMA", className =
             <div className="text-right text-[clamp(13px,1.4vw,17px)] font-bold italic tracking-tight text-[#b3a6ff]">monad</div>
           </div>
         </div>
-        {frozen && <div className="absolute inset-0 grid place-items-center bg-[#9ec9ff]/15 font-mono text-sm tracking-[0.3em] text-white backdrop-blur-[2px]">FROZEN</div>}
+        {frozen && !locked && <div className="absolute inset-0 grid place-items-center bg-[#9ec9ff]/15 font-mono text-sm tracking-[0.3em] text-white backdrop-blur-[2px]">FROZEN</div>}
+        {locked && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-[#12161d]/55 text-white backdrop-blur-[2px]">
+            <span className="font-mono text-sm tracking-[0.3em]">NOT ACTIVE</span>
+            <span className="text-[12px] text-white/75">Activates once your income is checked</span>
+          </div>
+        )}
       </motion.div>
     </div>
   );

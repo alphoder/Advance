@@ -100,7 +100,7 @@ function LiveStrip() {
     <div className="relative border-y border-line bg-bg-2/60 backdrop-blur">
       <div className="mx-auto grid max-w-7xl grid-cols-2 gap-px px-4 sm:px-6 md:grid-cols-5">
         {cells.map(([k, v]) => (
-          <div key={k} className="py-4">
+          <div key={k} className="py-4 text-center">
             <div className="text-[12px] text-faint">{k}</div>
             <div className="num mt-0.5 font-mono text-[17px] text-ink">{v}</div>
           </div>

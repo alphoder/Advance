@@ -1,11 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Caveat } from "next/font/google";
 import { Providers } from "@/components/providers";
 import { Backdrop } from "@/components/backdrop";
 import "./globals.css";
 
 const sans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const mono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+// Handwriting, used only for the annotation notes under the nav.
+const hand = Caveat({ variable: "--font-caveat", subsets: ["latin"], weight: ["500", "700"] });
 
 export const metadata: Metadata = {
   title: "Advance: get paid today, onchain",
@@ -17,7 +19,7 @@ export const viewport: Viewport = { themeColor: "#12161d", width: "device-width"
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${sans.variable} ${mono.variable} h-full antialiased`}>
+    <html lang="en" className={`${sans.variable} ${mono.variable} ${hand.variable} h-full antialiased`}>
       <body className="grain min-h-full flex flex-col">
         <Backdrop />
         {/* Content layer sits above the fixed 3D backdrop. */}

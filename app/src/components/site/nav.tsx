@@ -7,6 +7,8 @@ import { List, X, ArrowRight } from "@phosphor-icons/react";
 import { Logo, ChainToggle, ContractList, CHAIN_NAME } from "@/components/ui";
 import { useChainView } from "@/components/providers";
 import { publicClient } from "@/lib/chain";
+import { usePathname } from "next/navigation";
+import { NavHints } from "./nav-hints";
 
 const LINKS = [
   ["How it works", "/how-it-works"],
@@ -73,6 +75,8 @@ export function SiteNav() {
   const [menu, setMenu] = useState(false);
   const [hoverLink, setHoverLink] = useState<string>();
   const hoverTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const navRef = useRef<HTMLElement>(null);
+  const pathname = usePathname();
   const block = useBlock();
 
   // Hysteresis: collapse past 120px, expand above 60px, so it never flickers around one threshold.
@@ -90,6 +94,7 @@ export function SiteNav() {
       <div className="h-20" aria-hidden />
       <div className="pointer-events-none fixed inset-x-0 top-3 z-50 flex justify-center px-3">
         <nav
+          ref={navRef}
           onMouseEnter={onEnter}
           onMouseLeave={onLeave}
           className="pointer-events-auto flex items-center rounded-full border border-white/[0.08] bg-[#0b0e14]/90 p-1.5 shadow-[0_18px_50px_-18px_rgb(0_0_0/0.9),inset_0_1px_0_rgb(255_255_255/0.06)] backdrop-blur-xl"
@@ -104,7 +109,7 @@ export function SiteNav() {
             <ul className="flex items-center pr-1" onMouseLeave={() => setHoverLink(undefined)}>
               {LINKS.map(([label, href]) => (
                 <li key={href} onMouseEnter={() => setHoverLink(href)}>
-                  <Link href={href} tabIndex={expanded ? 0 : -1} className="relative block whitespace-nowrap rounded-full px-3.5 py-2 text-[14px] text-muted transition-colors duration-200 hover:text-ink">
+                  <Link href={href} data-nav={href} tabIndex={expanded ? 0 : -1} className="relative block whitespace-nowrap rounded-full px-3.5 py-2 text-[14px] text-muted transition-colors duration-200 hover:text-ink">
                     {hoverLink === href && (
                       <motion.span layoutId="island-hover" transition={{ type: "spring", duration: 0.32, bounce: 0.1 }} className="absolute inset-0 rounded-full bg-white/[0.08]" />
                     )}
@@ -129,6 +134,9 @@ export function SiteNav() {
           </button>
         </nav>
       </div>
+
+      {/* Home only: hand-drawn notes pointing at the links, shown while the island is open at the top. */}
+      {pathname === "/" && <NavHints navRef={navRef} visible={!scrolled} onHover={setHoverLink} />}
 
       {/* Mobile: the island morphs down into a menu card. */}
       <AnimatePresence>

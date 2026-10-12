@@ -10,6 +10,7 @@ import { Nav, Footer, Button, Card, ErrorNote, Proof, fmtUsd, Label, Spinner } f
 import { SignIn } from "@/components/sign-in";
 import { SharedWithMe } from "@/components/vault";
 import { KuruPanel } from "@/components/kuru";
+import { AnyChainDeposit } from "@/components/any-chain";
 
 type Pool = {
   steady: number; boost: number; total: number; lentOut: number; cash: number; feesEarned: number; losses: number;
@@ -50,6 +51,7 @@ export default function Earn() {
         {data && <KuruPanel nav={data.pool.boostPrice} myShares={data.me?.boost.shares ?? 0} onDone={refresh} />}
         {ready && !session && <div className="pt-4"><SignIn title="Sign in to start earning" /></div>}
         {session && data?.me && <Wallet wallet={data.me.wallet} onDone={refresh} />}
+        <AnyChainDeposit />
         {session && <SharedWithMe />}
         <Card className="text-[15px] text-muted">
           <b className="text-ink">Want to sell instead of waiting?</b> Boost shares are a token (advJR) that can trade on a Kuru order book, so you can

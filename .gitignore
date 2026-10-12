@@ -6,3 +6,7 @@ contracts/broadcast/*/31337/
 contracts/cache/
 contracts/out/
 node_modules/
+
+# Private strategy notes (never published)
+private/
+BLUEPRINT.md

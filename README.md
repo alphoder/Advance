@@ -9,7 +9,7 @@ Advance is an onchain credit protocol on Monad. It gives freelancers, small sell
 - **Track:** 1, Onchain Finance & Trading (undercollateralised lending priced on onchain credit history)
 - **Live app:** _add URL_
 - **Demo video (≤ 3 min):** _add URL_
-- **Product spec:** [PRD.md](PRD.md) · **Strategy:** [BLUEPRINT.md](BLUEPRINT.md)
+- **Product spec:** [PRD.md](PRD.md)
 
 ---
 

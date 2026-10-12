@@ -151,7 +151,7 @@ function AccountMenu() {
           <motion.div
             initial={{ opacity: 0, scale: 0.96, y: -4 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96 }}
             transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }} style={{ transformOrigin: "top right" }}
-            className="absolute right-0 top-11 z-50 w-72 rounded-2xl border border-line-strong bg-panel p-2 shadow-[0_24px_60px_-20px_rgb(2_6_20/0.9)]"
+            className="absolute right-0 top-11 z-50 w-72 rounded-2xl border border-line-strong bg-panel p-2 shadow-[0_24px_60px_-20px_rgb(5_7_10/0.9)]"
           >
             <div className="px-3 py-2.5">
               <div className="text-[12px] text-muted">{session.kind === "passkey" ? "Passkey account (Mera)" : "Temporary demo account"}</div>

@@ -13,7 +13,7 @@ export function SignIn({ title = "Sign in to Advance", subtitle }: { title?: str
 
   return (
     <Panel className="rise mx-auto max-w-md p-7 sm:p-9">
-      <div className="relative grid size-16 place-items-center rounded-2xl border border-line-strong bg-[radial-gradient(circle_at_30%_20%,rgb(226_114_91/0.35),transparent_60%),#0f1b42]">
+      <div className="relative grid size-16 place-items-center rounded-2xl border border-line-strong bg-[#1c2230] bg-[radial-gradient(circle_at_30%_20%,rgb(226_114_91/0.35),transparent_60%)]">
         <Fingerprint className="size-8 text-terra" weight="duotone" />
       </div>
       <h1 className="mt-6 text-3xl font-semibold tracking-tight">{title}</h1>

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Providers } from "@/components/providers";
+import { Backdrop } from "@/components/backdrop";
 import "./globals.css";
 
 const sans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -12,13 +13,17 @@ export const metadata: Metadata = {
   manifest: "/manifest.webmanifest",
 };
 
-export const viewport: Viewport = { themeColor: "#060b1c", width: "device-width", initialScale: 1 };
+export const viewport: Viewport = { themeColor: "#12161d", width: "device-width", initialScale: 1 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${sans.variable} ${mono.variable} h-full antialiased`}>
       <body className="grain min-h-full flex flex-col">
-        <Providers>{children}</Providers>
+        <Backdrop />
+        {/* Content layer sits above the fixed 3D backdrop. */}
+        <div className="relative z-10 flex min-h-[100dvh] flex-1 flex-col">
+          <Providers>{children}</Providers>
+        </div>
       </body>
     </html>
   );

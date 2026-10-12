@@ -12,7 +12,7 @@ export function SplitAnimation({ e }: { e: SplitEvent }) {
   const reduce = useReducedMotion();
   const t = (d: number) => ({ duration: 0.5, delay: reduce ? 0 : d, ease: EASE });
   return (
-    <div key={e.key} className="relative overflow-hidden rounded-2xl border border-line bg-[radial-gradient(70%_90%_at_50%_0%,rgb(131_110_249/0.18),transparent_70%),#0a1230] p-6">
+    <div key={e.key} className="relative overflow-hidden rounded-2xl border border-line bg-[#161b24] bg-[radial-gradient(70%_90%_at_50%_0%,rgb(131_110_249/0.18),transparent_70%)] p-6">
       <div className="text-center text-[12.5px] font-medium text-muted">Payment received · split in one transaction</div>
       <div className="relative mx-auto mt-4 h-48 max-w-md">
         <motion.div initial={reduce ? false : { opacity: 0, scale: 0.9, y: -8 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={t(0)}

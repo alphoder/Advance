@@ -2,7 +2,7 @@
 
 import { useMemo, useRef } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Edges, Float } from "@react-three/drei";
+import { Float } from "@react-three/drei";
 import * as THREE from "three";
 
 /**
@@ -87,7 +87,7 @@ function Coin({ animate }: { animate: boolean }) {
       <group rotation={[Math.PI / 2, 0, 0]}>
         <mesh>
           <cylinderGeometry args={[0.95, 0.95, 0.22, 72]} />
-          <meshStandardMaterial color="#16245a" metalness={0.85} roughness={0.28} emissive="#1b1f6b" emissiveIntensity={0.35} />
+          <meshStandardMaterial color="#1f2937" metalness={0.85} roughness={0.28} emissive="#262b3d" emissiveIntensity={0.35} />
         </mesh>
         <mesh position={[0, 0.115, 0]} rotation={[Math.PI / 2, 0, 0]}>
           <torusGeometry args={[0.68, 0.04, 16, 96]} />
@@ -126,40 +126,6 @@ function Endpoint({ position, color, kind }: { position: [number, number, number
   );
 }
 
-function Blocks({ animate }: { animate: boolean }) {
-  const blocks = useMemo(
-    () => Array.from({ length: 16 }, (_, i) => ({
-      x: -8 + (i / 16) * 16 + Math.random(),
-      y: (Math.random() - 0.5) * 6,
-      z: -3 - Math.random() * 4,
-      s: 0.25 + Math.random() * 0.35,
-      r: Math.random() * Math.PI,
-    })),
-    [],
-  );
-  const group = useRef<THREE.Group>(null);
-  useFrame((_, dt) => {
-    if (!group.current || !animate) return;
-    group.current.children.forEach((m, i) => {
-      m.position.x += dt * 0.35; // a new block every ~0.4s on Monad; these drift by like a chain
-      m.rotation.x += dt * 0.2;
-      m.rotation.y += dt * 0.15;
-      if (m.position.x > 9) m.position.x = -9 - (i % 3);
-    });
-  });
-  return (
-    <group ref={group}>
-      {blocks.map((b, i) => (
-        <mesh key={i} position={[b.x, b.y, b.z]} rotation={[b.r, b.r, 0]} scale={b.s}>
-          <boxGeometry args={[1, 1, 1]} />
-          <meshBasicMaterial color="#836ef9" transparent opacity={0.05} />
-          <Edges color="#836ef9" threshold={15} />
-        </mesh>
-      ))}
-    </group>
-  );
-}
-
 /** Camera eases toward the pointer: decorative depth, damped so it never feels twitchy. */
 function Rig({ animate }: { animate: boolean }) {
   const { camera, pointer } = useThree();
@@ -187,7 +153,6 @@ export default function SplitScene({ reduced = false, amount = 100 }: { reduced?
         <pointLight position={[3, 3, 4]} intensity={40} color="#836ef9" />
         <pointLight position={[3, -3, 4]} intensity={30} color="#e2725b" />
         <pointLight position={[-4, 1, 5]} intensity={20} color="#9fb3ff" />
-        <Blocks animate={animate} />
         <group position={[-0.9, 0, 0]} scale={0.92}>
           <Streams animate={animate} />
           <Coin animate={animate} />

@@ -182,7 +182,7 @@ export function Bento() {
       <div className="mt-12 grid gap-4 md:grid-cols-6 md:grid-rows-[auto_auto]">
         <motion.div {...reveal(0)} className="md:col-span-4">
           <Link href="/app/earn" className="block h-full">
-            <div className="relative h-full overflow-hidden rounded-2xl border border-line bg-[radial-gradient(120%_120%_at_100%_0%,rgb(131_110_249/0.28),transparent_55%),linear-gradient(180deg,#0f1b42,#0a1230)] p-7">
+            <div className="relative h-full overflow-hidden rounded-2xl border border-line bg-[radial-gradient(120%_120%_at_100%_0%,rgb(131_110_249/0.28),transparent_55%),linear-gradient(180deg,#1c2230,#161b24)] p-7">
               <ShieldCheck className="size-8 text-monad-hi" weight="duotone" />
               <h3 className="mt-5 text-2xl font-semibold">Two risk levels for savers</h3>
               <p className="mt-2 max-w-md text-muted">Steady is protected first. Boost absorbs missed repayments first and earns more for it. Returns come from real borrower fees.</p>
@@ -195,7 +195,7 @@ export function Bento() {
         </motion.div>
         <motion.div {...reveal(1)} className="md:col-span-2">
           <Link href="/app/files" className="block h-full">
-            <div className="h-full rounded-2xl border border-line bg-[linear-gradient(160deg,rgb(226_114_91/0.22),transparent_60%),#0a1230] p-7">
+            <div className="h-full rounded-2xl border border-line bg-[#161b24] bg-[linear-gradient(160deg,rgb(226_114_91/0.22),transparent_60%)] p-7">
               <LockKey className="size-8 text-terra" weight="duotone" />
               <h3 className="mt-5 text-xl font-semibold">One passkey, many keys</h3>
               <p className="mt-2 text-muted">Your passkey also derives an encryption key. Share an invoice with one lender, and nobody else can read it.</p>
@@ -213,7 +213,7 @@ export function Bento() {
         </motion.div>
         <motion.div {...reveal(3)} className="md:col-span-2">
           <Link href="/app/agents" className="block h-full">
-            <div className="relative h-full overflow-hidden rounded-2xl border border-line bg-[conic-gradient(from_200deg_at_80%_20%,rgb(131_110_249/0.25),transparent_30%,rgb(226_114_91/0.2),transparent_70%),#0a1230] p-7">
+            <div className="relative h-full overflow-hidden rounded-2xl border border-line bg-[#161b24] bg-[conic-gradient(from_200deg_at_80%_20%,rgb(131_110_249/0.25),transparent_30%,rgb(226_114_91/0.2),transparent_70%)] p-7">
               <Robot className="size-8 text-ink" weight="duotone" />
               <h3 className="mt-5 text-xl font-semibold">Credit for AI agents</h3>
               <p className="mt-2 text-muted">ERC-8004 agents borrow working capital and repay from their next job.</p>
@@ -274,7 +274,7 @@ export function Compare() {
 export function WhyMonad() {
   return (
     <section className="mx-auto max-w-7xl px-4 py-24 sm:px-6">
-      <div className="relative overflow-hidden rounded-3xl border border-line bg-[radial-gradient(80%_120%_at_0%_100%,rgb(131_110_249/0.25),transparent_60%),linear-gradient(180deg,#0d1838,#080f26)] p-8 sm:p-14">
+      <div className="relative overflow-hidden rounded-3xl border border-line bg-[radial-gradient(80%_120%_at_0%_100%,rgb(131_110_249/0.25),transparent_60%),linear-gradient(180deg,#1a202b,#12161d)] p-8 sm:p-14">
         <h2 className="max-w-3xl text-4xl font-semibold tracking-[-0.03em] sm:text-5xl">Repaying from every payment only works on Monad.</h2>
         <p className="mt-5 max-w-[60ch] text-lg text-muted">
           One payment means one onchain split. On most chains the fee to split a $10 payment costs more than the repayment.

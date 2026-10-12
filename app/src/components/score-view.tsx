@@ -19,7 +19,7 @@ export function ScoreDial({ score, approved, size = 168 }: { score: number; appr
   return (
     <div className="relative shrink-0" style={{ width: size, height: size }}>
       <svg viewBox="0 0 160 160" className="size-full -rotate-90">
-        <circle cx="80" cy="80" r={r} fill="none" stroke="rgb(140 162 225 / 0.12)" strokeWidth="10" />
+        <circle cx="80" cy="80" r={r} fill="none" stroke="rgb(156 163 175 / 0.12)" strokeWidth="10" />
         <motion.circle
           cx="80" cy="80" r={r} fill="none" stroke={color} strokeWidth="10" strokeLinecap="round" strokeDasharray={c}
           initial={{ strokeDashoffset: reduce ? c * (1 - score / 100) : c }}

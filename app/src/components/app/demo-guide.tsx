@@ -41,11 +41,11 @@ function Guide({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed bottom-4 right-4 z-40 w-[min(340px,calc(100vw-2rem))]">
-      <div className="overflow-hidden rounded-2xl border border-line-strong bg-panel shadow-[0_24px_60px_-20px_rgb(2_6_20/0.9)]">
+      <div className="overflow-hidden rounded-2xl border border-line-strong bg-panel shadow-[0_24px_60px_-20px_rgb(5_7_10/0.9)]">
         <div className="flex items-center gap-3 px-4 py-3">
           <div className="relative grid size-9 place-items-center">
             <svg viewBox="0 0 36 36" className="absolute inset-0 -rotate-90">
-              <circle cx="18" cy="18" r="15" fill="none" stroke="rgb(140 162 225 / 0.15)" strokeWidth="3" />
+              <circle cx="18" cy="18" r="15" fill="none" stroke="rgb(156 163 175 / 0.15)" strokeWidth="3" />
               <circle cx="18" cy="18" r="15" fill="none" stroke="var(--terra)" strokeWidth="3" strokeLinecap="round" strokeDasharray={94.2} strokeDashoffset={94.2 * (1 - done / steps.length)} style={{ transition: "stroke-dashoffset 600ms var(--ease-out)" }} />
             </svg>
             <Compass className="size-4 text-terra" weight="fill" />

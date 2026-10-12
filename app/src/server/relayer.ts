@@ -13,13 +13,22 @@ import {
 import { privateKeyToAccount, nonceManager } from "viem/accounts";
 import { chain, publicClient, RPC_URL, D } from "@/lib/chain";
 import { transferAuthTypes } from "@/lib/abi";
+import { HttpError } from "./http";
 
-const KEY = process.env.SERVER_PRIVATE_KEY as Hex | undefined;
-if (!KEY) throw new Error("SERVER_PRIVATE_KEY missing");
+/** Read the key only when a request needs it, so the site still builds and serves pages without one. */
+function key(): Hex {
+  const k = process.env.SERVER_PRIVATE_KEY as Hex | undefined;
+  if (!k) throw new HttpError(503, "This server isn't set up to send transactions yet.");
+  return k;
+}
+function lazy<T extends object>(make: () => T): T {
+  let v: T | undefined;
+  return new Proxy({} as T, { get: (_, p) => Reflect.get((v ??= make()), p) });
+}
 
 /** Server key: scorer, relayer (pays gas so users never need to), demo-client root. */
-export const relayer = privateKeyToAccount(KEY, { nonceManager });
-export const wallet = createWalletClient({ account: relayer, chain, transport: http(RPC_URL) });
+export const relayer = lazy(() => privateKeyToAccount(key(), { nonceManager }));
+export const wallet = lazy(() => createWalletClient({ account: relayer, chain, transport: http(RPC_URL) }));
 
 /** Monad charges the declared gas limit, not gas used: estimate, then pad 15%. */
 export async function send<const abi extends Abi, fn extends ContractFunctionName<abi, "nonpayable" | "payable">>(req: {
@@ -37,7 +46,7 @@ export async function send<const abi extends Abi, fn extends ContractFunctionNam
 
 /** Deterministic demo wallets (clients, Sybil Sam's helpers). Never hold real value. */
 export function demoAccount(label: string) {
-  return privateKeyToAccount(keccak256(encodePacked(["bytes32", "string"], [KEY!, label])));
+  return privateKeyToAccount(keccak256(encodePacked(["bytes32", "string"], [key(), label])));
 }
 
 const domainAbi = parseAbi([

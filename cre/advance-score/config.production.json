@@ -1,0 +1,10 @@
+{
+  "schedule": "0 */5 * * * *",
+  "scoreApi": "http://localhost:3000/api/score?address=",
+  "borrowers": ["0x0000000000000000000000000000000000000000"],
+  "evm": {
+    "chainSelectorName": "monad-mainnet",
+    "creditLine": "0x0000000000000000000000000000000000000000",
+    "gasLimit": "200000"
+  }
+}

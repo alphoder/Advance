@@ -1,0 +1,11 @@
+# CRE project settings. Simulate from this folder:
+#   cd advance-score && bun install && cd .. && cre workflow simulate advance-score --target staging-settings --broadcast
+staging-settings:
+  rpcs:
+    - chain-name: monad-testnet
+      url: https://testnet-rpc.monad.xyz
+
+production-settings:
+  rpcs:
+    - chain-name: monad-mainnet
+      url: https://rpc.monad.xyz

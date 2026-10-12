@@ -29,7 +29,8 @@ contract CreditLine is Ownable {
     IERC20 public immutable asset;
     AdvancePool public immutable pool;
 
-    address public scorer; // scoring service or the Chainlink CRE forwarder
+    address public scorer; // scoring service key
+    address public forwarder; // Chainlink CRE forwarder: delivers DON-signed score reports
     uint128[4] public tierCaps = [uint128(50e6), 200e6, 1_000e6, 5_000e6]; // AUSD, 6 decimals
 
     mapping(address => Credit) internal credits;
@@ -41,6 +42,7 @@ contract CreditLine is Ownable {
     event Defaulted(address indexed borrower, uint256 principalLost);
 
     error OnlyScorer();
+    error OnlyForwarder();
     error ZeroAmount();
     error OverLimit();
     error IsDefaulted();
@@ -56,9 +58,28 @@ contract CreditLine is Ownable {
         scorer = scorer_; // set to address(0) to pause limit updates
     }
 
-    /// @notice Limit is clamped to the borrower's tier cap; tiers only rise through full repayment.
-    function setLimit(address borrower, uint256 limit) public {
+    function setForwarder(address forwarder_) external onlyOwner {
+        forwarder = forwarder_;
+    }
+
+    function setLimit(address borrower, uint256 limit) external {
         if (msg.sender != scorer) revert OnlyScorer();
+        _setLimit(borrower, limit);
+    }
+
+    /// @notice Chainlink CRE receiver. report = abi.encode(address borrower, uint256 limit).
+    function onReport(bytes calldata, bytes calldata report) external {
+        if (msg.sender != forwarder) revert OnlyForwarder();
+        (address borrower, uint256 limit) = abi.decode(report, (address, uint256));
+        _setLimit(borrower, limit);
+    }
+
+    function supportsInterface(bytes4 id) external pure returns (bool) {
+        return id == 0x805f2132 /* IReceiver.onReport */ || id == 0x01ffc9a7; /* IERC165 */
+    }
+
+    /// @notice Limit is clamped to the borrower's tier cap; tiers only rise through full repayment.
+    function _setLimit(address borrower, uint256 limit) internal {
         Credit storage c = credits[borrower];
         if (c.defaulted) revert IsDefaulted();
         uint128 cap = tierCaps[c.tier];

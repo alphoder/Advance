@@ -5,5 +5,4 @@
 contracts/broadcast/*/31337/
 contracts/cache/
 contracts/out/
-deployments/31337.json
 node_modules/

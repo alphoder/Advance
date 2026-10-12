@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: light;
+  --paper: #f5f2ec;
+  --card: #fffdf9;
+  --ink: #16130f;
+  --muted: #6b645a;
+  --line: #e4ddd1;
+  --violet: #5b3df5;
+  --violet-soft: #ebe6ff;
+  --green: #12805c;
+  --green-soft: #dcf3e9;
+  --amber: #b45309;
+  --amber-soft: #fdf0dc;
+  --red: #b42318;
+  --red-soft: #fde4e1;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-card: var(--card);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-violet: var(--violet);
+  --color-violet-soft: var(--violet-soft);
+  --color-green: var(--green);
+  --color-green-soft: var(--green-soft);
+  --color-amber: var(--amber);
+  --color-amber-soft: var(--amber-soft);
+  --color-red: var(--red);
+  --color-red-soft: var(--red-soft);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-serif);
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+.num {
+  font-family: var(--font-serif), Georgia, serif;
+  font-variant-numeric: lining-nums tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+.rise { animation: rise 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+
+@keyframes flow-left {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(-110px, 70px) scale(0.85); opacity: 1; }
+}
+@keyframes flow-right {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(110px, 70px) scale(0.85); opacity: 1; }
+}
+@keyframes pop {
+  0% { transform: scale(0.6); opacity: 0; }
+  60% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); }
+}
+.pop { animation: pop 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 1ms !important; animation-delay: 0ms !important; transition-duration: 1ms !important; }
+}
+
+:focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; border-radius: 6px; }

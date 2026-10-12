@@ -41,7 +41,7 @@ contract Deploy is Script {
         vm.serializeAddress(j, "creditLine", address(credit));
         vm.serializeAddress(j, "agentAdapter", adapter);
         string memory out = vm.serializeAddress(j, "factory", address(factory));
-        vm.writeJson(out, string.concat(vm.projectRoot(), "/../deployments/", vm.toString(block.chainid), ".json"));
+        vm.writeJson(out, string.concat(vm.projectRoot(), "/../app/src/deployments/", vm.toString(block.chainid), ".json"));
         console.log(out);
     }
 }

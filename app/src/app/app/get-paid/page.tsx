@@ -72,7 +72,7 @@ function Inner() {
 
   return (
     <>
-      <PageHeader title="Get paid" sub="Clients pay your link with a passkey or wallet. Any advance you owe is repaid from the payment in the same second; the rest is yours." />
+      <PageHeader title="Get paid" help={["Send your link or QR code to a client, like any invoice.", "When they pay, the payment is split in that same second.", "If you owe anything, 20% repays it. The rest is yours.", "On the test network, the purple button plays a client, so you can watch a payment split."]} sub="Clients pay your link with a passkey or wallet. Any advance you owe is repaid from the payment in the same second; the rest is yours." />
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
         <Panel className="lg:col-span-7">
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-[180px_1fr]">

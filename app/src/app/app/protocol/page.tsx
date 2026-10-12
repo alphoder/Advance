@@ -19,7 +19,7 @@ export default function ProtocolPage() {
   ];
   return (
     <>
-      <PageHeader title="Protocol" sub={`The contracts, rules and live state behind Advance on ${CHAIN_NAME} (chain ${CHAIN_ID}). Every number is read live from the chain.`} />
+      <PageHeader title="Proof and contracts" help={["This page shows the live state of the whole system: money in, money lent, fees and losses.", "The contract addresses let anyone verify the code and the money on Monad."]} sub={`The contracts, rules and live state behind Advance on ${CHAIN_NAME} (chain ${CHAIN_ID}). Every number is read live from the chain.`} />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Panel><Stat label="Total in the pool" value={p ? fmtUsd(p.total, 0) : "…"} /></Panel>
         <Panel><Stat label="Lent out" value={p ? `${p.utilisation.toFixed(1)}%` : "…"} hint={p ? fmtUsd(p.lentOut, 0) : undefined} tone="terra" /></Panel>

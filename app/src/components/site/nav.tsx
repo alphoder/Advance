@@ -9,10 +9,12 @@ import { useChainView } from "@/components/providers";
 import { publicClient } from "@/lib/chain";
 
 const LINKS = [
-  ["How it works", "/#how"],
-  ["Earn", "/app/earn"],
-  ["Agents", "/app/agents"],
-  ["Protocol", "/app/protocol"],
+  ["How it works", "/how-it-works"],
+  ["Borrow", "/borrow"],
+  ["Save", "/save"],
+  ["Agents", "/agents"],
+  ["Safety", "/safety"],
+  ["FAQ", "/faq"],
 ] as const;
 
 // iOS sheet curve: fast start, long gentle settle. Width is the only thing that moves; text just fades.
@@ -161,11 +163,9 @@ export function SiteFooter() {
           <p className="mt-3 text-[14px] text-muted">Credit for the next billion earners and their agents, repaid at the source. Running on {CHAIN_NAME}.</p>
         </div>
         <div className="grid grid-cols-2 gap-x-12 gap-y-2 text-[14px] sm:grid-cols-3">
-          <Link href="/app" className="text-muted hover:text-ink">Borrow</Link>
-          <Link href="/app/earn" className="text-muted hover:text-ink">Earn</Link>
-          <Link href="/app/agents" className="text-muted hover:text-ink">Agents</Link>
-          <Link href="/app/market" className="text-muted hover:text-ink">Market</Link>
-          <Link href="/app/protocol" className="text-muted hover:text-ink">Protocol</Link>
+          {[["How it works", "/how-it-works"], ["Borrow", "/borrow"], ["Save", "/save"], ["Agents", "/agents"], ["Safety", "/safety"], ["Technology", "/technology"], ["FAQ", "/faq"], ["Check an address", "/check"], ["Open the app", "/app"]].map(([l, h]) => (
+            <Link key={h} href={h} className="text-muted hover:text-ink">{l}</Link>
+          ))}
         </div>
         <ChainToggle />
       </div>

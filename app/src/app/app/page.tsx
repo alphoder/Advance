@@ -4,13 +4,14 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
-import { ArrowRight, Lightning, QrCode, MagnifyingGlass, UsersThree, ClockCounterClockwise } from "@phosphor-icons/react";
+import { ArrowRight, Lightning, QrCode, MagnifyingGlass, UsersThree, ClockCounterClockwise, CheckCircle, Circle } from "@phosphor-icons/react";
 import { useAccount } from "@/lib/account";
 import { useAppData, useScore } from "@/lib/app-data";
 import { IS_TESTNET } from "@/lib/chain";
 import { Gate } from "@/components/app/shell";
 import { ActivityRow, PageHeader, TierLadder, TxLog, EmptyState } from "@/components/app/bits";
-import { Button, ErrorNote, Panel, Label, Skeleton, fmtUsd } from "@/components/ui";
+import { Button, ErrorNote, Panel, Label, Skeleton, fmtUsd, InfoTip } from "@/components/ui";
+import type { Activity } from "@/lib/app-data";
 import { ScoreDial } from "@/components/score-view";
 import { SplitAnimation } from "@/components/split";
 
@@ -81,16 +82,17 @@ function Inner() {
   return (
     <>
       <PageHeader
-        title="Your Advance"
-        sub={`Signed in with ${session?.kind === "passkey" ? "your passkey" : "a demo account"}. Everything below updates with every Monad block.`}
-        action={<Link href="/app/advance"><Button icon={<Lightning className="size-4" weight="fill" />}>Get an advance</Button></Link>}
+        title="Home"
+        sub="Everything about your advance, updated with every Monad block."
+        help={["\"Available now\" is how much you can take right now.", "\"You owe\" goes down by itself: 20% of every payment you receive repays it.", "Your score decides your limit. Repay in full to reach the next level.", "Not sure what to do? Follow the \"Your next step\" card."]}
       />
+      <NextStep c={c} hasDrawn={activity.events.some((e) => e.type === "Drawn")} />
       <TxLog items={log.slice(0, 6)} />
 
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-12">
         {/* The pair: terracotta is the earner's money, purple is repayment to the protocol. */}
         <div className="rounded-3xl bg-terra p-6 text-[#1a0d08] sm:p-7 lg:col-span-5">
-          <div className="text-[14px] font-medium opacity-70">Available now</div>
+          <div className="flex items-center gap-2 text-[14px] font-medium opacity-70">Available now <InfoTip>The most you can take as an advance right now. It grows each time you repay in full.</InfoTip></div>
           <div className="num mt-2 font-mono text-6xl font-semibold tracking-tight">{fmtUsd(c.available)}</div>
           <p className="mt-2 text-[14px] opacity-75">of a {fmtUsd(c.limit)} limit. Flat 2% fee, repaid from your next payments.</p>
           <div className="mt-6 flex gap-2">
@@ -104,14 +106,14 @@ function Inner() {
         </div>
 
         <div className="rounded-3xl bg-monad p-6 text-white sm:p-7 lg:col-span-4">
-          <div className="text-[14px] font-medium opacity-75">You owe</div>
+          <div className="flex items-center gap-2 text-[14px] font-medium opacity-75">You owe <InfoTip>Your advance plus its 2% fee. Payments you receive pay this down automatically; you never have to repay by hand.</InfoTip></div>
           <div className="num mt-2 font-mono text-5xl font-semibold tracking-tight">{fmtUsd(c.owed)}</div>
           <div className="mt-5 h-2 overflow-hidden rounded-full bg-white/25">
             <motion.div className="h-full rounded-full bg-white" initial={{ scaleX: 0 }} animate={{ scaleX: progress }} style={{ transformOrigin: "left" }} transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }} />
           </div>
           <p className="mt-2.5 text-[13px] opacity-80">{c.owed > 0 ? `${activity.shareBps / 100}% of each incoming payment pays this down automatically.` : "Nothing owed. Every payment comes to you in full."}</p>
           <div className="mt-5 flex justify-between border-t border-white/25 pt-4 text-[14px]">
-            <span className="opacity-80">Balance</span><span className="num font-mono">{fmtUsd(activity.balance)}</span>
+            <span className="flex items-center gap-2 opacity-80">Balance <InfoTip>Dollars (AUSD) in your Advance account that you can spend or send.</InfoTip></span><span className="num font-mono">{fmtUsd(activity.balance)}</span>
           </div>
         </div>
 
@@ -183,6 +185,38 @@ function OverviewSkeleton() {
       <Skeleton className="h-52 lg:col-span-3" />
       <Skeleton className="h-64 lg:col-span-7" />
       <Skeleton className="h-64 lg:col-span-5" />
+    </div>
+  );
+}
+
+/** Always tells a beginner exactly one thing to do next, based on where they are. */
+function NextStep({ c, hasDrawn }: { c: Activity["credit"]; hasDrawn: boolean }) {
+  const steps = ["Verify income", "Take an advance", "Get paid", "Repaid"];
+  const stage = c.owed > 0 ? 2 : hasDrawn ? 3 : c.limit > 0 ? 1 : 0;
+  const card =
+    stage === 1 ? { t: `Take your first advance: up to ${fmtUsd(c.available)}`, b: "Pick an amount, see the exact cost, tap once. It arrives in about a second.", href: "/app/advance", cta: "Get money now" }
+    : stage === 2 ? { t: `Share your payment link to repay ${fmtUsd(c.owed)}`, b: "When a client pays your link, 20% of the payment repays your advance automatically. You don't do anything else.", href: "/app/get-paid", cta: "Open my payment link" }
+    : { t: c.available >= 1 ? `All repaid. You can take up to ${fmtUsd(c.available)} again` : "All repaid", b: "Nothing owed: every payment now comes to you in full. Repaying in full is how your limit grows.", href: "/app/advance", cta: "Get money now" };
+  return (
+    <div className="mb-4 rounded-3xl border border-terra/35 bg-[linear-gradient(120deg,rgb(226_114_91/0.16),transparent_60%)] p-5 sm:p-6">
+      <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <div className="text-[13px] font-medium text-terra">Your next step</div>
+          <div className="mt-1 text-xl font-semibold tracking-tight sm:text-2xl">{card.t}</div>
+          <p className="mt-1 max-w-xl text-[14.5px] text-muted">{card.b}</p>
+        </div>
+        <Link href={card.href} className="press inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-terra px-6 font-medium text-[#1a0d08] hover:bg-terra-hi">
+          {card.cta} <ArrowRight className="size-4" weight="bold" />
+        </Link>
+      </div>
+      <ol className="mt-5 grid grid-cols-4 gap-2">
+        {steps.map((s, i) => (
+          <li key={s} className="flex items-center gap-2 text-[12.5px]">
+            {i < stage || (i === 3 && stage === 3) ? <CheckCircle className="size-4 shrink-0 text-monad-hi" weight="fill" /> : <Circle className={`size-4 shrink-0 ${i === stage ? "text-terra" : "text-faint"}`} weight={i === stage ? "fill" : "regular"} />}
+            <span className={i === stage ? "text-ink" : "text-muted"}>{s}</span>
+          </li>
+        ))}
+      </ol>
     </div>
   );
 }

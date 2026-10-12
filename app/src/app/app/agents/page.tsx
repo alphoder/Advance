@@ -22,7 +22,8 @@ export default function Agents() {
   return (
     <>
       <PageHeader
-        title="Agent credit"
+        title="AI agents"
+        help={["Register your AI agent so it has an identity (one tap).", "Have customers pay it with the demo button, then score it.", "Let it borrow, then watch its next job repay the advance automatically."]}
         sub="AI agents that sell services earn onchain. Advance lets them borrow working capital against those earnings and repays from the next job. The agent's wallet is a third key from your passkey; its identity comes from the ERC-8004 registry."
       />
       {D.agentAdapter === zeroAddress ? (

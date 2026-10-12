@@ -1,19 +1,43 @@
 "use client";
 
-import type { ReactNode } from "react";
-import { motion } from "motion/react";
-import { ArrowDownLeft, ArrowUpRight, Lightning, TrendUp, SlidersHorizontal, Warning, ArrowsSplit, CheckCircle } from "@phosphor-icons/react";
+import { useState, type ReactNode } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { ArrowDownLeft, ArrowUpRight, Lightning, TrendUp, SlidersHorizontal, Warning, ArrowsSplit, CheckCircle, Question } from "@phosphor-icons/react";
 import type { Ev, TxLine } from "@/lib/app-data";
 import { Panel, Proof, fmtUsd, Label } from "@/components/ui";
 
-export function PageHeader({ title, sub, action }: { title: string; sub?: string; action?: ReactNode }) {
+export function PageHeader({ title, sub, action, help }: { title: string; sub?: string; action?: ReactNode; help?: string[] }) {
+  const [open, setOpen] = useState(false);
   return (
-    <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-      <div>
-        <h2 className="text-3xl font-semibold tracking-[-0.03em] sm:text-4xl">{title}</h2>
-        {sub && <p className="mt-2 max-w-[62ch] text-muted">{sub}</p>}
+    <div className="mb-7">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h2 className="text-3xl font-semibold tracking-[-0.03em] sm:text-4xl">{title}</h2>
+          {sub && <p className="mt-2 max-w-[62ch] text-muted">{sub}</p>}
+        </div>
+        {action}
       </div>
-      {action}
+      {help && (
+        <div className="mt-4">
+          <button onClick={() => setOpen((o) => !o)} aria-expanded={open}
+            className="press inline-flex items-center gap-2 rounded-full border border-line bg-white/[0.03] px-3 py-1.5 text-[13px] text-muted hover:text-ink">
+            <Question className="size-4 text-terra" weight="fill" /> {open ? "Hide explanation" : "Explain this page"}
+          </button>
+          <AnimatePresence initial={false}>
+            {open && (
+              <motion.ol initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }} className="mt-3 grid max-w-3xl gap-2 overflow-hidden">
+                {help.map((h, i) => (
+                  <li key={h} className="flex gap-3 rounded-xl border border-line bg-panel/80 px-4 py-3 text-[14.5px]">
+                    <span className="grid size-6 shrink-0 place-items-center rounded-full bg-terra-soft font-mono text-[12px] text-terra">{i + 1}</span>
+                    <span>{h}</span>
+                  </li>
+                ))}
+              </motion.ol>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
     </div>
   );
 }

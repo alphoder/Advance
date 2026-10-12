@@ -23,7 +23,8 @@ function Inner() {
   return (
     <>
       <PageHeader
-        title="Credit score"
+        title="My score"
+        help={["Your score (0 to 100) is built only from facts on the blockchain: who pays you and how.", "Purple ticks help you. Orange and red items explain what's holding you back.", "\"How to unlock more\" tells you exactly what to do next.", "After new payments arrive, tap \"Re-check\" to update your limit."]}
         sub="Your score is built only from onchain facts: who pays you, how independent they are, how steady it is, and how you repay. Here is every input."
         action={
           <Button variant="secondary" loading={busy} icon={<ArrowsClockwise className="size-4" />}

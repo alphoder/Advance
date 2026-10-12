@@ -8,7 +8,8 @@ export default function FilesPage() {
   return (
     <Gate>
       <PageHeader
-        title="Private credit file"
+        title="My documents"
+        help={["Add an invoice or contract that shows your income.", "It's locked on your device before it's stored; only your passkey can unlock it.", "To show it to a lender, paste their address and tap Share. Only they can open it."]}
         sub="Invoices and contracts that prove your income, locked with a second key that only your passkey can recreate. Stored encrypted on Monad. Share one with a single lender."
       />
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">

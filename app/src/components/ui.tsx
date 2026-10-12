@@ -151,3 +151,15 @@ export function ContractList() {
 }
 
 export const CHAIN_NAME = chain.name;
+
+/** Small (?) that explains a term on hover or keyboard focus. */
+export function InfoTip({ children, label = "What is this?" }: { children: ReactNode; label?: string }) {
+  return (
+    <span className="group/tip relative inline-flex align-middle">
+      <button type="button" aria-label={label} className="grid size-4 place-items-center rounded-full border border-current/40 text-[10px] font-semibold leading-none opacity-70 hover:opacity-100 focus-visible:opacity-100">?</button>
+      <span role="tooltip" className="pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 z-50 w-60 -translate-x-1/2 translate-y-1 rounded-xl border border-line-strong bg-[#0b0e14] px-3 py-2 text-left text-[12.5px] font-normal leading-snug text-ink opacity-0 shadow-[0_12px_30px_-10px_rgb(0_0_0/0.8)] transition-[opacity,transform] duration-150 ease-out group-hover/tip:translate-y-0 group-hover/tip:opacity-100 group-focus-within/tip:translate-y-0 group-focus-within/tip:opacity-100">
+        {children}
+      </span>
+    </span>
+  );
+}

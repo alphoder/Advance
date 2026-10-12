@@ -336,3 +336,95 @@ export function TwoPaths() {
     </section>
   );
 }
+
+/* ---------------- Home: Advance in one picture ---------------- */
+
+export function OnePicture() {
+  return (
+    <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+      <div className="mx-auto max-w-2xl text-center">
+        <h2 className="text-4xl font-semibold tracking-[-0.03em] sm:text-5xl">Advance in one picture.</h2>
+        <p className="mt-4 text-lg text-muted">You get money today. When your client pays later, the payment splits itself: a small part repays the advance, the rest is yours.</p>
+      </div>
+      <div className="mt-12 grid grid-cols-1 items-stretch gap-3 md:grid-cols-[1fr_auto_1fr_auto_1fr]">
+        <div className="rounded-3xl bg-terra p-6 text-[#1a0d08]">
+          <div className="text-[13px] font-medium opacity-70">Today</div>
+          <div className="num mt-1 font-mono text-4xl font-semibold">+$50</div>
+          <p className="mt-2 text-[15px] opacity-80">You take an advance. It arrives in about a second.</p>
+        </div>
+        <div className="hidden items-center text-faint md:flex"><ArrowRight className="size-6" /></div>
+        <div className="rounded-3xl border border-line bg-panel p-6">
+          <div className="text-[13px] font-medium text-muted">Next week</div>
+          <div className="num mt-1 font-mono text-4xl font-semibold">$100</div>
+          <p className="mt-2 text-[15px] text-muted">A client pays your Advance link, like any normal payment.</p>
+        </div>
+        <div className="hidden items-center text-faint md:flex"><ArrowRight className="size-6" /></div>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="rounded-3xl bg-monad p-5 text-white">
+            <div className="num font-mono text-3xl font-semibold">$20</div>
+            <p className="mt-1 text-[13.5px] opacity-85">repays the advance</p>
+          </div>
+          <div className="rounded-3xl bg-terra p-5 text-[#1a0d08]">
+            <div className="num font-mono text-3xl font-semibold">$80</div>
+            <p className="mt-1 text-[13.5px] opacity-80">lands with you</p>
+          </div>
+        </div>
+      </div>
+      <div className="mt-8 text-center">
+        <Link href="/how-it-works" className="inline-flex items-center gap-1.5 text-[15px] text-terra hover:text-terra-hi">See the full walkthrough and simulator <ArrowRight className="size-4" /></Link>
+      </div>
+    </section>
+  );
+}
+
+/* ---------------- Home: choose your path ---------------- */
+
+export function ChoosePath() {
+  const paths = [
+    { href: "/borrow", who: "I earn money", t: "Get paid early", b: "Freelancers, sellers, creators and gig workers.", cls: "bg-terra text-[#1a0d08]" },
+    { href: "/save", who: "I have dollars", t: "Earn from fees", b: "Fund advances and choose your risk level.", cls: "bg-monad text-white" },
+    { href: "/agents", who: "I build AI agents", t: "Credit for agents", b: "Working capital for agents that earn onchain.", cls: "border border-line-strong bg-panel text-ink" },
+  ];
+  return (
+    <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+      <h2 className="text-center text-4xl font-semibold tracking-[-0.03em] sm:text-5xl">Which one are you?</h2>
+      <div className="mt-12 grid grid-cols-1 gap-4 md:grid-cols-3">
+        {paths.map((p) => (
+          <Link key={p.href} href={p.href} className="group block">
+            <div className={`press h-full rounded-3xl p-7 ${p.cls}`}>
+              <div className="text-[14px] font-medium opacity-75">{p.who}</div>
+              <div className="mt-2 text-3xl font-semibold tracking-tight">{p.t}</div>
+              <p className="mt-2 text-[15px] opacity-80">{p.b}</p>
+              <ArrowRight className="mt-8 size-6 transition-transform duration-300 group-hover:translate-x-1.5" weight="bold" />
+            </div>
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ---------------- Home: explore the rest ---------------- */
+
+export function Explore() {
+  const items = [
+    { href: "/check", t: "Check any address", b: "See what an address could borrow, and why." },
+    { href: "/safety", t: "Is it safe?", b: "How fake income is caught and losses are limited." },
+    { href: "/technology", t: "Why Monad", b: "Live chain stats, contracts, and the tech stack." },
+    { href: "/faq", t: "FAQ and glossary", b: "Every term explained in plain words." },
+  ];
+  return (
+    <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {items.map((i) => (
+          <Link key={i.href} href={i.href} className="group block">
+            <div className="press h-full rounded-3xl border border-line bg-panel/80 p-6 transition-colors hover:border-line-strong">
+              <div className="flex items-center justify-between"><h3 className="font-semibold">{i.t}</h3><ArrowRight className="size-4 text-muted transition-transform duration-200 group-hover:translate-x-1 group-hover:text-ink" /></div>
+              <p className="mt-2 text-[14.5px] text-muted">{i.b}</p>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+}

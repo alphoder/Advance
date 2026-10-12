@@ -6,7 +6,6 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       { source: "/earn", destination: "/app/earn", permanent: false },
-      { source: "/agents", destination: "/app/agents", permanent: false },
     ];
   },
   partialPrefetching: true,

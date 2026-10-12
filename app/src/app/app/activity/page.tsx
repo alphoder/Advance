@@ -28,7 +28,7 @@ function Inner() {
   const c = activity.credit;
   return (
     <>
-      <PageHeader title="Activity" sub="Every advance, payment, split and limit change, straight from the chain. Each row links to its transaction." />
+      <PageHeader title="History" help={["Every advance, payment and limit change appears here, newest first.", "Use the tabs to show only payments, advances or limit changes.", "\"Proof\" opens the transaction on Monad's public record."]} sub="Every advance, payment, split and limit change, straight from the chain. Each row links to its transaction." />
       <div className="grid gap-4 sm:grid-cols-3">
         <Panel><Stat label="Borrowed in total" value={fmtUsd(c.totalBorrowed)} tone="terra" /></Panel>
         <Panel><Stat label="Repaid in total" value={fmtUsd(c.totalRepaid)} tone="monad" hint={`${c.repayments} repayment${c.repayments === 1 ? "" : "s"}`} /></Panel>

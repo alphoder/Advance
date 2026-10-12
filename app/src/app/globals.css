@@ -122,3 +122,5 @@ body {
 
 :focus-visible { outline: 2px solid var(--monad); outline-offset: 2px; border-radius: 8px; }
 ::selection { background: var(--monad-soft); }
+
+@keyframes dash { to { stroke-dashoffset: -12; } }

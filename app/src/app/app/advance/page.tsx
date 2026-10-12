@@ -66,7 +66,7 @@ function Inner() {
 
   return (
     <>
-      <PageHeader title="Get an advance" sub="Pick an amount. You see the full cost in dollars before anything happens, and it repays itself from your next payments." />
+      <PageHeader title="Get money now" help={["Pick an amount with the slider. The exact cost in dollars is shown before anything happens.", "Tap the button. The money lands in your account in about a second.", "You never repay by hand: 20% of every payment you receive pays it back automatically.", "Want to finish early? Use \"Repay early\" on the right."]} sub="Pick an amount. You see the full cost in dollars before anything happens, and it repays itself from your next payments." />
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
         <Panel className="lg:col-span-7">
           {c.defaulted ? (

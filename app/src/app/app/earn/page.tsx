@@ -26,7 +26,8 @@ export default function EarnPage() {
   return (
     <>
       <PageHeader
-        title="Savings pools"
+        title="Save and earn"
+        help={["Put dollars in Steady (safer) or Boost (higher return).", "Your dollars fund advances. Borrowers' 2% fees become your earnings.", "If a borrower never repays, Boost absorbs the loss before Steady loses anything.", "On the test network, \"Get test dollars\" gives you free pretend dollars to try it."]}
         sub="Your dollars fund advances for freelancers and sellers. Every advance pays a flat 2% fee; 90% of it goes to savers. Choose your risk."
         action={!session ? <Link href="/app"><Button>Sign in to deposit</Button></Link> : undefined}
       />

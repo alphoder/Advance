@@ -6,7 +6,7 @@ import { Suspense, useEffect, useState, type ReactNode } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
   SquaresFour, Lightning, QrCode, Gauge, ClockCounterClockwise, LockKey, Vault, ChartLineUp, Robot, Cube,
-  List, X, SignOut, Copy, Check, Fingerprint, UserCircle,
+  List, X, SignOut, Copy, Check, Fingerprint, UserCircle, Question,
 } from "@phosphor-icons/react";
 import { useAccount } from "@/lib/account";
 import { AppDataProvider } from "@/lib/app-data";
@@ -18,20 +18,20 @@ import { DemoGuide } from "./demo-guide";
 type Item = { href: string; label: string; icon: typeof SquaresFour };
 export const NAV: { group: string; items: Item[] }[] = [
   { group: "Borrow", items: [
-    { href: "/app", label: "Overview", icon: SquaresFour },
-    { href: "/app/advance", label: "Get an advance", icon: Lightning },
+    { href: "/app", label: "Home", icon: SquaresFour },
+    { href: "/app/advance", label: "Get money now", icon: Lightning },
     { href: "/app/get-paid", label: "Get paid", icon: QrCode },
-    { href: "/app/score", label: "Credit score", icon: Gauge },
-    { href: "/app/activity", label: "Activity", icon: ClockCounterClockwise },
-    { href: "/app/files", label: "Credit file", icon: LockKey },
+    { href: "/app/score", label: "My score", icon: Gauge },
+    { href: "/app/activity", label: "History", icon: ClockCounterClockwise },
+    { href: "/app/files", label: "My documents", icon: LockKey },
   ] },
-  { group: "Earn", items: [
-    { href: "/app/earn", label: "Savings pools", icon: Vault },
-    { href: "/app/market", label: "Kuru market", icon: ChartLineUp },
+  { group: "Save", items: [
+    { href: "/app/earn", label: "Save and earn", icon: Vault },
+    { href: "/app/market", label: "Sell or buy savings", icon: ChartLineUp },
   ] },
-  { group: "Build", items: [
-    { href: "/app/agents", label: "Agent credit", icon: Robot },
-    { href: "/app/protocol", label: "Protocol", icon: Cube },
+  { group: "More", items: [
+    { href: "/app/agents", label: "AI agents", icon: Robot },
+    { href: "/app/protocol", label: "Proof and contracts", icon: Cube },
   ] },
 ];
 
@@ -112,9 +112,11 @@ function SideNav({ pathname }: { pathname: string }) {
           </div>
         ))}
       </nav>
-      <div className="rounded-xl border border-line bg-white/[0.02] p-3 text-[12.5px] text-muted">
-        Network <span className="font-mono text-ink">{CHAIN_ID}</span>. All numbers are read from the chain.
-      </div>
+      <Link href="/how-it-works" className="flex items-center gap-2.5 rounded-xl border border-line bg-white/[0.02] p-3 text-[13px] text-muted transition-colors hover:text-ink">
+        <Question className="size-5 shrink-0 text-terra" weight="duotone" />
+        <span>New here? <span className="text-ink">See how Advance works</span></span>
+      </Link>
+      <div className="mt-2 px-1 text-[11.5px] text-faint">Network {CHAIN_ID}. Every number is read from the chain.</div>
     </>
   );
 }

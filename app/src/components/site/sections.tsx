@@ -121,18 +121,18 @@ const STEPS = [
 
 export function HowItWorks() {
   const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start 70%", "end 60%"] });
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start 85%", "end 55%"] });
   return (
     <section id="how" className="mx-auto max-w-7xl px-4 py-24 sm:px-6 sm:py-32">
-      <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr]">
-        <div className="lg:sticky lg:top-28 lg:self-start">
-          <h2 className="text-4xl font-semibold tracking-[-0.03em] sm:text-5xl">Credit that repays itself.</h2>
-          <p className="mt-4 max-w-[44ch] text-lg text-muted">
-            Lenders say no because they can&apos;t control repayment. Advance moves repayment to the source: the payment itself.
-          </p>
-          <ProgressRail progress={scrollYProgress} />
-        </div>
-        <div ref={ref} className="relative space-y-5">
+      <div className="mx-auto max-w-2xl text-center">
+        <h2 className="text-4xl font-semibold tracking-[-0.03em] sm:text-5xl">Credit that repays itself.</h2>
+        <p className="mt-4 text-lg text-muted">
+          Lenders say no because they can&apos;t control repayment. Advance moves repayment to the source: the payment itself.
+        </p>
+      </div>
+      <div ref={ref} className="relative mt-16">
+        <ProgressRail progress={scrollYProgress} />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {STEPS.map((s, i) => <Step key={s.title} index={i} {...s} progress={scrollYProgress} />)}
         </div>
       </div>
@@ -140,28 +140,42 @@ export function HowItWorks() {
   );
 }
 
+/** Horizontal rail above the cards (desktop): fills with scroll, one node per step. */
 function ProgressRail({ progress }: { progress: MotionValue<number> }) {
-  const width = useTransform(progress, [0, 1], ["0%", "100%"]);
+  const scaleX = useTransform(progress, [0, 1], [0, 1]);
   return (
-    <div className="mt-10 hidden h-1 w-full max-w-sm overflow-hidden rounded-full bg-white/[0.06] lg:block">
-      <motion.div style={{ width }} className="h-full rounded-full bg-gradient-to-r from-monad to-terra" />
+    <div className="relative mb-8 hidden h-3 lg:block" aria-hidden>
+      <div className="absolute inset-x-[12.5%] top-1/2 h-px -translate-y-1/2 bg-line-strong" />
+      <motion.div style={{ scaleX, transformOrigin: "left" }} className="absolute inset-x-[12.5%] top-1/2 h-0.5 -translate-y-1/2 rounded-full bg-gradient-to-r from-monad to-terra" />
+      {STEPS.map((_, i) => <RailNode key={i} index={i} progress={progress} />)}
     </div>
   );
 }
 
-function Step({ icon: Icon, title, body, index, progress }: (typeof STEPS)[number] & { index: number; progress: MotionValue<number> }) {
-  const start = index / STEPS.length;
-  const opacity = useTransform(progress, [start - 0.15, start + 0.05], [0.35, 1]);
+function RailNode({ index, progress }: { index: number; progress: MotionValue<number> }) {
+  const at = index / (STEPS.length - 1);
+  const scale = useTransform(progress, [at - 0.08, at], [0.6, 1]);
+  const opacity = useTransform(progress, [at - 0.08, at], [0.35, 1]);
   return (
-    <motion.div style={{ opacity }}>
-      <Panel className="flex gap-5">
-        <div className="grid size-12 shrink-0 place-items-center rounded-xl border border-line bg-white/[0.03]">
+    <motion.span
+      style={{ left: `${12.5 + index * 25}%`, scale, opacity }}
+      className={`absolute top-1/2 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full ring-4 ring-bg ${index % 2 ? "bg-terra" : "bg-monad"}`}
+    />
+  );
+}
+
+function Step({ icon: Icon, title, body, index, progress }: (typeof STEPS)[number] & { index: number; progress: MotionValue<number> }) {
+  const at = index / (STEPS.length - 1);
+  const opacity = useTransform(progress, [at - 0.25, at], [0.4, 1]);
+  const y = useTransform(progress, [at - 0.25, at], [10, 0]);
+  return (
+    <motion.div style={{ opacity, y }} className="h-full">
+      <Panel className="flex h-full flex-col">
+        <div className="grid size-12 place-items-center rounded-xl border border-line bg-white/[0.03]">
           <Icon className={`size-6 ${index % 2 ? "text-terra" : "text-monad-hi"}`} weight="duotone" />
         </div>
-        <div>
-          <h3 className="text-xl font-semibold tracking-tight">{title}</h3>
-          <p className="mt-1.5 text-muted">{body}</p>
-        </div>
+        <h3 className="mt-5 text-lg font-semibold tracking-tight">{title}</h3>
+        <p className="mt-2 text-[14.5px] leading-relaxed text-muted">{body}</p>
       </Panel>
     </motion.div>
   );

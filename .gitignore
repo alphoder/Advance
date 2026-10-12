@@ -7,6 +7,10 @@ contracts/cache/
 contracts/out/
 node_modules/
 
-# Private strategy notes (never published)
+# Private docs and strategy notes (never published)
 private/
 BLUEPRINT.md
+PRD.md
+*.docx
+*.pdf
+app/AGENTS.md

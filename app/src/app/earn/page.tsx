@@ -8,6 +8,7 @@ import { erc20Abi, poolAbi, Tranche } from "@/lib/abi";
 import { D, IS_TESTNET } from "@/lib/chain";
 import { Nav, Footer, Button, Card, ErrorNote, Proof, fmtUsd, Label, Spinner } from "@/components/ui";
 import { SignIn } from "@/components/sign-in";
+import { SharedWithMe } from "@/components/vault";
 
 type Pool = {
   steady: number; boost: number; total: number; lentOut: number; cash: number; feesEarned: number; losses: number;
@@ -47,6 +48,7 @@ export default function Earn() {
         )}
         {ready && !session && <div className="pt-4"><SignIn title="Sign in to start earning" /></div>}
         {session && data?.me && <Wallet wallet={data.me.wallet} onDone={refresh} />}
+        {session && <SharedWithMe />}
         <Card className="text-[15px] text-muted">
           <b className="text-ink">Want to sell instead of waiting?</b> Boost shares are a token (advJR) that can trade on a Kuru order book, so you can
           exit any time at the market price. <b className="text-ink">Coming from another chain?</b> Deposit USDC from Base, Arbitrum and more through

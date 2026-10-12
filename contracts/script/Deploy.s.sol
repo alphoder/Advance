@@ -9,6 +9,7 @@ import {CreditLine} from "../src/CreditLine.sol";
 import {ReceivablesFactory} from "../src/Receivables.sol";
 import {TestAUSD} from "../src/TestAUSD.sol";
 import {AgentCreditAdapter} from "../src/AgentCreditAdapter.sol";
+import {CreditFiles} from "../src/CreditFiles.sol";
 
 /// forge script script/Deploy.s.sol --rpc-url <rpc> --broadcast --private-key $PRIVATE_KEY
 /// Env: AUSD (omit to deploy TestAUSD), SCORER, CRE_FORWARDER, AGENT_REGISTRY (all optional).
@@ -29,6 +30,7 @@ contract Deploy is Script {
         ReceivablesFactory factory = new ReceivablesFactory(credit);
         address adapter =
             registry == address(0) ? address(0) : address(new AgentCreditAdapter(IERC721(registry), factory));
+        CreditFiles files = new CreditFiles();
         vm.stopBroadcast();
 
         string memory j = "d";
@@ -40,6 +42,7 @@ contract Deploy is Script {
         vm.serializeAddress(j, "juniorToken", address(pool.juniorToken()));
         vm.serializeAddress(j, "creditLine", address(credit));
         vm.serializeAddress(j, "agentAdapter", adapter);
+        vm.serializeAddress(j, "creditFiles", address(files));
         string memory out = vm.serializeAddress(j, "factory", address(factory));
         vm.writeJson(out, string.concat(vm.projectRoot(), "/../app/src/deployments/", vm.toString(block.chainid), ".json"));
         console.log(out);

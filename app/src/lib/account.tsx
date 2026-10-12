@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { createWalletClient, http, type Address, type WalletClient, type Account } from "viem";
 import { privateKeyToAccount, generatePrivateKey } from "viem/accounts";
+import { keccak256, concatHex, toHex, hexToBytes, type Hex } from "viem";
 import { HDKey } from "@scure/bip32";
 import { entropyToMnemonic, mnemonicToSeedSync } from "@scure/bip39";
 import { wordlist } from "@scure/bip39/wordlists/english.js";
@@ -15,8 +16,8 @@ type Session = {
   address: Address;
   kind: Kind;
   wallet: WalletClient<ReturnType<typeof http>, typeof chain, Account>;
-  /** PRF output: root for the encrypted credit file key. Passkey sessions only, memory only. */
-  prf?: Uint8Array;
+  /** Second key from the same passkey (BIP-44 index 1): encrypts the credit file. Memory only. */
+  encKey: Uint8Array;
 };
 type Ctx = {
   session?: Session;
@@ -42,6 +43,9 @@ function deriveKey(prf: Uint8Array, index = 0): Uint8Array {
   return node.privateKey;
 }
 
+/** Demo accounts have no passkey; derive their encryption key from the demo key instead. */
+const demoEncKey = (key: Hex) => hexToBytes(keccak256(concatHex([key, toHex("advance/enc")])));
+
 function walletFor(account: Account) {
   return createWalletClient({ account, chain, transport: http(RPC_URL) });
 }
@@ -49,7 +53,7 @@ function walletFor(account: Account) {
 function passkeySession(prf: Uint8Array): Session {
   const session = createSecp256k1SigningSession({ privateKey: deriveKey(prf) as Uint8Array<ArrayBuffer> });
   const account = toViemAccount(session);
-  return { address: account.address, kind: "passkey", wallet: walletFor(account), prf };
+  return { address: account.address, kind: "passkey", wallet: walletFor(account), encKey: deriveKey(prf, 1) };
 }
 
 function friendly(e: unknown) {
@@ -84,7 +88,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     const demo = store.get(DEMO);
     if (demo) {
       const account = privateKeyToAccount(demo as `0x${string}`);
-      setSession({ address: account.address, kind: "demo", wallet: walletFor(account) });
+      setSession({ address: account.address, kind: "demo", wallet: walletFor(account), encKey: demoEncKey(demo as Hex) });
     }
     setHasPasskey(Boolean(store.get(CRED)));
     setReady(true);
@@ -139,7 +143,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     const key = (store.get(DEMO) as `0x${string}` | null) ?? generatePrivateKey();
     store.set(DEMO, key);
     const account = privateKeyToAccount(key);
-    const s: Session = { address: account.address, kind: "demo", wallet: walletFor(account) };
+    const s: Session = { address: account.address, kind: "demo", wallet: walletFor(account), encKey: demoEncKey(key) };
     setSession(s);
     setError(undefined);
     return s;

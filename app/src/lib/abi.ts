@@ -78,3 +78,12 @@ export const receiveAuthTypes = {
 export const transferAuthTypes = {
   TransferWithAuthorization: receiveAuthTypes.ReceiveWithAuthorization,
 } as const;
+
+export const creditFilesAbi = parseAbi([
+  "event EncryptionKey(address indexed owner, bytes pubkey)",
+  "event FilePublished(address indexed owner, bytes32 indexed id, string name, bytes blob)",
+  "event AccessGranted(address indexed owner, bytes32 indexed id, address indexed lender, bytes wrappedKey)",
+  "function setEncryptionKey(bytes pubkey)",
+  "function publish(bytes32 id, string name, bytes blob)",
+  "function grant(bytes32 id, address lender, bytes wrappedKey)",
+]);

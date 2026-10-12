@@ -13,6 +13,7 @@ import { Nav, Footer, Button, Card, ErrorNote, Proof, fmtUsd, short, Label, Spin
 import { SignIn } from "@/components/sign-in";
 import { ScoreView } from "@/components/score-view";
 import { SplitAnimation, type SplitEvent } from "@/components/split";
+import { CreditFileCard } from "@/components/vault";
 
 type Ev = { type: string; key: string; tx: string; block: number; ts: number; amount?: number; fee?: number; repaid?: number; toYou?: number; tier?: number; payer?: string };
 type Activity = {
@@ -178,6 +179,8 @@ function Dashboard({ address, demo }: { address: Address; demo: boolean }) {
       )}
 
       {score?.approved && <Card><ScoreView s={score} compact /></Card>}
+
+      {!fresh && <CreditFileCard />}
 
       {data.events.length > 0 && <Feed events={data.events} />}
 

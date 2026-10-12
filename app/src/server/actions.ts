@@ -65,7 +65,7 @@ export async function demoClientPaysAccount(client: string, borrower: Address, a
 
 /** Gas drip: users never buy MON. Tops a new account up to a small working balance. */
 export async function dripGas(to: Address) {
-  const target = parseEther(IS_TESTNET ? "0.2" : "0.02");
+  const target = parseEther(IS_TESTNET ? "0.1" : "0.02");
   const bal = await publicClient.getBalance({ address: to });
   if (bal >= target / 2n) return undefined;
   const hash = await wallet.sendTransaction({ to, value: target - bal, gas: 21_000n, account: relayer, chain: wallet.chain });

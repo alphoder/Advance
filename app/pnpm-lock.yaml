@@ -11,6 +11,12 @@ importers:
       '@category-labs/mera':
         specifier: ^0.2.0
         version: 0.2.0(viem@2.57.4(typescript@5.9.3))
+      '@noble/curves':
+        specifier: ^2.4.0
+        version: 2.4.0
+      '@noble/hashes':
+        specifier: ^2.4.0
+        version: 2.4.0
       '@scure/bip32':
         specifier: ^2.4.0
         version: 2.4.0

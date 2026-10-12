@@ -11,7 +11,7 @@ const sel = (abi: readonly unknown[], name: string) =>
 /** Everything the borrower dashboard shows, straight from the chain. */
 export const GET = handler(async (req) => {
   const borrower = addr(new URL(req.url).searchParams.get("address"));
-  const [account, opened, credit, owed, available, balance, mon] = await Promise.all([
+  const [account, opened, credit, owed, available, balance, mon, trust] = await Promise.all([
     publicClient.readContract({ address: D.factory, abi: factoryAbi, functionName: "predict", args: [borrower] }),
     publicClient.readContract({ address: D.factory, abi: factoryAbi, functionName: "accountOf", args: [borrower] }),
     publicClient.readContract({ address: D.creditLine, abi: creditAbi, functionName: "creditOf", args: [borrower] }),
@@ -19,6 +19,7 @@ export const GET = handler(async (req) => {
     publicClient.readContract({ address: D.creditLine, abi: creditAbi, functionName: "available", args: [borrower] }),
     publicClient.readContract({ address: D.ausd, abi: erc20Abi, functionName: "balanceOf", args: [borrower] }),
     publicClient.getBalance({ address: borrower }),
+    publicClient.readContract({ address: D.creditLine, abi: creditAbi, functionName: "trustPoints", args: [borrower] }).catch(() => 0n),
   ]);
   const shareBps = opened !== "0x0000000000000000000000000000000000000000"
     ? Number(await publicClient.readContract({ address: account, abi: receivablesAbi, functionName: "shareBps" }))
@@ -27,7 +28,7 @@ export const GET = handler(async (req) => {
   const [creditLogs, splitLogs] = await Promise.all([
     fetchLogs({
       address: [D.creditLine],
-      topics: [["Drawn", "Repaid", "LimitSet", "TierUp", "Defaulted"].map((n) => sel(creditAbi, n)), [addrTopic(borrower)]],
+      topics: [["Drawn", "Repaid", "LimitSet", "TierUp", "Defaulted", "TrustCard", "TrustForfeited"].map((n) => sel(creditAbi, n)), [addrTopic(borrower)]],
       fromBlock: D.startBlock,
     }),
     fetchLogs({ address: [account], topics: [[sel(receivablesAbi, "PaymentSplit")]], fromBlock: D.startBlock }),
@@ -51,6 +52,10 @@ export const GET = handler(async (req) => {
           return { ...base, amount: usd(a.limit as bigint), tier: Number(a.tier) };
         case "TierUp":
           return { ...base, tier: Number(a.tier) };
+        case "TrustCard":
+          return { ...base, card: Number(a.card), points: Number(a.points), drawBps: Number(a.drawBps), speedBps: Number(a.speedBps), clientBps: Number(a.clientBps) };
+        case "TrustForfeited":
+          return { ...base, points: Number(a.points) };
         default:
           return { ...base, amount: usd(a.principalLost as bigint) };
       }
@@ -63,6 +68,7 @@ export const GET = handler(async (req) => {
     shareBps,
     balance: usd(balance),
     gas: Number(mon) / 1e18,
+    trustPoints: Number(trust),
     credit: {
       limit: usd(credit.limit),
       principal: usd(credit.principal),

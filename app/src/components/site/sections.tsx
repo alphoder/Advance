@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import dynamic from "next/dynamic";
+import { Mark, Note } from "@/components/site/doodles";
 import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion, useScroll, useTransform, type MotionValue } from "motion/react";
 import {
@@ -9,12 +9,9 @@ import {
 } from "@phosphor-icons/react";
 import { publicClient, CHAIN_ID } from "@/lib/chain";
 import { usePoll } from "@/lib/hooks";
-import { Panel, fmtUsd, CHAIN_NAME } from "@/components/ui";
-
-const SplitScene = dynamic(() => import("@/components/three/split-scene"), {
-  ssr: false,
-  loading: () => <div className="size-full animate-pulse rounded-3xl bg-white/[0.02]" />,
-});
+import { Panel, fmtUsd } from "@/components/ui";
+import { HeroStory } from "@/components/site/hero-story";
+import { AdvanceCard, GiftCard, brand } from "@/components/rewards";
 
 const EASE = [0.23, 1, 0.32, 1] as const;
 
@@ -22,46 +19,21 @@ const EASE = [0.23, 1, 0.32, 1] as const;
 
 export function Hero() {
   const reduce = useReducedMotion();
+  const rise = (d: number) => ({
+    initial: reduce ? false : { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.7, ease: EASE, delay: d },
+  } as const);
   return (
     <section className="relative overflow-hidden">
       <div className="grid-bg pointer-events-none absolute inset-0" />
-      <div className="relative mx-auto grid min-h-[calc(100dvh-4rem)] max-w-7xl items-center gap-6 px-4 pb-10 pt-8 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:pt-4">
-        <div>
-          <motion.div
-            initial={reduce ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: EASE }}
-            className="inline-flex items-center gap-2 rounded-full border border-line bg-white/[0.03] px-3 py-1 text-[13px] text-muted"
-          >
-            <span className="live-dot size-1.5 rounded-full bg-monad text-monad" /> Live on {CHAIN_NAME}
-          </motion.div>
-          <motion.h1
-            initial={reduce ? false : { opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: EASE, delay: 0.06 }}
-            className="mt-6 text-[42px] font-semibold leading-[1.02] tracking-[-0.04em] sm:text-6xl lg:text-[68px]"
-          >
-            Get paid today for work you&apos;ve <span className="text-terra">already done.</span>
-          </motion.h1>
-          <motion.p
-            initial={reduce ? false : { opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: EASE, delay: 0.12 }}
-            className="mt-6 max-w-[46ch] text-lg leading-relaxed text-muted"
-          >
-            Advances on the money already heading your way. Your next client payment repays it automatically, in the same transaction.
-          </motion.p>
-          <motion.div
-            initial={reduce ? false : { opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: EASE, delay: 0.18 }}
-            className="mt-9 flex flex-wrap gap-3"
-          >
-            <Link href="/app?demo=1" className="press inline-flex min-h-12 items-center gap-2 rounded-xl bg-terra px-6 text-[15px] font-medium text-[#1a0d08] shadow-[0_14px_40px_-14px_rgb(226_114_91/0.8)] hover:bg-terra-hi">
-              Try the 60-second demo <ArrowRight className="size-4" weight="bold" />
-            </Link>
-            <a href="#check" className="press inline-flex min-h-12 items-center gap-2 rounded-xl border border-line-strong bg-white/[0.03] px-6 text-[15px] font-medium hover:bg-white/[0.07]">
-              Check any address
-            </a>
-          </motion.div>
-        </div>
-        <motion.div
-          initial={reduce ? false : { opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1, ease: EASE, delay: 0.1 }}
-          className="relative h-[380px] sm:h-[460px] lg:h-[600px]"
-        >
-          <SplitScene reduced={Boolean(reduce)} />
+      <div className="relative mx-auto max-w-6xl px-4 pb-12 pt-12 text-center sm:px-6 lg:pt-36">
+        <motion.h1 {...rise(0.06)} className="mx-auto max-w-4xl text-[42px] font-semibold leading-[1.02] tracking-[-0.04em] sm:text-6xl lg:text-[64px]">
+          Get paid today for work you&apos;ve <span className="text-terra">already done.</span>
+        </motion.h1>
+        <motion.p {...rise(0.12)} className="mx-auto mt-6 max-w-[52ch] text-lg leading-relaxed text-muted">
+          Invoices take 30, 60, 90 days to clear. Advance pays you now, then collects from your client whenever they pay.
+        </motion.p>
+        <motion.div initial={reduce ? false : { opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, ease: EASE, delay: 0.3 }} className="mt-4">
+          <HeroStory />
         </motion.div>
       </div>
       <LiveStrip />
@@ -125,7 +97,7 @@ export function HowItWorks() {
   return (
     <section id="how" className="mx-auto max-w-7xl px-4 py-24 sm:px-6 sm:py-32">
       <div className="mx-auto max-w-2xl text-center">
-        <h2 className="text-4xl font-semibold tracking-[-0.03em] sm:text-5xl">Credit that repays itself.</h2>
+        <h2 className="text-4xl font-semibold tracking-[-0.03em] sm:text-5xl">Credit that <Mark kind="highlight" tone="monad">repays itself.</Mark></h2>
         <p className="mt-4 text-lg text-muted">
           Lenders say no because they can&apos;t control repayment. Advance moves repayment to the source: the payment itself.
         </p>
@@ -259,7 +231,7 @@ export function Compare() {
     <section className="mx-auto max-w-7xl px-4 py-24 sm:px-6">
       <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
         <div>
-          <h2 className="text-4xl font-semibold tracking-[-0.03em] sm:text-5xl">What $50 for two weeks costs.</h2>
+          <h2 className="text-4xl font-semibold tracking-[-0.03em] sm:text-5xl">What $50 for two weeks <Mark kind="highlight">costs.</Mark></h2>
           <p className="mt-4 max-w-[44ch] text-lg text-muted">85% of freelancers get paid late at least some of the time. The fast options punish them for it.</p>
         </div>
         <div className="space-y-6">
@@ -267,7 +239,7 @@ export function Compare() {
             <div key={r.name}>
               <div className="flex items-baseline justify-between">
                 <span className={r.us ? "font-semibold text-terra" : "text-ink"}>{r.name}</span>
-                <span className={`num font-mono text-2xl ${r.us ? "text-terra" : ""}`}>{fmtUsd(r.cost)}</span>
+                <span className={`num font-mono text-2xl ${r.us ? "text-terra" : ""}`}>{r.us ? <Mark kind="circle">{fmtUsd(r.cost)}</Mark> : fmtUsd(r.cost)}</span>
               </div>
               <motion.div
                 initial={{ scaleX: 0 }} whileInView={{ scaleX: 1 }} viewport={{ once: true }} transition={{ duration: 0.9, delay: i * 0.1, ease: EASE }}
@@ -337,46 +309,6 @@ export function TwoPaths() {
   );
 }
 
-/* ---------------- Home: Advance in one picture ---------------- */
-
-export function OnePicture() {
-  return (
-    <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
-      <div className="mx-auto max-w-2xl text-center">
-        <h2 className="text-4xl font-semibold tracking-[-0.03em] sm:text-5xl">Advance in one picture.</h2>
-        <p className="mt-4 text-lg text-muted">You get money today. When your client pays later, the payment splits itself: a small part repays the advance, the rest is yours.</p>
-      </div>
-      <div className="mt-12 grid grid-cols-1 items-stretch gap-3 md:grid-cols-[1fr_auto_1fr_auto_1fr]">
-        <div className="rounded-3xl bg-terra p-6 text-[#1a0d08]">
-          <div className="text-[13px] font-medium opacity-70">Today</div>
-          <div className="num mt-1 font-mono text-4xl font-semibold">+$50</div>
-          <p className="mt-2 text-[15px] opacity-80">You take an advance. It arrives in about a second.</p>
-        </div>
-        <div className="hidden items-center text-faint md:flex"><ArrowRight className="size-6" /></div>
-        <div className="rounded-3xl border border-line bg-panel p-6">
-          <div className="text-[13px] font-medium text-muted">Next week</div>
-          <div className="num mt-1 font-mono text-4xl font-semibold">$100</div>
-          <p className="mt-2 text-[15px] text-muted">A client pays your Advance link, like any normal payment.</p>
-        </div>
-        <div className="hidden items-center text-faint md:flex"><ArrowRight className="size-6" /></div>
-        <div className="grid grid-cols-2 gap-3">
-          <div className="rounded-3xl bg-monad p-5 text-white">
-            <div className="num font-mono text-3xl font-semibold">$20</div>
-            <p className="mt-1 text-[13.5px] opacity-85">repays the advance</p>
-          </div>
-          <div className="rounded-3xl bg-terra p-5 text-[#1a0d08]">
-            <div className="num font-mono text-3xl font-semibold">$80</div>
-            <p className="mt-1 text-[13.5px] opacity-80">lands with you</p>
-          </div>
-        </div>
-      </div>
-      <div className="mt-8 text-center">
-        <Link href="/how-it-works" className="inline-flex items-center gap-1.5 text-[15px] text-terra hover:text-terra-hi">See the full walkthrough and simulator <ArrowRight className="size-4" /></Link>
-      </div>
-    </section>
-  );
-}
-
 /* ---------------- Home: choose your path ---------------- */
 
 export function ChoosePath() {
@@ -387,7 +319,7 @@ export function ChoosePath() {
   ];
   return (
     <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
-      <h2 className="text-center text-4xl font-semibold tracking-[-0.03em] sm:text-5xl">Which one are you?</h2>
+      <div className="relative mx-auto w-fit"><h2 className="text-center text-4xl font-semibold tracking-[-0.03em] sm:text-5xl">Which one are you?</h2><Note dir="down-left" arrow="zigzag" className="left-full top-2 ml-6" tilt={4}>pick yours, we&apos;ll explain the rest</Note></div>
       <div className="mt-12 grid grid-cols-1 gap-4 md:grid-cols-3">
         {paths.map((p) => (
           <Link key={p.href} href={p.href} className="group block">
@@ -428,6 +360,60 @@ export function Explore() {
             </div>
           </Link>
         ))}
+      </div>
+    </section>
+  );
+}
+
+/* ---------------- Home: spend it anywhere ---------------- */
+
+const FAN = [
+  { id: "brewline", amount: 25, r: -16, x: "-62%", y: "8%" },
+  { id: "nimbus", amount: 100, r: -7, x: "-34%", y: "-6%" },
+  { id: "pixelhaus", amount: 50, r: 8, x: "34%", y: "-6%" },
+  { id: "velo", amount: 50, r: 17, x: "62%", y: "8%" },
+];
+
+export function Perks() {
+  const reduce = useReducedMotion();
+  return (
+    <section className="mx-auto max-w-6xl overflow-hidden px-4 py-20 sm:px-6">
+      <div className="mx-auto max-w-2xl text-center">
+        <h2 className="text-4xl font-semibold tracking-[-0.03em] sm:text-5xl">Spend it <span className="text-terra">anywhere.</span></h2>
+        <p className="mt-4 text-lg text-muted">A card for your advance, gift cards from the shops you use for up to 12% less, and coupons that unlock every time you repay on time.</p>
+      </div>
+      <div className="relative mx-auto mt-14 h-[230px] max-w-3xl sm:h-[330px]">
+        {FAN.map((f, i) => (
+          <div key={f.id} className="absolute left-1/2 top-[6%] w-[42%] -translate-x-1/2 sm:w-[36%]" style={{ zIndex: i === 1 || i === 2 ? 2 : 1 }}>
+            <motion.div
+              initial={reduce ? false : { x: "0%", y: "20%", rotate: 0, opacity: 0 }}
+              whileInView={{ x: f.x, y: f.y, rotate: f.r, opacity: 1 }}
+              viewport={{ once: true, amount: 0.4 }}
+              transition={{ type: "spring", duration: 0.9, bounce: 0.2, delay: 0.1 + i * 0.07 }}
+            >
+              <GiftCard b={brand(f.id)} amount={f.amount} />
+            </motion.div>
+          </div>
+        ))}
+        <motion.div
+          className="absolute left-1/2 top-[14%] z-10 w-[56%] -translate-x-1/2 sm:w-[46%]"
+          initial={reduce ? false : { y: 40, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true, amount: 0.4 }}
+          transition={{ type: "spring", duration: 0.9, bounce: 0.2, delay: 0.45 }}
+        >
+          <AdvanceCard />
+        </motion.div>
+      </div>
+      <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
+        {[
+          ["The Advance card", "Spend your advance in shops and online the moment it lands."],
+          ["Gift cards for less", "Cartwheel, Nimbus Air, Velo, Pixelhaus and more, up to 12% off."],
+          ["Rewards for repaying", "Points and coupons every time an advance is repaid on time."],
+        ].map(([t, b]) => (
+          <div key={t} className="rounded-3xl border border-line bg-panel/80 p-5"><div className="font-semibold">{t}</div><p className="mt-1 text-[14px] text-muted">{b}</p></div>
+        ))}
+      </div>
+      <div className="mt-8 text-center">
+        <Link href="/app/rewards" className="inline-flex items-center gap-1.5 text-[15px] text-terra hover:text-terra-hi">See rewards and gift cards <ArrowRight className="size-4" /></Link>
       </div>
     </section>
   );

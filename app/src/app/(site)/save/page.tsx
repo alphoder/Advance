@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Mark, Note, Sparkle } from "@/components/site/doodles";
 import { motion } from "motion/react";
 import { ShieldCheck, Rocket, Coins, Globe, ChartLineUp } from "@phosphor-icons/react";
 import { PageIntro, Section, Reveal, NextPage, CtaLink, QA } from "@/components/site/kit";
@@ -16,7 +17,7 @@ export default function Save() {
   return (
     <>
       <PageIntro
-        title={<>Earn from <span className="text-monad-hi">real</span> borrower fees</>}
+        title={<>Earn from <span className="text-monad-hi"><Mark delay={0.7}>real</Mark></span> borrower fees</>}
         sub="Your dollars fund advances. Every advance pays a flat 2% fee, and 90% of it goes to savers. Choose how much risk you want."
       >
         <CtaLink href="/app/earn" variant="monad">Open savings pools</CtaLink>
@@ -45,7 +46,8 @@ export default function Save() {
       </Section>
 
       <Section id="protection" title="What happens if borrowers don't repay?" sub="Drag the slider to imagine missed repayments in a $10,000 pool. Watch who absorbs the loss.">
-        <div className="rounded-3xl border border-line bg-panel/80 p-6 sm:p-8">
+        <div className="relative rounded-3xl border border-line bg-panel/80 p-6 sm:p-8">
+          <Note dir="down-left" arrow="zigzag" className="-top-20 right-[22%]" tilt={4}>drag it and watch Steady stay safe</Note>
           <div className="flex flex-wrap items-baseline justify-between gap-3">
             <div className="text-[14px] text-muted">Missed repayments</div>
             <div className="num font-mono text-4xl font-semibold text-danger">{fmtUsd(loss)}</div>

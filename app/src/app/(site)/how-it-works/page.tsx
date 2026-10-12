@@ -1,6 +1,7 @@
 "use client";
 
 import { CalendarBlank, Fingerprint, ChartLineUp, Lightning, ArrowsSplit } from "@phosphor-icons/react";
+import { Mark, Note, Sparkle } from "@/components/site/doodles";
 import { PageIntro, Section, Reveal, NextPage, CtaLink } from "@/components/site/kit";
 import { RepaySimulator, MoneyFlow } from "@/components/site/simulator";
 
@@ -15,7 +16,7 @@ export default function HowItWorks() {
   return (
     <>
       <PageIntro
-        title={<>How Advance <span className="text-terra">works</span></>}
+        title={<>How Advance <span className="text-terra"><Mark tone="monad" delay={0.7}>works</Mark></span></>}
         sub="Advance pays you today for money that is already on its way to you. When that money arrives, a small slice pays the advance back by itself."
       >
         <CtaLink href="#simulator">Try the simulator</CtaLink>
@@ -66,6 +67,7 @@ export default function HowItWorks() {
       </Section>
 
       <Section id="simulator" title="Try it yourself" sub="A simulator with pretend money. Take an advance, then press the buttons to have clients pay you. Watch the advance pay itself off.">
+        <Note dir="down-left" arrow="loop" className="right-[8%] top-10" tilt={3}>go on, press the buttons!</Note>
         <RepaySimulator />
       </Section>
 

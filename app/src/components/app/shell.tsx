@@ -6,7 +6,7 @@ import { Suspense, useEffect, useState, type ReactNode } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
   SquaresFour, Lightning, QrCode, Gauge, ClockCounterClockwise, LockKey, Vault, ChartLineUp, Robot, Cube,
-  List, X, SignOut, Copy, Check, Fingerprint, UserCircle, Question,
+  List, X, SignOut, Copy, Check, Fingerprint, UserCircle, Question, Gift,
 } from "@phosphor-icons/react";
 import { useAccount } from "@/lib/account";
 import { AppDataProvider } from "@/lib/app-data";
@@ -21,6 +21,7 @@ export const NAV: { group: string; items: Item[] }[] = [
     { href: "/app", label: "Home", icon: SquaresFour },
     { href: "/app/advance", label: "Get money now", icon: Lightning },
     { href: "/app/get-paid", label: "Get paid", icon: QrCode },
+    { href: "/app/rewards", label: "Rewards and gift cards", icon: Gift },
     { href: "/app/score", label: "My score", icon: Gauge },
     { href: "/app/activity", label: "History", icon: ClockCounterClockwise },
     { href: "/app/files", label: "My documents", icon: LockKey },
@@ -66,10 +67,16 @@ export function AppShell({ children }: { children: ReactNode }) {
       </AnimatePresence>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-line bg-bg/70 px-4 backdrop-blur-xl sm:px-6">
-          <button className="press -ml-1 rounded-lg p-2 text-muted lg:hidden" onClick={() => setOpen(true)} aria-label="Open menu"><List className="size-5" /></button>
-          <h1 className="truncate text-[15px] font-semibold">{current.label}</h1>
-          <div className="ml-auto flex items-center gap-2">
+        {/* Dynamic-Island top bar: one floating pill instead of a full-width header */}
+        <header className="pointer-events-none sticky top-3 z-30 flex justify-center px-3 sm:px-6">
+          <div className="pointer-events-auto flex max-w-full items-center gap-1 rounded-full border border-line-strong bg-[#0b0e14]/90 p-1.5 shadow-[0_18px_50px_-18px_rgb(0_0_0/0.9)] backdrop-blur-xl">
+            <button className="press grid size-8 place-items-center rounded-full text-muted hover:text-ink lg:hidden" onClick={() => setOpen(true)} aria-label="Open menu"><List className="size-5" /></button>
+            <AnimatePresence mode="popLayout" initial={false}>
+              <motion.h1 key={current.href} initial={{ opacity: 0, y: 6, filter: "blur(3px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }} exit={{ opacity: 0, y: -6, filter: "blur(3px)" }}
+                transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }} className="truncate px-3 text-[14px] font-semibold">
+                {current.label}
+              </motion.h1>
+            </AnimatePresence>
             <LiveBlock />
             <div className="hidden sm:block"><ChainToggle compact /></div>
             <AccountMenu />
@@ -130,7 +137,7 @@ function LiveBlock() {
     return () => clearInterval(id);
   }, []);
   return (
-    <div className="hidden items-center gap-2 rounded-lg border border-line px-2.5 py-1.5 font-mono text-[12px] text-muted md:flex" title="Latest block">
+    <div className="hidden items-center gap-2 rounded-full bg-white/[0.04] px-3 py-1.5 font-mono text-[12px] text-muted md:flex" title="Latest block">
       <span className="live-dot size-1.5 rounded-full bg-monad text-monad" />
       {n ? `#${n.toLocaleString()}` : "…"}
     </div>
@@ -141,10 +148,10 @@ function AccountMenu() {
   const { session, signOut } = useAccount();
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
-  if (!session) return <Link href="/app" className="press rounded-lg bg-terra px-3 py-1.5 text-[13px] font-medium text-[#1a0d08]">Sign in</Link>;
+  if (!session) return <Link href="/app" className="press rounded-full bg-terra px-3.5 py-1.5 text-[13px] font-medium text-[#1a0d08]">Sign in</Link>;
   return (
     <div className="relative">
-      <button onClick={() => setOpen((o) => !o)} className="press flex items-center gap-2 rounded-lg border border-line-strong bg-white/[0.03] py-1.5 pl-2 pr-3 text-[13px]">
+      <button onClick={() => setOpen((o) => !o)} className="press flex items-center gap-2 rounded-full bg-white/[0.06] py-1.5 pl-2.5 pr-3 text-[13px] hover:bg-white/[0.09]">
         {session.kind === "passkey" ? <Fingerprint className="size-4 text-terra" weight="duotone" /> : <UserCircle className="size-4 text-muted" />}
         <span className="font-mono">{short(session.address)}</span>
       </button>

@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { Fragment, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { AnimatePresence, motion, useMotionValueEvent, useReducedMotion, useScroll } from "motion/react";
-import { List, X, ArrowRight } from "@phosphor-icons/react";
+import { List, X, ArrowRight, CaretDown, Lightning, Vault, Robot } from "@phosphor-icons/react";
 import { Logo, ChainToggle, ContractList, CHAIN_NAME } from "@/components/ui";
 import { useChainView } from "@/components/providers";
 import { publicClient } from "@/lib/chain";
@@ -12,12 +12,16 @@ import { NavHints } from "./nav-hints";
 
 const LINKS = [
   ["How it works", "/how-it-works"],
-  ["Borrow", "/borrow"],
-  ["Save", "/save"],
-  ["Agents", "/agents"],
   ["Compare", "/compare"],
   ["Security", "/safety"],
   ["FAQ", "/faq"],
+] as const;
+
+/** Borrow, Save and Agents live under one "Products" entry instead of three separate links. */
+const PRODUCTS = [
+  { href: "/borrow", t: "Borrow", b: "Get paid early on income that's on its way", icon: Lightning, tone: "bg-terra text-[#1a0d08]" },
+  { href: "/save", t: "Save", b: "Fund advances and earn from borrower fees", icon: Vault, tone: "bg-monad text-white" },
+  { href: "/agents", t: "AI agents", b: "Working capital for agents that earn onchain", icon: Robot, tone: "bg-white/10 text-ink" },
 ] as const;
 
 // iOS sheet curve: fast start, long gentle settle. Width is the only thing that moves; text just fades.
@@ -76,6 +80,10 @@ export function SiteNav() {
   const [hoverLink, setHoverLink] = useState<string>();
   const hoverTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const navRef = useRef<HTMLElement>(null);
+  const [products, setProducts] = useState(false);
+  const productsTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const openProducts = () => { clearTimeout(productsTimer.current); setProducts(true); };
+  const closeProducts = () => { clearTimeout(productsTimer.current); productsTimer.current = setTimeout(() => setProducts(false), 180); };
   const pathname = usePathname();
   const block = useBlock();
 
@@ -88,6 +96,8 @@ export function SiteNav() {
   useEffect(() => () => clearTimeout(hoverTimer.current), []);
 
   const expanded = !scrolled || hovered;
+  useEffect(() => { if (!expanded) setProducts(false); }, [expanded]);
+  useEffect(() => setProducts(false), [pathname]);
 
   return (
     <>
@@ -97,7 +107,7 @@ export function SiteNav() {
           ref={navRef}
           onMouseEnter={onEnter}
           onMouseLeave={onLeave}
-          className="pointer-events-auto flex items-center rounded-full border border-white/[0.08] bg-[#0b0e14]/90 p-1.5 shadow-[0_18px_50px_-18px_rgb(0_0_0/0.9),inset_0_1px_0_rgb(255_255_255/0.06)] backdrop-blur-xl"
+          className="pointer-events-auto relative flex items-center rounded-full border border-white/[0.08] bg-[#0b0e14]/90 p-1.5 shadow-[0_18px_50px_-18px_rgb(0_0_0/0.9),inset_0_1px_0_rgb(255_255_255/0.06)] backdrop-blur-xl"
           aria-label="Main"
         >
           <Link href="/" className="flex items-center rounded-full py-1 pl-2.5 pr-1.5 text-[15px] font-semibold tracking-tight" aria-label="Advance home">
@@ -107,15 +117,32 @@ export function SiteNav() {
 
           <Collapse open={expanded} reduce={reduce} className="hidden md:block">
             <ul className="flex items-center pr-1" onMouseLeave={() => setHoverLink(undefined)}>
-              {LINKS.map(([label, href]) => (
-                <li key={href} onMouseEnter={() => setHoverLink(href)}>
-                  <Link href={href} data-nav={href} tabIndex={expanded ? 0 : -1} className="relative block whitespace-nowrap rounded-full px-3.5 py-2 text-[14px] text-muted transition-colors duration-200 hover:text-ink">
-                    {hoverLink === href && (
-                      <motion.span layoutId="island-hover" transition={{ type: "spring", duration: 0.32, bounce: 0.1 }} className="absolute inset-0 rounded-full bg-white/[0.08]" />
-                    )}
-                    <span className="relative">{label}</span>
-                  </Link>
-                </li>
+              {LINKS.map(([label, href], i) => (
+                <Fragment key={href}>
+                  <li onMouseEnter={() => setHoverLink(href)}>
+                    <Link href={href} data-nav={href} tabIndex={expanded ? 0 : -1} className="relative block whitespace-nowrap rounded-full px-3.5 py-2 text-[14px] text-muted transition-colors duration-200 hover:text-ink">
+                      {hoverLink === href && (
+                        <motion.span layoutId="island-hover" transition={{ type: "spring", duration: 0.32, bounce: 0.1 }} className="absolute inset-0 rounded-full bg-white/[0.08]" />
+                      )}
+                      <span className="relative">{label}</span>
+                    </Link>
+                  </li>
+                  {i === 0 && (
+                    <li onMouseEnter={() => { setHoverLink("products"); openProducts(); }} onMouseLeave={closeProducts}>
+                      <button
+                        type="button" tabIndex={expanded ? 0 : -1} aria-expanded={products} aria-haspopup="true"
+                        onClick={() => setProducts((p) => !p)}
+                        className={`relative flex items-center gap-1 whitespace-nowrap rounded-full px-3.5 py-2 text-[14px] transition-colors duration-200 hover:text-ink ${products ? "text-ink" : "text-muted"}`}
+                      >
+                        {hoverLink === "products" && (
+                          <motion.span layoutId="island-hover" transition={{ type: "spring", duration: 0.32, bounce: 0.1 }} className="absolute inset-0 rounded-full bg-white/[0.08]" />
+                        )}
+                        <span className="relative">Products</span>
+                        <CaretDown className={`relative size-3.5 transition-transform duration-200 ${products ? "rotate-180" : ""}`} weight="bold" />
+                      </button>
+                    </li>
+                  )}
+                </Fragment>
               ))}
             </ul>
           </Collapse>
@@ -132,6 +159,33 @@ export function SiteNav() {
           <button className="press ml-0.5 grid size-9 place-items-center rounded-full text-muted hover:bg-white/[0.06] hover:text-ink md:hidden" onClick={() => setMenu((m) => !m)} aria-label="Menu" aria-expanded={menu}>
             {menu ? <X className="size-[18px]" /> : <List className="size-[18px]" />}
           </button>
+
+          {/* Products: the island grows a panel downward, like a Dynamic Island expanding. */}
+          <AnimatePresence>
+            {products && expanded && (
+              <motion.div
+                onMouseEnter={openProducts} onMouseLeave={closeProducts}
+                initial={{ opacity: 0, y: -8, scaleY: 0.92, filter: "blur(4px)" }} animate={{ opacity: 1, y: 0, scaleY: 1, filter: "blur(0px)" }}
+                exit={{ opacity: 0, y: -6, scaleY: 0.96, filter: "blur(2px)", transition: { duration: 0.14 } }}
+                transition={reduce ? { duration: 0 } : { duration: 0.32, ease: EASE_IOS }}
+                style={{ transformOrigin: "top center" }}
+                className="absolute left-1/2 top-[calc(100%+8px)] hidden w-[520px] -translate-x-1/2 rounded-[26px] border border-white/[0.08] bg-[#0b0e14]/95 p-2 shadow-[0_24px_60px_-20px_rgb(0_0_0/0.9)] backdrop-blur-xl md:block"
+              >
+                {PRODUCTS.map(({ href, t, b, icon: Icon, tone }, i) => (
+                  <motion.div key={href} initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: reduce ? 0 : 0.04 + i * 0.04, duration: 0.2 }}>
+                    <Link href={href} onClick={() => setProducts(false)} className="group flex items-center gap-3.5 rounded-2xl p-3 transition-colors hover:bg-white/[0.05]">
+                      <span className={`grid size-11 shrink-0 place-items-center rounded-xl ${tone}`}><Icon className="size-5" weight="bold" /></span>
+                      <span className="flex-1">
+                        <span className="block text-[15px] font-medium text-ink">{t}</span>
+                        <span className="block text-[13px] text-muted">{b}</span>
+                      </span>
+                      <ArrowRight className="size-4 text-faint transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-ink" />
+                    </Link>
+                  </motion.div>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </nav>
       </div>
 
@@ -147,6 +201,13 @@ export function SiteNav() {
             style={{ transformOrigin: "top center" }}
             className="fixed inset-x-3 top-[70px] z-50 rounded-[28px] border border-white/[0.08] bg-[#0b0e14]/95 p-2 shadow-[0_24px_60px_-20px_rgb(0_0_0/0.9)] backdrop-blur-xl md:hidden"
           >
+            <div className="px-4 pb-1 pt-2 text-[12px] text-faint">Products</div>
+            {PRODUCTS.map(({ href, t, icon: Icon }) => (
+              <Link key={href} href={href} onClick={() => setMenu(false)} className="flex items-center gap-3 rounded-2xl px-4 py-2.5 text-[15px] text-ink hover:bg-white/[0.05]">
+                <Icon className="size-4 text-muted" /> {t}
+              </Link>
+            ))}
+            <div className="mx-4 my-1.5 h-px bg-white/[0.06]" />
             {LINKS.map(([label, href], i) => (
               <motion.div key={href} initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.04 * i, duration: 0.2 }}>
                 <Link href={href} onClick={() => setMenu(false)} className="block rounded-2xl px-4 py-3 text-[15px] text-ink hover:bg-white/[0.05]">{label}</Link>

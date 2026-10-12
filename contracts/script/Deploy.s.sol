@@ -28,6 +28,7 @@ contract Deploy is Script {
         pool.setCreditLine(address(credit));
         if (forwarder != address(0)) credit.setForwarder(forwarder);
         ReceivablesFactory factory = new ReceivablesFactory(credit);
+        credit.setFactory(address(factory));
         address adapter =
             registry == address(0) ? address(0) : address(new AgentCreditAdapter(IERC721(registry), factory));
         CreditFiles files = new CreditFiles();

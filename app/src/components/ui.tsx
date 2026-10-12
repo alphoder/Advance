@@ -105,7 +105,7 @@ export function AddressLink({ address }: { address: string }) {
 export function ChainToggle({ compact = false }: { compact?: boolean }) {
   const { on, toggle } = useChainView();
   return (
-    <button onClick={toggle} aria-pressed={on} className="press inline-flex items-center gap-2 rounded-lg border border-line px-2.5 py-1.5 text-[12.5px] text-muted hover:text-ink">
+    <button onClick={toggle} aria-pressed={on} className={`press inline-flex items-center gap-2 px-2.5 py-1.5 text-[12.5px] text-muted hover:text-ink ${compact ? "rounded-full bg-white/[0.04]" : "rounded-lg border border-line"}`}>
       <span className={`relative h-4 w-7 rounded-full transition-colors ${on ? "bg-monad" : "bg-white/10"}`}>
         <span className={`absolute left-0 top-0.5 size-3 rounded-full bg-white transition-transform duration-200 ease-out ${on ? "translate-x-3.5" : "translate-x-0.5"}`} />
       </span>

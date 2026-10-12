@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Mark, Note, Sparkle } from "@/components/site/doodles";
 import { motion } from "motion/react";
 import { PaintBrush, Storefront, VideoCamera, Bicycle, Fingerprint, Wallet, CheckCircle } from "@phosphor-icons/react";
 import { PageIntro, Section, Reveal, NextPage, CtaLink, QA } from "@/components/site/kit";
@@ -24,7 +25,7 @@ export default function Borrow() {
   return (
     <>
       <PageIntro
-        title={<>Get paid <span className="text-terra">today</span>, not in 45 days</>}
+        title={<>Get paid <span className="text-terra">today</span>, not in <Mark kind="scribble" delay={0.8}>45 days</Mark></>}
         sub="Advance is for people who earn real money but wait too long to receive it: freelancers, online sellers, creators and gig workers."
       >
         <CtaLink href="/app?demo=1">Try it as Priya</CtaLink>
@@ -49,7 +50,8 @@ export default function Borrow() {
       </Section>
 
       <Section title="What it costs" sub="Move the slider. The fee is always 2% of what you take, shown in dollars before you agree.">
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
+        <div className="relative grid grid-cols-1 gap-4 lg:grid-cols-12">
+          <Note dir="down-left" arrow="swoop" tone="monad" className="-top-20 left-[26%]" tilt={-3}>drag the slider</Note>
           <div className="rounded-3xl bg-terra p-7 text-[#1a0d08] lg:col-span-5">
             <div className="text-[14px] font-medium opacity-70">You take</div>
             <div className="num mt-1 font-mono text-6xl font-semibold">{fmtUsd(amount)}</div>

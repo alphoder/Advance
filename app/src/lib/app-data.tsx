@@ -9,6 +9,7 @@ import { api } from "./tx";
 export type Ev = {
   type: string; key: string; tx: string; block: number; ts: number;
   amount?: number; fee?: number; repaid?: number; toYou?: number; tier?: number; payer?: string;
+  card?: number; points?: number; drawBps?: number; speedBps?: number; clientBps?: number;
 };
 export type Activity = {
   account: Address;
@@ -16,6 +17,7 @@ export type Activity = {
   shareBps: number;
   balance: number;
   gas: number;
+  trustPoints: number;
   credit: {
     limit: number; principal: number; fee: number; owed: number; available: number;
     totalBorrowed: number; totalRepaid: number; repayments: number; tier: number; defaulted: boolean;
@@ -61,6 +63,9 @@ export function AppDataProvider({ address, children }: { address: Address; child
 
   return <AppData.Provider value={{ activity, refresh, score, apply, seed, log, pushLog }}>{children}</AppData.Provider>;
 }
+
+/** Same data, or null outside a signed-in shell (for pages that also work signed out). */
+export const useMaybeAppData = () => useContext(AppData);
 
 export function useAppData() {
   const ctx = useContext(AppData);

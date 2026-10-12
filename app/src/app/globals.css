@@ -125,3 +125,8 @@ body {
 ::selection { background: var(--monad-soft); }
 
 @keyframes dash { to { stroke-dashoffset: -12; } }
+
+/* hero story: the Advance coin turns slowly in 3D */
+@keyframes coin-spin { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
+.coin-spin { animation: coin-spin 7s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .coin-spin { animation: none; } }

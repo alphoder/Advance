@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Mark, Note, Sparkle } from "@/components/site/doodles";
 import { UserFocus, XCircle, Warning, LockKey, TestTube, ShieldCheck, ArrowRight, Fingerprint, IdentificationBadge, Scales, Key } from "@phosphor-icons/react";
 import { PageIntro, Section, Reveal, NextPage, CtaLink, Status } from "@/components/site/kit";
 
@@ -27,7 +28,7 @@ export default function Safety() {
   return (
     <>
       <PageIntro
-        title={<>Security, <span className="text-terra">tested</span> and honest</>}
+        title={<>Security, <span className="text-terra"><Mark tone="monad" delay={0.7}>tested</Mark></span> and <Mark kind="highlight" delay={1}>honest</Mark></>}
         sub="How Advance protects borrowers, savers and the system: what we've tested, how fraud is stopped, how identity grows with your limit, and the risks we haven't solved."
       >
         <CtaLink href="/stress-tests">See every attack we tested</CtaLink>
@@ -111,6 +112,7 @@ export default function Safety() {
       </Section>
 
       <Section title="What we haven't solved yet">
+        <Note dir="down-left" arrow="zigzag" className="right-[8%] top-6" tilt={4}>the honest bit</Note>
         <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
           {[
             ["Redirected income", "A borrower can ask clients to pay a different address. Small limits and public defaults keep it small; partner apps that route payments are the long-term fix."],

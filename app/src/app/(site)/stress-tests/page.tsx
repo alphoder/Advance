@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Mark, Note, Sparkle } from "@/components/site/doodles";
 import { AnimatePresence, motion } from "motion/react";
 import { CaretDown } from "@phosphor-icons/react";
 import { PageIntro, Section, NextPage, CtaLink, Status } from "@/components/site/kit";
@@ -209,13 +210,14 @@ export default function StressTests() {
   return (
     <>
       <PageIntro
-        title={<>We tried to <span className="text-terra">break it</span></>}
+        title={<>We tried to <span className="text-terra"><Mark tone="monad" delay={0.7}>break it</Mark></span></>}
         sub={`${total} ways someone could cheat or lose money with Advance, and what stops each one. Every defence is marked Live (built and tested today) or Next (designed, being built).`}
       >
         <CtaLink href="/check">Test the fraud check yourself</CtaLink>
         <CtaLink href="/safety" variant="secondary">Security overview</CtaLink>
       </PageIntro>
-      <div className="mx-auto mt-2 flex max-w-6xl flex-wrap items-center justify-center gap-3 px-4 text-[13px] text-muted">
+      <div className="relative mx-auto mt-2 flex max-w-6xl flex-wrap items-center justify-center gap-3 px-4 text-[13px] text-muted">
+        <Note dir="down-right" arrow="swoop" className="left-[6%] top-14" tilt={-4}>tap any question to open it</Note>
         <span className="flex items-center gap-2"><Status s="live" /> built and tested now</span>
         <span className="flex items-center gap-2"><Status s="partial" /> built, not deployed</span>
         <span className="flex items-center gap-2"><Status s="next" /> designed, being built</span>

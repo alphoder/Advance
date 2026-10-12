@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Mark, Note, Sparkle } from "@/components/site/doodles";
 import { Fingerprint, Database, MagnifyingGlass, Cpu, ChartLineUp, Globe, IdentificationCard, Lightning } from "@phosphor-icons/react";
 import { publicClient, CHAIN_ID } from "@/lib/chain";
 import { PageIntro, Section, Reveal, NextPage, CtaLink } from "@/components/site/kit";
@@ -43,7 +44,7 @@ export default function Technology() {
   return (
     <>
       <PageIntro
-        title={<>Why this only works on <span className="text-monad-hi">Monad</span></>}
+        title={<>Why this only works on <span className="text-monad-hi"><Mark delay={0.7}>Monad</Mark></span></>}
         sub="Repaying from every single payment means one onchain transaction per payment. That only makes sense where transactions are instant and nearly free."
       >
         <CtaLink href="/app/protocol" variant="monad">See live protocol state</CtaLink>

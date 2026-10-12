@@ -40,7 +40,7 @@ function Guide({ onClose }: { onClose: () => void }) {
   const next = steps.find((s) => !s.done);
 
   return (
-    <div className="fixed bottom-4 right-4 z-40 w-[min(340px,calc(100vw-2rem))]">
+    <div className="fixed bottom-24 right-4 z-40 w-[min(340px,calc(100vw-2rem))] sm:bottom-4 sm:right-[92px]">
       <div className="overflow-hidden rounded-2xl border border-line-strong bg-panel shadow-[0_24px_60px_-20px_rgb(5_7_10/0.9)]">
         <div className="flex items-center gap-3 px-4 py-3">
           <div className="relative grid size-9 place-items-center">

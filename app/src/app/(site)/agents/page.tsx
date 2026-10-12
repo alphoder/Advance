@@ -1,6 +1,7 @@
 "use client";
 
 import { Robot, IdentificationCard, CurrencyCircleDollar, Cpu, ArrowsSplit, ArrowDown } from "@phosphor-icons/react";
+import { Mark, Note, Sparkle } from "@/components/site/doodles";
 import { PageIntro, Section, Reveal, NextPage, CtaLink, QA } from "@/components/site/kit";
 
 const FLOW = [
@@ -19,6 +20,7 @@ export default function Agents() {
         sub="AI agents that sell services earn money onchain. Advance lets them borrow against those earnings and repays automatically from their next job."
       >
         <CtaLink href="/app/agents" variant="monad">Set up an agent</CtaLink>
+        <Note dir="up-left" arrow="loop" tone="terra" className="-top-36 right-0" tilt={5}>yes, robots can borrow now</Note>
         <CtaLink href="/how-it-works" variant="secondary">How Advance works</CtaLink>
       </PageIntro>
 

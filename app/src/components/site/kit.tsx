@@ -38,7 +38,7 @@ export function PageIntro({ title, sub, children }: { title: ReactNode; sub: Rea
 
 export function Section({ title, sub, children, center = false, id }: { title?: ReactNode; sub?: ReactNode; children: ReactNode; center?: boolean; id?: string }) {
   return (
-    <section id={id} className="mx-auto max-w-6xl scroll-mt-24 px-4 py-16 sm:px-6 sm:py-20">
+    <section id={id} className="relative mx-auto max-w-6xl scroll-mt-24 px-4 py-16 sm:px-6 sm:py-20">
       {(title || sub) && (
         <div className={`mb-10 ${center ? "mx-auto max-w-2xl text-center" : "max-w-2xl"}`}>
           {title && <h2 className="text-3xl font-semibold tracking-[-0.03em] sm:text-4xl">{title}</h2>}

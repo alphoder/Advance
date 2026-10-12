@@ -30,6 +30,7 @@ contract AdvanceTest is Test {
         credit = new CreditLine(pool, scorer);
         pool.setCreditLine(address(credit));
         factory = new ReceivablesFactory(credit);
+        credit.setFactory(address(factory));
 
         _deposit(seniorLender, AdvancePool.Tranche.Senior, 8_000e6);
         _deposit(juniorLender, AdvancePool.Tranche.Junior, 2_000e6);
@@ -253,10 +254,78 @@ contract AdvanceTest is Test {
         assertEq(acct, factory.accountOf(agentWallet));
         assertEq(adapter.agentIdOf(agentWallet), 42);
     }
+
+    // ---------- trust points ----------
+
+    function _advanceAndClientRepays(uint256 drawAmt, uint256 afterSecs) internal returns (address acct) {
+        acct = factory.open(priya);
+        vm.prank(scorer);
+        credit.setLimit(priya, drawAmt);
+        vm.prank(priya);
+        credit.draw(drawAmt);
+        vm.warp(block.timestamp + afterSecs);
+        vm.prank(priya);
+        ReceivablesAccount(acct).setRepaymentShare(10_000); // repay fully from the next client payment
+        uint256 owed_ = credit.owed(priya);
+        ausd.faucet(client, owed_);
+        vm.prank(client);
+        ausd.transfer(acct, owed_);
+        ReceivablesAccount(acct).sweep();
+    }
+
+    function test_TrustCard_ClientRepaymentEarnsCard() public {
+        _advanceAndClientRepays(50e6, 2 days);
+        assertEq(credit.cardCount(priya), 1, "one card per advance repaid");
+        uint256 pts = credit.trustPoints(priya);
+        assertGe(pts, 20, "at least 20% of the $1 fee");
+        assertLe(pts, 90, "at most 90% of the $1 fee");
+    }
+
+    function test_TrustCard_SelfRepayEarnsNothing() public {
+        vm.prank(scorer);
+        credit.setLimit(priya, 50e6);
+        vm.prank(priya);
+        credit.draw(50e6);
+        ausd.faucet(priya, 1e6);
+        vm.startPrank(priya);
+        ausd.approve(address(credit), 51e6);
+        credit.repay(priya, 51e6);
+        vm.stopPrank();
+        assertEq(credit.owed(priya), 0);
+        assertEq(credit.cardCount(priya), 0, "no card for paying yourself back");
+        assertEq(credit.trustPoints(priya), 0);
+    }
+
+    function test_TrustCard_SlowerEarnsLess() public {
+        _advanceAndClientRepays(50e6, 25 days); // speed 25%: max 90% x 25% of $1 = 22 points
+        assertLe(credit.trustPoints(priya), 22);
+    }
+
+    /// The anti-farming invariant: whatever the luck and timing, a card is worth less than the fee paid.
+    function testFuzz_TrustCard_NeverExceedsFee(uint256 rand, uint32 secs, uint64 amt) public {
+        uint256 drawAmt = bound(amt, 1e6, 50e6);
+        vm.prevrandao(bytes32(rand));
+        _advanceAndClientRepays(drawAmt, bound(secs, 0, 30 days));
+        uint256 fee = drawAmt * 200 / 10_000;
+        assertLt(credit.trustPoints(priya) * credit.POINT(), fee, "card < fee");
+    }
+
+    function test_TrustPoints_ForfeitedOnDefault() public {
+        _advanceAndClientRepays(50e6, 1 days);
+        assertGt(credit.trustPoints(priya), 0);
+        vm.prank(scorer);
+        credit.setLimit(priya, 200e6);
+        vm.prank(priya);
+        credit.draw(100e6);
+        vm.warp(block.timestamp + 31 days);
+        credit.markDefault(priya);
+        assertEq(credit.trustPoints(priya), 0, "unclaimed points lost on a missed advance");
+    }
 }
 
 contract MockRegistry is ERC721("Agents", "AGENT") {
     function mint(address to, uint256 id) external {
         _mint(to, id);
     }
+
 }

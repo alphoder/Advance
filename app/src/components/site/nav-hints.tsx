@@ -6,9 +6,9 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 /** Hand-drawn notes under the island, each pointing at a nav link. Positions come from the real link rects. */
 const HINTS = [
-  { href: "/how-it-works", text: "Want to know how it works? Click here!", dx: -230, dy: 128, bend: -70, tone: "terra", tilt: -4 },
-  { href: "/compare", text: "Curious how we're different?", dx: 40, dy: 168, bend: 50, tone: "monad", tilt: 3 },
-  { href: "/safety", text: "Can it be cheated? We tried.", dx: 190, dy: 96, bend: 80, tone: "terra", tilt: -2 },
+  { href: "/how-it-works", text: "Want to know how it works? Click here!", dx: -250, dy: 96, bend: -70, tone: "terra", tilt: -4 },
+  { href: "/compare", text: "Curious how we're different?", dx: 30, dy: 118, bend: 50, tone: "monad", tilt: 3 },
+  { href: "/safety", text: "Can it be cheated? We tried.", dx: 200, dy: 80, bend: 80, tone: "terra", tilt: -2 },
 ] as const;
 
 type Geo = { x: number; y: number; tx: number; ty: number; w: number }[];

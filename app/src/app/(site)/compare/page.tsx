@@ -1,6 +1,7 @@
 "use client";
 
 import { Check, X } from "@phosphor-icons/react";
+import { Mark, Note, Sparkle } from "@/components/site/doodles";
 import { PageIntro, Section, Reveal, NextPage, CtaLink } from "@/components/site/kit";
 
 const CARD_ROWS: [string, string, string][] = [
@@ -38,13 +39,14 @@ export default function Compare() {
   return (
     <>
       <PageIntro
-        title={<>How Advance is <span className="text-terra">different</span></>}
+        title={<>How Advance is <span className="text-terra"><Mark kind="circle" tone="monad" delay={0.7}>different</Mark></span></>}
         sub="The repayment idea is proven. What's new is who it's for and how it works."
       >
         <CtaLink href="/how-it-works">How Advance works</CtaLink>
       </PageIntro>
 
       <Section title="Why Advance is different, in five lines">
+        <Note dir="down-left" arrow="loop" tone="monad" className="right-[6%] top-6" tilt={3}>the short version</Note>
         <div className="grid grid-cols-1 gap-3 md:grid-cols-5">
           {[
             ["For people, not just businesses", "Stripe, Shopify and Credit Coop lend to companies. Advance lends to individual earners and AI agents."],

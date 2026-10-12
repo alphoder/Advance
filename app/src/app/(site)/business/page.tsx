@@ -1,6 +1,7 @@
 "use client";
 
 import { Coins, Plugs, Gauge, Globe, Robot, Bank } from "@phosphor-icons/react";
+import { Mark, Note, Sparkle } from "@/components/site/doodles";
 import { PageIntro, Section, Reveal, NextPage, Status } from "@/components/site/kit";
 
 const STREAMS = [
@@ -22,11 +23,12 @@ export default function Business() {
   return (
     <>
       <PageIntro
-        title={<>How Advance makes <span className="text-terra">money</span></>}
+        title={<>How Advance makes <span className="text-terra"><Mark kind="highlight" tone="monad" delay={0.7}>money</Mark></span></>}
         sub="Advance takes a small share of a fee borrowers already pay. Savers carry the lending risk, so the company never lends its own money."
       />
 
       <Section title="The money from one advance">
+        <Note dir="down-right" arrow="loop" className="right-[4%] top-4" tilt={-4}>this is how we eat</Note>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
           {[
             ["Borrower takes", "$100", "border border-line bg-panel/80"],

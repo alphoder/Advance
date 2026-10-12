@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Mark, Note, Sparkle } from "@/components/site/doodles";
 import { PageIntro, Section, NextPage, QA } from "@/components/site/kit";
 
 const GLOSSARY: [string, string][] = [
@@ -36,6 +37,7 @@ export default function Faq() {
       </Section>
 
       <Section title="The tough questions" sub="Real questions people asked us while we built Advance.">
+        <Note dir="down-left" arrow="swoop" tone="monad" className="right-[6%] top-8" tilt={3}>these are the good ones</Note>
         <div className="grid gap-3">
           <QA q="My limit is $50 and my $300 salary arrives next week. How does the math work?">
             You take $50 today and owe $51 (the $50 plus the 2% fee). When the $300 salary reaches your Advance link, 20% of it would be $60, but you only owe $51, so only $51 is taken and $249 lands with you, in the same second.

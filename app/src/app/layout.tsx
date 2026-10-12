@@ -1,7 +1,10 @@
 import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
 import { Geist, Geist_Mono, Caveat } from "next/font/google";
 import { Providers } from "@/components/providers";
 import { Backdrop } from "@/components/backdrop";
+import { Sounds } from "@/components/sounds";
+import { Assistant } from "@/components/assistant";
 import "./globals.css";
 
 const sans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -24,8 +27,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Backdrop />
         {/* Content layer sits above the fixed 3D backdrop. */}
         <div className="relative z-10 flex min-h-[100dvh] flex-1 flex-col">
-          <Providers>{children}</Providers>
+          <Providers>
+            {children}
+            {/* reads the URL, so it needs a Suspense boundary on dynamic routes */}
+            <Suspense><Assistant /></Suspense>
+          </Providers>
         </div>
+        <Sounds />
       </body>
     </html>
   );

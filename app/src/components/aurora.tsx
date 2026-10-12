@@ -23,7 +23,7 @@ export default function AuroraDeposit({ address, apiKey }: { address: string; ap
         lockSwapDirection: true,
         slippageTolerance: 50,
       }}
-      theme={{ colorScheme: "light", accentColor: "#5b3df5", stylePreset: "clean", borderRadius: "lg", showContainer: false }}
+      theme={{ colorScheme: "dark", accentColor: "#e2725b", stylePreset: "clean", borderRadius: "lg", showContainer: false }}
     >
       <WidgetDepositMode />
     </WidgetConfigProvider>

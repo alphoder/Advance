@@ -1,55 +1,51 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Fingerprint, ArrowRight, UserCircle } from "@phosphor-icons/react";
 import { useAccount } from "@/lib/account";
-import { Button, Card, ErrorNote } from "./ui";
+import { Button, ErrorNote, Panel } from "./ui";
 
 export function SignIn({ title = "Sign in to Advance", subtitle }: { title?: string; subtitle?: string }) {
   const { signUp, signIn, startDemoAccount, busy, error, hasPasskey } = useAccount();
   const [name, setName] = useState("");
-  const [mode, setMode] = useState<"new" | "back">(hasPasskey ? "back" : "new");
+  const [mode, setMode] = useState<"new" | "back">("new");
+  useEffect(() => { if (hasPasskey) setMode("back"); }, [hasPasskey]);
 
   return (
-    <Card className="rise mx-auto max-w-md">
-      <div className="grid size-14 place-items-center rounded-2xl bg-ink text-paper">
-        <svg viewBox="0 0 24 24" className="size-7" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
-          <path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3M9 9v1M15 9v1M12 9v4h-1M9 16c1.5 1.2 4.5 1.2 6 0" strokeLinecap="round" />
-        </svg>
+    <Panel className="rise mx-auto max-w-md p-7 sm:p-9">
+      <div className="relative grid size-16 place-items-center rounded-2xl border border-line-strong bg-[radial-gradient(circle_at_30%_20%,rgb(226_114_91/0.35),transparent_60%),#0f1b42]">
+        <Fingerprint className="size-8 text-terra" weight="duotone" />
       </div>
-      <h1 className="num mt-5 text-4xl">{title}</h1>
+      <h1 className="mt-6 text-3xl font-semibold tracking-tight">{title}</h1>
       <p className="mt-2 text-muted">
-        {subtitle ?? "Use Face ID, your fingerprint or your device PIN. No password, no wallet, no seed phrase. Your account lives in your passkey."}
+        {subtitle ?? "Use Face ID, your fingerprint or device PIN. No password, no wallet, no seed phrase. Your account lives in your passkey."}
       </p>
 
       {mode === "new" ? (
-        <form className="mt-5 space-y-3" onSubmit={(e) => { e.preventDefault(); signUp(name.trim()); }}>
-          <label className="block text-[14px] font-medium" htmlFor="name">Your name</label>
+        <form className="mt-6 space-y-3" onSubmit={(e) => { e.preventDefault(); signUp(name.trim()); }}>
+          <label className="block text-[13.5px] font-medium" htmlFor="name">Your name</label>
           <input
             id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Priya" autoComplete="name"
-            className="min-h-11 w-full rounded-full border border-line bg-paper px-4 outline-none focus:border-ink"
+            className="min-h-12 w-full rounded-xl border border-line-strong bg-bg/60 px-4 text-ink outline-none placeholder:text-faint focus:border-terra"
           />
-          <Button type="submit" loading={busy} className="w-full">Create account with a passkey</Button>
-          <button type="button" className="w-full text-[14px] text-muted underline underline-offset-4" onClick={() => setMode("back")}>
-            I already have an Advance passkey
-          </button>
+          <Button type="submit" loading={busy} className="min-h-12 w-full" icon={<Fingerprint className="size-5" weight="bold" />}>Create account with passkey</Button>
+          <button type="button" className="w-full py-1 text-[13.5px] text-muted hover:text-ink" onClick={() => setMode("back")}>I already have an Advance passkey</button>
         </form>
       ) : (
-        <div className="mt-5 space-y-3">
-          <Button loading={busy} className="w-full" onClick={() => signIn()}>Sign in with passkey</Button>
-          <button type="button" className="w-full text-[14px] text-muted underline underline-offset-4" onClick={() => setMode("new")}>
-            Create a new account instead
-          </button>
+        <div className="mt-6 space-y-3">
+          <Button loading={busy} className="min-h-12 w-full" onClick={() => signIn()} icon={<Fingerprint className="size-5" weight="bold" />}>Sign in with passkey</Button>
+          <button type="button" className="w-full py-1 text-[13.5px] text-muted hover:text-ink" onClick={() => setMode("new")}>Create a new account instead</button>
         </div>
       )}
 
       <div className="mt-4"><ErrorNote>{error}</ErrorNote></div>
-      <div className="mt-5 border-t border-line pt-4 text-[13px] text-muted">
-        Passkey not working on this browser?{" "}
-        <button className="font-medium text-ink underline underline-offset-4" onClick={() => startDemoAccount()}>
-          Use a temporary demo account
-        </button>{" "}
-        (kept only in this browser).
+      <div className="mt-6 border-t border-line pt-5">
+        <button onClick={() => startDemoAccount()} className="group flex w-full items-center gap-3 rounded-xl px-1 text-left text-[13.5px] text-muted hover:text-ink">
+          <UserCircle className="size-5" />
+          <span className="flex-1">Passkey not working here? Use a temporary demo account</span>
+          <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+        </button>
       </div>
-    </Card>
+    </Panel>
   );
 }

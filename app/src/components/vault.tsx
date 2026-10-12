@@ -8,7 +8,8 @@ import { sendTx, api } from "@/lib/tx";
 import { creditFilesAbi } from "@/lib/abi";
 import { D } from "@/lib/chain";
 import { encPublicKey, encryptFile, openOwnFile, openSharedFile, prepareFile, wrapForLender } from "@/lib/vault";
-import { Button, Card, ErrorNote, Label, Proof, short } from "./ui";
+import { Button, Panel, ErrorNote, Label, Proof, short } from "./ui";
+import { LockKey, LockKeyOpen, UploadSimple } from "@phosphor-icons/react";
 
 type FileRow = { owner: string; id: Hex; name: string; blob: Hex; size: number; tx: string; block: number; ts: number };
 type VaultResp = {
@@ -79,44 +80,42 @@ export function CreditFileCard() {
   }
 
   return (
-    <Card className="space-y-4">
+    <Panel className="space-y-4">
       <div>
-        <Label>Private credit file</Label>
-        <p className="mt-1 text-muted">
-          Add invoices or contracts that prove your income. They&apos;re locked with a key that only your passkey can recreate, and stored
-          encrypted on Monad. Share one with a specific lender; nobody else, including Advance, can read it.
-        </p>
+        <Label>Your documents</Label>
+        <p className="mt-1 text-[14px] text-muted">Encrypted in your browser before they leave it. Nobody, including Advance, can read them unless you share.</p>
       </div>
-      <label className="flex min-h-11 cursor-pointer items-center justify-center rounded-full border border-dashed border-ink/40 px-4 text-[15px] hover:bg-ink/5">
+      <label className="press flex min-h-24 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-line-strong bg-bg/40 px-4 text-[14.5px] text-muted hover:border-terra/60 hover:text-ink">
         <input type="file" accept="image/*,application/pdf,.txt,.csv" className="sr-only" disabled={Boolean(busy)} onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) add(f); }} />
-        {busy ?? "＋ Add a document"}
+        <UploadSimple className="size-6 text-terra" />
+        {busy ?? "Add an invoice or contract"}
       </label>
       {last && <Proof hash={last} />}
       <ErrorNote>{error}</ErrorNote>
       {data?.files.map((f) => {
         const sharedWith = data.grantsOut.filter((g) => g.id === f.id);
         return (
-          <div key={f.id} className="rounded-2xl border border-line p-4">
+          <div key={f.id} className="rounded-xl border border-line bg-bg/40 p-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
-                <div className="font-medium">🔒 {f.name}</div>
+                <div className="flex items-center gap-2 font-medium"><LockKey className="size-4 text-monad-hi" weight="fill" /> {f.name}</div>
                 <div className="text-[13px] text-muted">{(f.size / 1024).toFixed(1)} KB encrypted · <Proof hash={f.tx} label="stored onchain" /></div>
               </div>
               <Button variant="secondary" onClick={() => run("Opening…", async () => show(await openOwnFile(session!.encKey, f.blob), f.name))}>Open</Button>
             </div>
-            {sharedWith.length > 0 && <div className="mt-2 text-[13px] text-green">Shared with {sharedWith.map((g) => short(g.lender)).join(", ")}</div>}
+            {sharedWith.length > 0 && <div className="mt-2 text-[13px] text-monad-hi">Shared with {sharedWith.map((g) => short(g.lender)).join(", ")}</div>}
             <div className="mt-3 flex gap-2">
               <input
                 value={shareTo[f.id] ?? ""} onChange={(e) => setShareTo((s) => ({ ...s, [f.id]: e.target.value }))}
                 placeholder="Lender address 0x…" aria-label="Lender address"
-                className="min-h-11 min-w-0 flex-1 rounded-full border border-line bg-paper px-4 font-mono text-[13px] outline-none focus:border-ink"
+                className="min-h-11 min-w-0 flex-1 rounded-xl border border-line-strong bg-bg/60 px-3 font-mono text-[13px] text-ink outline-none placeholder:text-faint focus:border-monad"
               />
-              <Button onClick={() => share(f)} disabled={Boolean(busy)}>Share</Button>
+              <Button variant="monad" onClick={() => share(f)} disabled={Boolean(busy)}>Share</Button>
             </div>
           </div>
         );
       })}
-    </Card>
+    </Panel>
   );
 }
 
@@ -132,7 +131,7 @@ export function SharedWithMe() {
     try { await fn(); refresh(); } catch (e) { setError((e as Error).message); } finally { setBusy(undefined); }
   }
   return (
-    <Card className="space-y-3">
+    <Panel className="space-y-3">
       <Label>Documents shared with you</Label>
       {!data ? null : !ready ? (
         <div className="space-y-2">
@@ -140,12 +139,12 @@ export function SharedWithMe() {
           <Button loading={busy !== undefined} onClick={() => run("Turning on…", ensureKey)}>Turn on secure documents</Button>
         </div>
       ) : data.shared.length === 0 ? (
-        <p className="text-muted">Nothing yet. Borrowers can share with your address: <span className="break-all font-mono text-[13px] text-ink">{session.address}</span></p>
+        <p className="text-muted">Nothing yet. Borrowers can share with your address: <span className="break-all font-mono text-[12.5px] text-ink">{session.address}</span></p>
       ) : (
         data.shared.map((g) => (
-          <div key={g.tx} className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-line p-3">
+          <div key={g.tx} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-line bg-bg/40 p-3">
             <div>
-              <div className="font-medium">🔓 {g.file?.name ?? "File"}</div>
+              <div className="flex items-center gap-2 font-medium"><LockKeyOpen className="size-4 text-terra" weight="fill" /> {g.file?.name ?? "File"}</div>
               <div className="text-[13px] text-muted">from {short(g.owner)} · <Proof hash={g.tx} label="grant" /></div>
             </div>
             <Button
@@ -158,7 +157,7 @@ export function SharedWithMe() {
         ))
       )}
       <ErrorNote>{error}</ErrorNote>
-    </Card>
+    </Panel>
   );
 }
 

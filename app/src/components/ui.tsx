@@ -1,67 +1,93 @@
 "use client";
 
 import Link from "next/link";
-import type { ButtonHTMLAttributes, ReactNode } from "react";
+import type { ButtonHTMLAttributes, PointerEvent, ReactNode } from "react";
+import { ArrowUpRight, CircleNotch, Cube, WarningCircle } from "@phosphor-icons/react";
 import { txUrl, addressUrl, IS_LOCAL, chain, D } from "@/lib/chain";
 import { useChainView } from "./providers";
-import { useAccount } from "@/lib/account";
 
 export const fmtUsd = (n: number, digits = 2) =>
   `$${n.toLocaleString("en-US", { minimumFractionDigits: n % 1 === 0 && digits === 2 ? 0 : digits, maximumFractionDigits: digits })}`;
 export const short = (a?: string) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : "");
 
+type Variant = "primary" | "monad" | "secondary" | "ghost";
+const VARIANT: Record<Variant, string> = {
+  primary: "bg-terra text-[#1a0d08] hover:bg-terra-hi shadow-[0_10px_30px_-12px_rgb(226_114_91/0.7)]",
+  monad: "bg-monad text-white hover:bg-monad-hi shadow-[0_10px_30px_-12px_rgb(131_110_249/0.7)]",
+  secondary: "border border-line-strong bg-white/[0.03] text-ink hover:bg-white/[0.07]",
+  ghost: "text-muted hover:text-ink hover:bg-white/[0.05]",
+};
+
 export function Button({
-  variant = "primary",
-  loading,
-  children,
-  className = "",
-  ...rest
-}: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "secondary" | "ghost" | "violet"; loading?: boolean }) {
-  const styles = {
-    primary: "bg-ink text-paper hover:bg-black",
-    violet: "bg-violet text-white hover:brightness-110",
-    secondary: "bg-card text-ink border border-line hover:border-ink/40",
-    ghost: "text-ink hover:bg-ink/5",
-  }[variant];
+  variant = "primary", loading, children, className = "", icon, ...rest
+}: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; loading?: boolean; icon?: ReactNode }) {
   return (
     <button
       {...rest}
       disabled={rest.disabled || loading}
-      className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 text-[15px] font-medium transition active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 ${styles} ${className}`}
+      className={`press inline-flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-xl px-5 text-[14.5px] font-medium disabled:pointer-events-none disabled:opacity-45 ${VARIANT[variant]} ${className}`}
     >
-      {loading && <Spinner />}
+      {loading ? <CircleNotch className="size-4 animate-spin" weight="bold" /> : icon}
       {children}
     </button>
   );
 }
 
-export function Spinner({ className = "" }: { className?: string }) {
-  return <span aria-hidden className={`inline-block size-4 animate-spin rounded-full border-2 border-current border-r-transparent ${className}`} />;
+/** Glass panel with a pointer-following spotlight border (CSS vars, no React state). */
+export function Panel({ children, className = "", as: Tag = "div" }: { children: ReactNode; className?: string; as?: "div" | "section" }) {
+  const onMove = (e: PointerEvent<HTMLElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    e.currentTarget.style.setProperty("--mx", `${e.clientX - r.left}px`);
+    e.currentTarget.style.setProperty("--my", `${e.clientY - r.top}px`);
+  };
+  return (
+    <Tag onPointerMove={onMove} className={`glass spotlight rounded-2xl p-5 sm:p-6 ${className}`}>
+      {children}
+    </Tag>
+  );
 }
 
-export function Card({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return <div className={`rounded-3xl border border-line bg-card p-5 sm:p-6 ${className}`}>{children}</div>;
+export function Label({ children, className = "" }: { children: ReactNode; className?: string }) {
+  return <div className={`text-[12.5px] font-medium text-muted ${className}`}>{children}</div>;
 }
 
-export function Label({ children }: { children: ReactNode }) {
-  return <div className="text-[13px] font-medium uppercase tracking-wide text-muted">{children}</div>;
+export function Stat({ label, value, hint, tone }: { label: string; value: ReactNode; hint?: ReactNode; tone?: "terra" | "monad" }) {
+  const color = tone === "terra" ? "text-terra" : tone === "monad" ? "text-monad-hi" : "text-ink";
+  return (
+    <div>
+      <Label>{label}</Label>
+      <div className={`num mt-1.5 text-3xl font-semibold ${color}`}>{value}</div>
+      {hint && <div className="mt-1 text-[13px] text-muted">{hint}</div>}
+    </div>
+  );
 }
 
-/** "See proof" link. Always available; louder when the chain view is on. */
-export function Proof({ hash, label = "See proof", block, ms }: { hash?: string; label?: string; block?: number; ms?: number }) {
+export function Skeleton({ className = "" }: { className?: string }) {
+  return <div className={`skeleton ${className}`} aria-hidden />;
+}
+
+/** "Proof" link. Always available; shows hash + block when the chain view is on. */
+export function Proof({ hash, label = "Proof", block, ms }: { hash?: string; label?: string; block?: number; ms?: number }) {
   const { on } = useChainView();
   if (!hash) return null;
   const url = txUrl(hash);
-  const text = on ? `${short(hash)}${block ? ` · block ${block.toLocaleString()}` : ""}` : label;
+  const text = on ? `${short(hash)}${block ? ` · #${block.toLocaleString()}` : ""}` : label;
+  const inner = (
+    <>
+      <Cube className="size-3.5" weight="duotone" />
+      <span className={on ? "font-mono" : ""}>{IS_LOCAL && !url ? `${text} (local)` : text}</span>
+      {url && <ArrowUpRight className="size-3" />}
+    </>
+  );
   return (
-    <span className="inline-flex items-center gap-2 text-[13px] text-muted">
-      {ms !== undefined && <span className="rounded-full bg-violet-soft px-2 py-0.5 font-medium text-violet">settled in {(ms / 1000).toFixed(2)}s</span>}
+    <span className="inline-flex items-center gap-2 text-[12.5px]">
+      {ms !== undefined && (
+        <span className="rounded-md bg-monad-soft px-1.5 py-0.5 font-mono text-[11.5px] text-monad-hi">{(ms / 1000).toFixed(2)}s</span>
+      )}
       {url ? (
-        <a href={url} target="_blank" rel="noreferrer" className={`underline decoration-line underline-offset-4 hover:text-ink ${on ? "font-mono" : ""}`}>
-          {text} ↗
-        </a>
+        <a href={url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-muted transition-colors hover:text-monad-hi">{inner}</a>
       ) : (
-        <span className={on ? "font-mono" : ""} title={hash}>{IS_LOCAL ? `${text} (local chain)` : text}</span>
+        <span className="inline-flex items-center gap-1 text-muted" title={hash}>{inner}</span>
       )}
     </span>
   );
@@ -70,63 +96,53 @@ export function Proof({ hash, label = "See proof", block, ms }: { hash?: string;
 export function AddressLink({ address }: { address: string }) {
   const url = addressUrl(address);
   return url ? (
-    <a className="font-mono underline decoration-line underline-offset-4" href={url} target="_blank" rel="noreferrer">{short(address)}</a>
+    <a className="font-mono text-ink/90 underline decoration-line-strong underline-offset-4 hover:text-monad-hi" href={url} target="_blank" rel="noreferrer">{short(address)}</a>
   ) : (
     <span className="font-mono" title={address}>{short(address)}</span>
   );
 }
 
-export function ChainToggle() {
+export function ChainToggle({ compact = false }: { compact?: boolean }) {
   const { on, toggle } = useChainView();
   return (
-    <button onClick={toggle} aria-pressed={on} className="inline-flex items-center gap-2 rounded-full border border-line bg-card px-3 py-1.5 text-[13px] text-muted hover:text-ink">
-      <span className={`relative h-4 w-7 rounded-full transition ${on ? "bg-violet" : "bg-line"}`}>
-        <span className={`absolute top-0.5 size-3 rounded-full bg-white transition ${on ? "left-3.5" : "left-0.5"}`} />
+    <button onClick={toggle} aria-pressed={on} className="press inline-flex items-center gap-2 rounded-lg border border-line px-2.5 py-1.5 text-[12.5px] text-muted hover:text-ink">
+      <span className={`relative h-4 w-7 rounded-full transition-colors ${on ? "bg-monad" : "bg-white/10"}`}>
+        <span className={`absolute top-0.5 size-3 rounded-full bg-white transition-transform duration-200 ${on ? "translate-x-3.5" : "translate-x-0.5"}`} />
       </span>
-      Show me the chain
+      {compact ? "Chain" : "Show me the chain"}
     </button>
   );
 }
 
-export function Nav() {
-  const { session } = useAccount();
+export function Logo({ className = "" }: { className?: string }) {
   return (
-    <header className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
-      <Link href="/" className="flex items-center gap-2 text-lg font-semibold tracking-tight">
-        <img src="/icon.svg" alt="" className="size-7" /> Advance
-      </Link>
-      <nav className="flex items-center gap-1 text-[15px] sm:gap-2">
-        <Link href="/agents" className="hidden rounded-full px-3 py-2 text-muted hover:text-ink sm:inline">Agents</Link>
-        <Link href="/earn" className="rounded-full px-3 py-2 text-muted hover:text-ink">Earn</Link>
-        <Link href="/app" className="rounded-full bg-ink px-4 py-2 text-paper">{session ? "My Advance" : "Sign in"}</Link>
-      </nav>
-    </header>
+    <Link href="/" className={`flex items-center gap-2.5 text-[17px] font-semibold tracking-tight ${className}`}>
+      <img src="/icon.svg" alt="" className="size-7" /> Advance
+    </Link>
   );
 }
 
-export function Footer() {
-  const { on } = useChainView();
+export function ErrorNote({ children }: { children?: ReactNode }) {
+  if (!children) return null;
   return (
-    <footer className="mx-auto mt-auto w-full max-w-6xl px-4 pb-10 pt-16 text-[13px] text-muted sm:px-6">
-      <div className="flex flex-wrap items-center justify-between gap-4 border-t border-line pt-6">
-        <span>Advance runs on {chain.name}. Every number on this site is read from the chain.</span>
-        <ChainToggle />
-      </div>
-      {on && <ContractList />}
-    </footer>
+    <p role="alert" className="flex items-start gap-2 rounded-xl border border-danger/30 bg-danger-soft px-3.5 py-2.5 text-[13.5px] text-danger">
+      <WarningCircle className="mt-0.5 size-4 shrink-0" weight="fill" />
+      <span>{children}</span>
+    </p>
   );
 }
 
-function ContractList() {
+export function ContractList() {
   const rows: [string, string][] = [
     ["AdvancePool", D.pool], ["CreditLine", D.creditLine], ["ReceivablesFactory", D.factory],
-    ["Steady share token (advSR)", D.seniorToken], ["Boost share token (advJR)", D.juniorToken], ["AUSD", D.ausd],
+    ["Steady share (advSR)", D.seniorToken], ["Boost share (advJR)", D.juniorToken], ["AUSD", D.ausd],
+    ["CreditFiles", D.creditFiles], ...(D.kuruMarket ? [["Kuru advJR/AUSD", D.kuruMarket] as [string, string]] : []),
   ];
   return (
-    <dl className="mt-4 grid gap-x-6 gap-y-1 font-mono text-[12px] sm:grid-cols-2">
+    <dl className="grid gap-x-8 gap-y-1 text-[13px] sm:grid-cols-2">
       {rows.map(([k, v]) => (
-        <div key={k} className="flex justify-between gap-3 border-b border-line/60 py-1">
-          <dt className="font-sans text-muted">{k}</dt>
+        <div key={k} className="flex justify-between gap-3 py-1.5">
+          <dt className="text-muted">{k}</dt>
           <dd><AddressLink address={v} /></dd>
         </div>
       ))}
@@ -134,7 +150,4 @@ function ContractList() {
   );
 }
 
-export function ErrorNote({ children }: { children?: ReactNode }) {
-  if (!children) return null;
-  return <p role="alert" className="rounded-2xl bg-red-soft px-4 py-3 text-[14px] text-red">{children}</p>;
-}
+export const CHAIN_NAME = chain.name;

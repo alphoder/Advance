@@ -1,19 +1,19 @@
 import { Suspense } from "react";
 import { isAddress, getAddress } from "viem";
-import { Nav, Footer, ErrorNote, Spinner } from "@/components/ui";
+import { Logo, ErrorNote, Skeleton } from "@/components/ui";
 import { Pay } from "./pay";
 
 export default function PayPage({ params }: PageProps<"/pay/[borrower]">) {
   return (
-    <>
-      <Nav />
-      <main className="mx-auto w-full max-w-md px-4 pt-6 sm:px-6">
-        <Suspense fallback={<div className="py-10 text-center"><Spinner /></div>}>
+    <div className="relative min-h-[100dvh]">
+      <div className="grid-bg pointer-events-none absolute inset-0" />
+      <header className="relative mx-auto flex h-16 max-w-xl items-center px-4"><Logo /></header>
+      <main className="relative mx-auto w-full max-w-xl px-4 pb-16 pt-4">
+        <Suspense fallback={<Skeleton className="h-96" />}>
           <Resolve params={params} />
         </Suspense>
       </main>
-      <Footer />
-    </>
+    </div>
   );
 }
 

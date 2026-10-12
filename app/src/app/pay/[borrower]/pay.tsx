@@ -8,7 +8,8 @@ import { usePoll } from "@/lib/hooks";
 import { api } from "@/lib/tx";
 import { factoryAbi, receivablesAbi, receiveAuthTypes } from "@/lib/abi";
 import { D, IS_TESTNET, publicClient } from "@/lib/chain";
-import { Button, Card, ErrorNote, Proof, fmtUsd, short, Spinner } from "@/components/ui";
+import { Button, Panel, ErrorNote, Proof, fmtUsd, short, Skeleton } from "@/components/ui";
+import { CheckCircle, Fingerprint, ShieldCheck } from "@phosphor-icons/react";
 import { SignIn } from "@/components/sign-in";
 
 const domainAbi = parseAbi([
@@ -25,7 +26,7 @@ export function Pay({ borrower }: { borrower: Address }) {
   const [done, setDone] = useState<{ hash: string; block: number; ms: number; repaid: number; toThem: number }>();
   const { data: bal, refresh } = usePoll<{ balance: number }>(session ? `/api/activity?address=${session.address}` : undefined, 3000);
 
-  if (!ready) return <Spinner />;
+  if (!ready) return <Skeleton className="h-96" />;
 
   async function pay() {
     if (!session) return;
@@ -76,36 +77,36 @@ export function Pay({ borrower }: { borrower: Address }) {
 
   if (done)
     return (
-      <Card className="pop text-center">
-        <div className="mx-auto grid size-14 place-items-center rounded-full bg-green-soft text-2xl text-green">✓</div>
-        <h1 className="num mt-4 text-4xl">Paid {fmtUsd(Number(amount))}</h1>
-        <p className="mt-2 text-muted">
-          {fmtUsd(done.toThem)} reached {short(borrower)} instantly{done.repaid > 0 ? `, and ${fmtUsd(done.repaid)} paid down their advance` : ""}. One transaction.
+      <Panel className="pop p-8 text-center">
+        <div className="mx-auto grid size-16 place-items-center rounded-full border border-terra/40 bg-terra-soft"><CheckCircle className="size-9 text-terra" weight="fill" /></div>
+        <h1 className="num mt-5 text-4xl font-semibold">Paid {fmtUsd(Number(amount))}</h1>
+        <p className="mx-auto mt-3 max-w-sm text-muted">
+          {fmtUsd(done.toThem)} reached {short(borrower)} instantly{done.repaid > 0 ? `, and ${fmtUsd(done.repaid)} paid down their advance` : ""}. One transaction, no fees for you.
         </p>
-        <div className="mt-4"><Proof hash={done.hash} block={done.block} ms={done.ms} /></div>
-      </Card>
+        <div className="mt-5 flex justify-center"><Proof hash={done.hash} block={done.block} ms={done.ms} /></div>
+      </Panel>
     );
 
   return (
     <div className="space-y-4">
-      <Card>
-        <div className="text-[13px] font-medium uppercase tracking-wide text-muted">Payment request</div>
-        <h1 className="num mt-1 text-4xl">Pay {short(borrower)}</h1>
+      <Panel className="p-6 sm:p-8">
+        <div className="text-[13px] font-medium text-muted">Payment request</div>
+        <h1 className="mt-1 text-3xl font-semibold tracking-tight">Pay <span className="font-mono">{short(borrower)}</span></h1>
         {memo && <p className="mt-1 text-muted">For: {memo}</p>}
-        <label htmlFor="amount" className="mt-5 block text-[14px] font-medium">Amount (US dollars)</label>
-        <div className="mt-1 flex min-h-14 items-center rounded-2xl border border-line bg-paper px-4">
-          <span className="num text-3xl text-muted">$</span>
-          <input id="amount" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ""))} className="num w-full bg-transparent px-1 text-3xl outline-none" />
+        <label htmlFor="amount" className="mt-6 block text-[13.5px] font-medium">Amount (US dollars)</label>
+        <div className="mt-2 flex min-h-16 items-center rounded-xl border border-line-strong bg-bg/60 px-4 focus-within:border-terra">
+          <span className="font-mono text-3xl text-faint">$</span>
+          <input id="amount" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ""))} className="num w-full bg-transparent px-1 font-mono text-3xl font-semibold outline-none" />
         </div>
-        <p className="mt-2 text-[13px] text-muted">Paid in AUSD, a US dollar stablecoin. No fees for you.</p>
-      </Card>
+        <p className="mt-3 flex items-center gap-2 text-[13px] text-muted"><ShieldCheck className="size-4 text-monad-hi" /> Paid in AUSD, a US dollar stablecoin. You sign, Advance covers the network fee.</p>
+      </Panel>
       {!session ? (
         <SignIn title="Sign in to pay" subtitle="Use Face ID or your fingerprint. No wallet or app to install." />
       ) : (
-        <Card className="space-y-3">
+        <Panel className="space-y-3">
           <div className="flex justify-between text-[15px]">
             <span className="text-muted">Your balance</span>
-            <span className="num text-xl">{bal ? fmtUsd(bal.balance) : "…"}</span>
+            <span className="num font-mono text-xl">{bal ? fmtUsd(bal.balance) : "…"}</span>
           </div>
           {IS_TESTNET && bal && bal.balance < Number(amount) && (
             <Button
@@ -115,11 +116,11 @@ export function Pay({ borrower }: { borrower: Address }) {
               Get $1,000 of test dollars
             </Button>
           )}
-          <Button variant="violet" className="w-full" loading={Boolean(busy)} onClick={pay} disabled={!bal || bal.balance < Number(amount)}>
+          <Button className="min-h-12 w-full" icon={<Fingerprint className="size-5" weight="bold" />} loading={Boolean(busy)} onClick={pay} disabled={!bal || bal.balance < Number(amount)}>
             {busy ?? `Pay ${fmtUsd(Number(amount) || 0)}`}
           </Button>
           <ErrorNote>{error}</ErrorNote>
-        </Card>
+        </Panel>
       )}
     </div>
   );

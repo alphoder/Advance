@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion } from "motion/react";
+import { ArrowDown, ArrowUp } from "@phosphor-icons/react";
 import { useAccount } from "@/lib/account";
 import { sendTx } from "@/lib/tx";
 import { erc20Abi, kuruBookAbi, KURU } from "@/lib/abi";
 import { D, publicClient } from "@/lib/chain";
-import { AddressLink, Button, Card, ErrorNote, Label, Proof, fmtUsd } from "./ui";
+import { AddressLink, Button, ErrorNote, Label, Panel, Proof, fmtUsd } from "./ui";
 
-/** Boost shares trade on a Kuru order book; the pool's share value is shown beside it as fair value. */
+/** Boost shares on a Kuru order book; the pool's share value is shown beside it as fair value. */
 export function KuruPanel({ nav, myShares, onDone }: { nav: number; myShares: number; onDone: () => void }) {
   const market = D.kuruMarket;
   const { session } = useAccount();
@@ -15,6 +17,7 @@ export function KuruPanel({ nav, myShares, onDone }: { nav: number; myShares: nu
   const [busy, setBusy] = useState<string>();
   const [error, setError] = useState<string>();
   const [last, setLast] = useState<{ hash: string; block: number; ms: number }>();
+  const [usd, setUsd] = useState(10);
 
   useEffect(() => {
     if (!market) return;
@@ -27,9 +30,17 @@ export function KuruPanel({ nav, myShares, onDone }: { nav: number; myShares: nu
     return () => clearInterval(id);
   }, [market]);
 
-  if (!market) return null;
+  if (!market)
+    return (
+      <Panel>
+        <Label>Kuru market</Label>
+        <p className="mt-2 text-muted">The Boost market lists on Kuru when Advance is deployed to Monad testnet (<span className="font-mono">contracts/script/KuruMarket.s.sol</span>). It isn&apos;t live on this network.</p>
+      </Panel>
+    );
+
   const mid = book && book.bid && book.ask ? (book.bid + book.ask) / 2 : undefined;
   const gap = mid ? ((mid - nav) / nav) * 100 : undefined;
+  const spread = book && book.bid && book.ask ? ((book.ask - book.bid) / book.ask) * 100 : undefined;
 
   async function trade(kind: "buy" | "sell") {
     if (!session || !book || !market) return;
@@ -41,8 +52,8 @@ export function KuruPanel({ nav, myShares, onDone }: { nav: number; myShares: nu
         await sendTx(session, { address: D.juniorToken, abi: erc20Abi, functionName: "approve", args: [market, size] });
         setLast(await sendTx(session, { address: market, abi: kuruBookAbi, functionName: "placeAndExecuteMarketSell", args: [(size * KURU.sizePrecision) / 1_000_000n, minOut, false, false] }));
       } else {
-        const dollars = 10n;
-        const minOut = BigInt(Math.floor((10 / book.ask) * 0.97 * 1e6));
+        const dollars = BigInt(usd);
+        const minOut = BigInt(Math.floor((usd / book.ask) * 0.97 * 1e6));
         await sendTx(session, { address: D.ausd, abi: erc20Abi, functionName: "approve", args: [market, dollars * 1_000_000n] });
         setLast(await sendTx(session, { address: market, abi: kuruBookAbi, functionName: "placeAndExecuteMarketBuy", args: [dollars * KURU.pricePrecision, minOut, false, false] }));
       }
@@ -54,30 +65,59 @@ export function KuruPanel({ nav, myShares, onDone }: { nav: number; myShares: nu
     }
   }
 
+  // Price ladder: fair value centred, bid/ask placed relative to it (±5% window).
+  const pos = (v: number) => `${Math.max(0, Math.min(100, 50 + ((v - nav) / nav) * 1000))}%`;
+
   return (
-    <Card>
-      <Label>Trade Boost on Kuru · live order book</Label>
-      <p className="mt-1 text-muted">Don&apos;t want to wait for cash to free up? Sell your Boost shares to another saver at the market price, any time.</p>
-      <div className="mt-4 grid grid-cols-3 gap-3">
-        <div><div className="text-[13px] text-muted">Best bid</div><div className="num text-2xl">{book?.bid ? fmtUsd(book.bid, 4) : "—"}</div></div>
-        <div><div className="text-[13px] text-muted">Best ask</div><div className="num text-2xl">{book?.ask ? fmtUsd(book.ask, 4) : "—"}</div></div>
-        <div><div className="text-[13px] text-muted">Fair value (pool)</div><div className="num text-2xl">{fmtUsd(nav, 4)}</div></div>
+    <Panel>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <span className="live-dot size-1.5 rounded-full bg-monad text-monad" />
+          <Label>advJR / AUSD on Kuru · live</Label>
+        </div>
+        <div className="text-[12.5px] text-muted">Market <AddressLink address={market} /></div>
+      </div>
+
+      <div className="mt-6 grid grid-cols-2 gap-6 md:grid-cols-4">
+        <div><Label>Best bid</Label><div className="num mt-1 font-mono text-3xl font-semibold text-terra">{book?.bid ? fmtUsd(book.bid, 4) : "…"}</div></div>
+        <div><Label>Best ask</Label><div className="num mt-1 font-mono text-3xl font-semibold text-monad-hi">{book?.ask ? fmtUsd(book.ask, 4) : "…"}</div></div>
+        <div><Label>Fair value (pool)</Label><div className="num mt-1 font-mono text-3xl font-semibold">{fmtUsd(nav, 4)}</div></div>
+        <div><Label>Spread</Label><div className="num mt-1 font-mono text-3xl font-semibold">{spread !== undefined ? `${spread.toFixed(2)}%` : "…"}</div></div>
+      </div>
+
+      <div className="relative mt-8 h-14">
+        <div className="absolute inset-x-0 top-6 h-px bg-line-strong" />
+        <div className="absolute top-3 h-7 w-px bg-ink" style={{ left: "50%" }} />
+        <div className="absolute top-11 -translate-x-1/2 text-[11.5px] text-muted" style={{ left: "50%" }}>fair value</div>
+        {book?.bid ? <motion.div animate={{ left: pos(book.bid) }} transition={{ type: "spring", duration: 0.6, bounce: 0.1 }} className="absolute top-4 size-4 -translate-x-1/2 rounded-full bg-terra shadow-[0_0_14px_var(--terra)]" /> : null}
+        {book?.ask ? <motion.div animate={{ left: pos(book.ask) }} transition={{ type: "spring", duration: 0.6, bounce: 0.1 }} className="absolute top-4 size-4 -translate-x-1/2 rounded-full bg-monad shadow-[0_0_14px_var(--monad)]" /> : null}
       </div>
       {gap !== undefined && (
-        <p className="mt-2 text-[14px] text-muted">
-          Market is trading {Math.abs(gap).toFixed(2)}% {gap >= 0 ? "above" : "below"} the pool&apos;s share value, which is computed onchain from loans and losses.
-        </p>
+        <p className="mt-2 text-[13.5px] text-muted">Market is trading <span className="font-mono text-ink">{Math.abs(gap).toFixed(2)}%</span> {gap >= 0 ? "above" : "below"} the onchain fair value.</p>
       )}
-      {session && (
-        <div className="mt-4 flex flex-wrap gap-2">
-          <Button variant="secondary" loading={busy === "buy"} onClick={() => trade("buy")}>Buy $10 of Boost</Button>
-          {myShares > 0 && <Button variant="secondary" loading={busy === "sell"} onClick={() => trade("sell")}>Sell all my Boost</Button>}
+
+      {session ? (
+        <div className="mt-6 grid gap-3 md:grid-cols-2">
+          <div className="rounded-xl border border-line bg-bg/50 p-4">
+            <div className="flex items-center gap-2 text-[13.5px] font-medium"><ArrowUp className="size-4 text-monad-hi" weight="bold" /> Buy Boost</div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {[10, 50, 100].map((v) => (
+                <button key={v} onClick={() => setUsd(v)} className={`press rounded-lg border px-3 py-1.5 font-mono text-[13px] ${v === usd ? "border-monad bg-monad-soft text-monad-hi" : "border-line text-muted"}`}>{fmtUsd(v)}</button>
+              ))}
+            </div>
+            <Button variant="monad" className="mt-3 w-full" loading={busy === "buy"} onClick={() => trade("buy")}>Buy {fmtUsd(usd)} of Boost</Button>
+          </div>
+          <div className="rounded-xl border border-line bg-bg/50 p-4">
+            <div className="flex items-center gap-2 text-[13.5px] font-medium"><ArrowDown className="size-4 text-terra" weight="bold" /> Sell Boost</div>
+            <p className="mt-3 font-mono text-[13px] text-muted">You hold {myShares.toLocaleString(undefined, { maximumFractionDigits: 4 })} shares</p>
+            <Button className="mt-3 w-full" loading={busy === "sell"} disabled={myShares <= 0} onClick={() => trade("sell")}>Sell all my Boost</Button>
+          </div>
         </div>
+      ) : (
+        <p className="mt-6 text-[14px] text-muted">Sign in to trade.</p>
       )}
-      <div className="mt-3 flex flex-wrap items-center gap-3 text-[13px] text-muted">
-        Market <AddressLink address={market} /> {last && <Proof hash={last.hash} block={last.block} ms={last.ms} />}
-      </div>
+      <div className="mt-3 flex flex-wrap items-center gap-3">{last && <Proof hash={last.hash} block={last.block} ms={last.ms} />}</div>
       <div className="mt-2"><ErrorNote>{error}</ErrorNote></div>
-    </Card>
+    </Panel>
   );
 }

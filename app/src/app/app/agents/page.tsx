@@ -9,9 +9,11 @@ import { usePoll } from "@/lib/hooks";
 import { api, sendTx } from "@/lib/tx";
 import { agentAbi, creditAbi, identityRegistryAbi, ERC8004_REGISTRY } from "@/lib/abi";
 import { D, publicClient } from "@/lib/chain";
-import { Nav, Footer, Button, Card, ErrorNote, Label, Proof, fmtUsd, short } from "@/components/ui";
-import { SignIn } from "@/components/sign-in";
+import { Button, Panel, ErrorNote, Label, Proof, fmtUsd, short } from "@/components/ui";
+import { PageHeader } from "@/components/app/bits";
+import { Robot, CheckCircle } from "@phosphor-icons/react";
 import { ScoreView } from "@/components/score-view";
+import { Gate } from "@/components/app/shell";
 
 type Activity = { credit: { limit: number; owed: number; available: number; repayments: number; tier: number }; balance: number; events: { type: string; key: string; tx: string; amount?: number; repaid?: number; toYou?: number }[] };
 
@@ -19,25 +21,17 @@ export default function Agents() {
   const { session, ready } = useAccount();
   return (
     <>
-      <Nav />
-      <main className="mx-auto w-full max-w-2xl space-y-4 px-4 sm:px-6">
-        <section className="pb-2 pt-6">
-          <p className="inline-flex rounded-full bg-violet-soft px-3 py-1 text-[13px] font-medium text-violet">For AI agents that earn</p>
-          <h1 className="num mt-4 text-5xl sm:text-6xl">Working capital for your AI agent</h1>
-          <p className="mt-3 text-lg text-muted">
-            Agents that sell services earn onchain. Advance lets them borrow against those earnings, and repays automatically from the next job.
-            Your agent gets its own wallet from your passkey, and its identity comes from the ERC-8004 agent registry.
-          </p>
-        </section>
-        {D.agentAdapter === zeroAddress ? (
-          <Card><p className="text-muted">Agent credit runs on Monad testnet, where the ERC-8004 registry lives. It isn&apos;t set up on this network.</p></Card>
-        ) : !ready ? null : !session ? (
-          <SignIn title="Sign in to set up your agent" />
-        ) : (
-          <AgentFlow owner={session} />
-        )}
-      </main>
-      <Footer />
+      <PageHeader
+        title="Agent credit"
+        sub="AI agents that sell services earn onchain. Advance lets them borrow working capital against those earnings and repays from the next job. The agent's wallet is a third key from your passkey; its identity comes from the ERC-8004 registry."
+      />
+      {D.agentAdapter === zeroAddress ? (
+        <Panel><p className="text-muted">Agent credit runs on Monad testnet, where the ERC-8004 registry lives. It isn&apos;t set up on this network.</p></Panel>
+      ) : !ready ? null : !session ? (
+        <Gate><span /></Gate>
+      ) : (
+        <AgentFlow owner={session} />
+      )}
     </>
   );
 }
@@ -66,16 +60,16 @@ function AgentFlow({ owner }: { owner: Session }) {
 
   return (
     <>
-      <Card className="space-y-3">
+      <Panel className="space-y-3">
         <Label>Your agent</Label>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
-            <div className="num text-3xl">{registered ? `Agent #${agentId!.id}` : "Not registered yet"}</div>
-            <div className="font-mono text-[13px] text-muted">wallet {short(agent.address)} · owned by {short(owner.address)}</div>
+            <div className="flex items-center gap-3"><div className="grid size-12 place-items-center rounded-xl border border-monad/40 bg-monad-soft"><Robot className="size-6 text-monad-hi" weight="duotone" /></div><div className="num text-3xl font-semibold">{registered ? `Agent #${agentId!.id}` : "Not registered yet"}</div></div>
+            <div className="mt-2 font-mono text-[13px] text-muted">wallet {short(agent.address)} · owned by {short(owner.address)}</div>
           </div>
           {!registered && (
             <Button
-              variant="violet" loading={busy === "reg"}
+              variant="monad" loading={busy === "reg"}
               onClick={() => run("reg", async () => {
                 const uri = `data:application/json,${encodeURIComponent(JSON.stringify({ name: "Advance demo agent", description: "Sells design reviews to other agents", wallet: agent.address }))}`;
                 const r = await sendTx(owner, { address: ERC8004_REGISTRY, abi: identityRegistryAbi, functionName: "register", args: [uri] });
@@ -92,10 +86,10 @@ function AgentFlow({ owner }: { owner: Session }) {
             </Button>
           )}
         </div>
-      </Card>
+      </Panel>
 
       {registered && c && (
-        <Card className="space-y-4">
+        <Panel className="space-y-4">
           <Label>Agent credit line</Label>
           {c.limit === 0 ? (
             <div className="flex flex-wrap gap-2">
@@ -112,12 +106,12 @@ function AgentFlow({ owner }: { owner: Session }) {
           ) : (
             <>
               <div>
-                <div className="num text-6xl">{fmtUsd(c.available)}</div>
+                <div className="num font-mono text-6xl font-semibold text-terra">{fmtUsd(c.available)}</div>
                 <p className="text-muted">available to the agent · owes {fmtUsd(c.owed)} · repaid {c.repayments}×</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 {c.available >= 1 && (
-                  <Button variant="violet" loading={busy === "draw"} onClick={() => run("draw", async () => {
+                  <Button variant="monad" loading={busy === "draw"} onClick={() => run("draw", async () => {
                     const amt = Math.floor(c.available);
                     const r = await sendTx(agent, { address: D.creditLine, abi: creditAbi, functionName: "draw", args: [BigInt(amt) * 1_000_000n] });
                     add(`Agent drew ${fmtUsd(amt)} of working capital (to buy compute)`, r.hash, r.ms);
@@ -130,26 +124,26 @@ function AgentFlow({ owner }: { owner: Session }) {
               </div>
             </>
           )}
-          {score && <ScoreView s={score} compact />}
-        </Card>
+          {score && <ScoreView s={score} detail={false} />}
+        </Panel>
       )}
 
-      {busy && <Card className="text-muted">Working onchain…</Card>}
+      {busy && <Panel className="flex items-center gap-3 text-muted"><span className="live-dot size-2 rounded-full bg-terra text-terra" /> Working onchain…</Panel>}
       <ErrorNote>{error}</ErrorNote>
       {proofs.length > 0 && (
-        <Card className="space-y-2">
+        <Panel className="space-y-2">
           <Label>Onchain</Label>
           {proofs.map((p) => (
             <div key={p.hash + p.label} className="flex flex-wrap items-center justify-between gap-2 text-[15px]">
-              <span>✓ {p.label}</span><Proof hash={p.hash} ms={p.ms} />
+              <span className="flex items-center gap-2.5"><CheckCircle className="size-4 text-monad-hi" weight="fill" /> {p.label}</span><Proof hash={p.hash} ms={p.ms} />
             </div>
           ))}
-        </Card>
+        </Panel>
       )}
       {act && act.events.filter((e) => e.type === "PaymentSplit").length > 0 && (
-        <Card>
+        <Panel>
           <Label>Agent earnings</Label>
-          <ul className="mt-2 divide-y divide-line text-[15px]">
+          <ul className="mt-2 divide-y divide-line text-[14.5px]">
             {act.events.filter((e) => e.type === "PaymentSplit").map((e) => (
               <li key={e.key} className="flex justify-between py-2">
                 <span>Earned {fmtUsd(e.amount!)}</span>
@@ -157,7 +151,7 @@ function AgentFlow({ owner }: { owner: Session }) {
               </li>
             ))}
           </ul>
-        </Card>
+        </Panel>
       )}
     </>
   );

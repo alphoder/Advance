@@ -107,7 +107,7 @@ export function ChainToggle({ compact = false }: { compact?: boolean }) {
   return (
     <button onClick={toggle} aria-pressed={on} className="press inline-flex items-center gap-2 rounded-lg border border-line px-2.5 py-1.5 text-[12.5px] text-muted hover:text-ink">
       <span className={`relative h-4 w-7 rounded-full transition-colors ${on ? "bg-monad" : "bg-white/10"}`}>
-        <span className={`absolute top-0.5 size-3 rounded-full bg-white transition-transform duration-200 ${on ? "translate-x-3.5" : "translate-x-0.5"}`} />
+        <span className={`absolute left-0 top-0.5 size-3 rounded-full bg-white transition-transform duration-200 ease-out ${on ? "translate-x-3.5" : "translate-x-0.5"}`} />
       </span>
       {compact ? "Chain" : "Show me the chain"}
     </button>

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { PageIntro, Section, NextPage, QA } from "@/components/site/kit";
 
 const GLOSSARY: [string, string][] = [
@@ -31,6 +32,36 @@ export default function Faq() {
           <QA q="What does it cost?">A flat 2% of what you take. Take $50, pay back $51. Nothing else, no matter how long it takes.</QA>
           <QA q="Do I need crypto experience?">No. You sign in with Face ID and see dollars. The blockchain is there so everything is verifiable, but you never need to touch it.</QA>
           <QA q="Why do I start at only $50?">Because the score is built from your track record. Every advance you repay in full raises your limit: $200, then $1,000, then $5,000.</QA>
+        </div>
+      </Section>
+
+      <Section title="The tough questions" sub="Real questions people asked us while we built Advance.">
+        <div className="grid gap-3">
+          <QA q="My limit is $50 and my $300 salary arrives next week. How does the math work?">
+            You take $50 today and owe $51 (the $50 plus the 2% fee). When the $300 salary reaches your Advance link, 20% of it would be $60, but you only owe $51, so only $51 is taken and $249 lands with you, in the same second.
+            In total you got $299 of your $300 salary, $50 of it early, for a $1 fee. Because you repaid in full, your limit rises to $200.
+          </QA>
+          <QA q="What if a friend sends me a fake salary every month and I give it back in cash?">
+            It can pass, but only for $50: everyone starts there, and limits rise only after full repayment. Then the default is public forever. See every scenario on our <Link href="/stress-tests" className="text-terra underline underline-offset-4">stress tests</Link> page.
+          </QA>
+          <QA q="What if my whole family (or a friend group) pays each other in a circle, even through an exchange?">
+            Exchanges hide the trail, so we don&apos;t rely on tracing. Today each account is capped at $50 to start. We&apos;re adding rules so income from personal wallets never unlocks more, connected accounts share one limit, and bigger limits need proof you&apos;re a unique person. Details on the <Link href="/stress-tests" className="text-terra underline underline-offset-4">stress tests</Link> page.
+          </QA>
+          <QA q="What if I get a big limit and lose my job the next day?">
+            The limit is at most half a month of verified income, so the most anyone can take is about two weeks of pay. Your last paycheck repays first if it's paid to your Advance link. Next, we're adding a freeze on new advances when income stops, and keeping the debt collectible when income returns.
+          </QA>
+          <QA q="Do I need to do KYC?">
+            Not for $50 to $200. As limits grow, so will the checks (being built): at $1,000 you&apos;ll prove you&apos;re one unique person, privately, with no documents stored; at $5,000 a licensed partner verifies you. See <Link href="/safety" className="text-terra underline underline-offset-4">security</Link>.
+          </QA>
+          <QA q="How is this different from a credit card?">
+            A card lends against your past debts, charges interest that compounds, and you must remember to pay. Advance lends against income arriving now, charges a flat 2%, and repays itself. Full comparison on the <Link href="/compare" className="text-terra underline underline-offset-4">compare</Link> page.
+          </QA>
+          <QA q="Isn't this already done by someone else?">
+            The repayment idea is proven (Stripe Capital, Shopify Capital, Credit Coop with Visa), but only for businesses or inside one platform. Advance is the first to offer it to any earner and to AI agents. See <Link href="/compare" className="text-terra underline underline-offset-4">compare</Link>.
+          </QA>
+          <QA q="How does Advance make money?">
+            It keeps 10% of the 2% fee on every advance (savers get 90%), plus partner fees and score access later. Savers carry the lending risk, so Advance never lends its own money. See the <Link href="/business" className="text-terra underline underline-offset-4">business model</Link>.
+          </QA>
         </div>
       </Section>
 

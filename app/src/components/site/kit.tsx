@@ -107,3 +107,14 @@ export function QA({ q, children }: { q: string; children: ReactNode }) {
     </details>
   );
 }
+
+/** Honest build status: Live = deployed and tested today; Next = designed, not built yet. */
+export function Status({ s }: { s: "live" | "next" | "partial" }) {
+  const map = {
+    live: ["Live", "bg-monad text-white"],
+    partial: ["Partly live", "bg-white/10 text-ink"],
+    next: ["Next", "border border-terra/50 text-terra"],
+  } as const;
+  const [label, cls] = map[s];
+  return <span className={`inline-flex shrink-0 items-center rounded-full px-2.5 py-0.5 text-[12px] font-medium ${cls}`}>{label}</span>;
+}

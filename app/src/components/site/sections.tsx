@@ -408,10 +408,14 @@ export function ChoosePath() {
 
 export function Explore() {
   const items = [
+    { href: "/stress-tests", t: "We tried to break it", b: "13 ways to cheat or lose money, and what stops each." },
+    { href: "/compare", t: "How we're different", b: "Advance vs credit cards, Stripe Capital, Credit Coop and more." },
+    { href: "/safety", t: "Security", b: "What we've tested, identity checks, and honest risks." },
+    { href: "/business", t: "Business model", b: "How Advance makes money, in plain numbers." },
     { href: "/check", t: "Check any address", b: "See what an address could borrow, and why." },
-    { href: "/safety", t: "Is it safe?", b: "How fake income is caught and losses are limited." },
     { href: "/technology", t: "Why Monad", b: "Live chain stats, contracts, and the tech stack." },
-    { href: "/faq", t: "FAQ and glossary", b: "Every term explained in plain words." },
+    { href: "/agents", t: "AI agents", b: "Working capital for agents that earn onchain." },
+    { href: "/faq", t: "FAQ and glossary", b: "Including the tough questions." },
   ];
   return (
     <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">

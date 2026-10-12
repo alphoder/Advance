@@ -13,7 +13,8 @@ const LINKS = [
   ["Borrow", "/borrow"],
   ["Save", "/save"],
   ["Agents", "/agents"],
-  ["Safety", "/safety"],
+  ["Compare", "/compare"],
+  ["Security", "/safety"],
   ["FAQ", "/faq"],
 ] as const;
 
@@ -163,7 +164,7 @@ export function SiteFooter() {
           <p className="mt-3 text-[14px] text-muted">Credit for the next billion earners and their agents, repaid at the source. Running on {CHAIN_NAME}.</p>
         </div>
         <div className="grid grid-cols-2 gap-x-12 gap-y-2 text-[14px] sm:grid-cols-3">
-          {[["How it works", "/how-it-works"], ["Borrow", "/borrow"], ["Save", "/save"], ["Agents", "/agents"], ["Safety", "/safety"], ["Technology", "/technology"], ["FAQ", "/faq"], ["Check an address", "/check"], ["Open the app", "/app"]].map(([l, h]) => (
+          {[["How it works", "/how-it-works"], ["Borrow", "/borrow"], ["Save", "/save"], ["Agents", "/agents"], ["Compare", "/compare"], ["Business model", "/business"], ["Security", "/safety"], ["Stress tests", "/stress-tests"], ["Technology", "/technology"], ["FAQ", "/faq"], ["Check an address", "/check"], ["Open the app", "/app"]].map(([l, h]) => (
             <Link key={h} href={h} className="text-muted hover:text-ink">{l}</Link>
           ))}
         </div>

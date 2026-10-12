@@ -98,19 +98,23 @@ export function KuruPanel({ nav, myShares, onDone }: { nav: number; myShares: nu
 
       {session ? (
         <div className="mt-6 grid gap-3 md:grid-cols-2">
-          <div className="rounded-xl border border-line bg-bg/50 p-4">
-            <div className="flex items-center gap-2 text-[13.5px] font-medium"><ArrowUp className="size-4 text-monad-hi" weight="bold" /> Buy Boost</div>
+          <div className="rounded-3xl bg-monad p-5 text-white">
+            <div className="flex items-center gap-2 text-[14px] font-medium"><ArrowUp className="size-4" weight="bold" /> Buy Boost</div>
             <div className="mt-3 flex flex-wrap gap-2">
               {[10, 50, 100].map((v) => (
-                <button key={v} onClick={() => setUsd(v)} className={`press rounded-lg border px-3 py-1.5 font-mono text-[13px] ${v === usd ? "border-monad bg-monad-soft text-monad-hi" : "border-line text-muted"}`}>{fmtUsd(v)}</button>
+                <button key={v} onClick={() => setUsd(v)} className={`press rounded-lg px-3 py-1.5 font-mono text-[13px] ${v === usd ? "bg-white text-[#2b1f7a]" : "bg-black/15 hover:bg-black/25"}`}>{fmtUsd(v)}</button>
               ))}
             </div>
-            <Button variant="monad" className="mt-3 w-full" loading={busy === "buy"} onClick={() => trade("buy")}>Buy {fmtUsd(usd)} of Boost</Button>
+            <button onClick={() => trade("buy")} disabled={busy === "buy"} className="press mt-4 min-h-11 w-full rounded-xl bg-white text-[14.5px] font-medium text-[#2b1f7a] hover:bg-white/90 disabled:opacity-50">
+              {busy === "buy" ? "Buying…" : `Buy ${fmtUsd(usd)} of Boost`}
+            </button>
           </div>
-          <div className="rounded-xl border border-line bg-bg/50 p-4">
-            <div className="flex items-center gap-2 text-[13.5px] font-medium"><ArrowDown className="size-4 text-terra" weight="bold" /> Sell Boost</div>
-            <p className="mt-3 font-mono text-[13px] text-muted">You hold {myShares.toLocaleString(undefined, { maximumFractionDigits: 4 })} shares</p>
-            <Button className="mt-3 w-full" loading={busy === "sell"} disabled={myShares <= 0} onClick={() => trade("sell")}>Sell all my Boost</Button>
+          <div className="rounded-3xl bg-terra p-5 text-[#1a0d08]">
+            <div className="flex items-center gap-2 text-[14px] font-medium"><ArrowDown className="size-4" weight="bold" /> Sell Boost</div>
+            <p className="mt-3 font-mono text-[13px] opacity-75">You hold {myShares.toLocaleString(undefined, { maximumFractionDigits: 4 })} shares</p>
+            <button onClick={() => trade("sell")} disabled={busy === "sell" || myShares <= 0} className="press mt-4 min-h-11 w-full rounded-xl bg-[#1a0d08] text-[14.5px] font-medium text-terra-hi hover:bg-black disabled:opacity-50">
+              {busy === "sell" ? "Selling…" : "Sell all my Boost"}
+            </button>
           </div>
         </div>
       ) : (

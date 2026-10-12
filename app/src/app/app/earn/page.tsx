@@ -101,49 +101,56 @@ function TrancheCard({ name, tranche, price, size, blurb, pos, wallet, onDone, a
     } catch (e) { setError((e as Error).message); } finally { setBusy(undefined); }
   }
 
+  // The pair: Steady is terracotta, Boost is Monad purple. Solid cards, ink text on terracotta, white on purple.
+  const ink = accent ? "text-white" : "text-[#1a0d08]";
   return (
-    <Panel className={accent ? "border-monad/35" : ""}>
-      <div className="flex items-start justify-between">
+    <div className={`rounded-3xl p-6 sm:p-7 ${accent ? "bg-monad" : "bg-terra"} ${ink}`}>
+      <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className={`grid size-11 place-items-center rounded-xl border ${accent ? "border-monad/40 bg-monad-soft" : "border-line bg-white/[0.04]"}`}>{icon}</div>
+          <div className="grid size-11 place-items-center rounded-xl bg-black/15 [&_svg]:!text-current">{icon}</div>
           <div>
-            <h3 className={`text-2xl font-semibold ${accent ? "text-monad-hi" : ""}`}>{name}</h3>
-            <div className="font-mono text-[12.5px] text-muted">{fmtUsd(size, 0)} deposited</div>
+            <h3 className="text-2xl font-semibold tracking-tight">{name}</h3>
+            <div className="font-mono text-[12.5px] opacity-75">{fmtUsd(size, 0)} deposited</div>
           </div>
         </div>
         <div className="text-right">
-          <div className="text-[12px] text-muted">1 share is worth</div>
-          <div className="num font-mono text-lg">{fmtUsd(price, 6)}</div>
+          <div className="text-[12px] opacity-75">1 share is worth</div>
+          <div className="num font-mono text-lg font-semibold">{fmtUsd(price, 6)}</div>
         </div>
       </div>
-      <p className="mt-4 text-[14.5px] text-muted">{blurb}</p>
+      <p className="mt-4 text-[14.5px] opacity-80">{blurb}</p>
       {pos && pos.shares > 0 && (
-        <div className="mt-5 rounded-xl border border-line bg-bg/50 p-4">
-          <div className="text-[12.5px] text-muted">Your {name} savings</div>
+        <div className="mt-5 rounded-2xl bg-black/15 p-4">
+          <div className="text-[12.5px] opacity-75">Your {name} savings</div>
           <div className="num mt-1 font-mono text-3xl font-semibold">{fmtUsd(pos.value, 4)}</div>
-          {pos.earned === null ? (
-            <div className="text-[13px] text-muted">Includes shares bought on the market</div>
-          ) : (
-            <div className={`text-[13px] ${pos.earned >= 0 ? "text-terra" : "text-danger"}`}>{pos.earned >= 0 ? "Earned " : "Down "}{fmtUsd(Math.abs(pos.earned), 6)} so far</div>
-          )}
+          <div className="text-[13px] opacity-80">
+            {pos.earned === null ? "Includes shares bought on the market" : `${pos.earned >= 0 ? "Earned" : "Down"} ${fmtUsd(Math.abs(pos.earned), 6)} so far`}
+          </div>
         </div>
       )}
       {session && (
         <div className="mt-5 space-y-2.5">
           <div className="flex gap-2">
             <label className="sr-only" htmlFor={`amt-${name}`}>Amount to deposit in {name}</label>
-            <div className="flex min-h-11 flex-1 items-center rounded-xl border border-line-strong bg-bg/60 px-3 focus-within:border-terra">
-              <span className="text-faint">$</span>
+            <div className="flex min-h-11 flex-1 items-center rounded-xl bg-black/20 px-3 focus-within:ring-2 focus-within:ring-current/40">
+              <span className="opacity-60">$</span>
               <input id={`amt-${name}`} inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ""))} className="w-full bg-transparent px-1 font-mono outline-none" />
             </div>
-            <Button variant={accent ? "monad" : "primary"} loading={busy === "in"} onClick={deposit} disabled={!wallet}>Deposit</Button>
+            <button onClick={deposit} disabled={!wallet || busy === "in"}
+              className={`press inline-flex min-h-11 items-center gap-2 rounded-xl px-5 text-[14.5px] font-medium disabled:opacity-50 ${accent ? "bg-white text-[#2b1f7a] hover:bg-white/90" : "bg-[#1a0d08] text-terra-hi hover:bg-black"}`}>
+              {busy === "in" ? "Depositing…" : "Deposit"}
+            </button>
           </div>
-          {pos && pos.shares > 0 && <Button variant="secondary" className="w-full" loading={busy === "out"} onClick={withdraw}>Withdraw everything</Button>}
-          {last && <Proof hash={last.hash} block={last.block} ms={last.ms} />}
-          <ErrorNote>{error}</ErrorNote>
+          {pos && pos.shares > 0 && (
+            <button onClick={withdraw} disabled={busy === "out"} className="press min-h-11 w-full rounded-xl border border-current/30 text-[14.5px] font-medium hover:bg-black/10 disabled:opacity-50">
+              {busy === "out" ? "Withdrawing…" : "Withdraw everything"}
+            </button>
+          )}
+          {last && <div className="[&_*]:!text-current"><Proof hash={last.hash} block={last.block} ms={last.ms} /></div>}
+          {error && <p role="alert" className="rounded-xl bg-black/25 px-3 py-2 text-[13px]">{error}</p>}
         </div>
       )}
-    </Panel>
+    </div>
   );
 }
 

@@ -26,14 +26,14 @@ export function SplitAnimation({ e }: { e: SplitEvent }) {
             initial={{ pathLength: reduce ? 1 : 0 }} animate={{ pathLength: 1 }} transition={t(0.25)} style={{ filter: "drop-shadow(0 0 6px var(--terra))" }} />
         </svg>
         <motion.div initial={reduce ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={t(0.7)}
-          className="absolute bottom-0 left-0 w-[44%] rounded-xl border border-monad/40 bg-monad-soft px-3 py-2.5 text-center">
-          <div className="num font-mono text-2xl font-semibold text-monad-hi">{fmtUsd(e.repaid)}</div>
-          <div className="text-[12px] text-monad-hi/80">{e.repaid > 0 ? "repaid your advance" : "nothing owed"}</div>
+          className="absolute bottom-0 left-0 w-[44%] rounded-2xl bg-monad px-3 py-3 text-center text-white">
+          <div className="num font-mono text-2xl font-semibold">{fmtUsd(e.repaid)}</div>
+          <div className="text-[12px] opacity-80">{e.repaid > 0 ? "repaid your advance" : "nothing owed"}</div>
         </motion.div>
         <motion.div initial={reduce ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={t(0.7)}
-          className="absolute bottom-0 right-0 w-[44%] rounded-xl border border-terra/40 bg-terra-soft px-3 py-2.5 text-center">
-          <div className="num font-mono text-2xl font-semibold text-terra">{fmtUsd(e.toYou)}</div>
-          <div className="text-[12px] text-terra/80">landed with you</div>
+          className="absolute bottom-0 right-0 w-[44%] rounded-2xl bg-terra px-3 py-3 text-center text-[#1a0d08]">
+          <div className="num font-mono text-2xl font-semibold">{fmtUsd(e.toYou)}</div>
+          <div className="text-[12px] opacity-75">landed with you</div>
         </motion.div>
       </div>
       <div className="mt-5 flex flex-wrap items-center justify-center gap-3 text-[12.5px] text-muted">

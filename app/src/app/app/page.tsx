@@ -88,27 +88,32 @@ function Inner() {
       <TxLog items={log.slice(0, 6)} />
 
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-12">
-        <Panel className="lg:col-span-5">
-          <Label>Available now</Label>
-          <div className="num mt-2 font-mono text-6xl font-semibold text-terra">{fmtUsd(c.available)}</div>
-          <p className="mt-2 text-[14px] text-muted">of a {fmtUsd(c.limit)} limit. Flat 2% fee, repaid from your next payments.</p>
+        {/* The pair: terracotta is the earner's money, purple is repayment to the protocol. */}
+        <div className="rounded-3xl bg-terra p-6 text-[#1a0d08] sm:p-7 lg:col-span-5">
+          <div className="text-[14px] font-medium opacity-70">Available now</div>
+          <div className="num mt-2 font-mono text-6xl font-semibold tracking-tight">{fmtUsd(c.available)}</div>
+          <p className="mt-2 text-[14px] opacity-75">of a {fmtUsd(c.limit)} limit. Flat 2% fee, repaid from your next payments.</p>
           <div className="mt-6 flex gap-2">
-            <Link href="/app/advance" className="flex-1"><Button className="w-full" disabled={c.available < 1}>Take it</Button></Link>
-            <Link href="/app/get-paid" className="flex-1"><Button variant="secondary" className="w-full" icon={<QrCode className="size-4" />}>Get paid</Button></Link>
+            <Link href="/app/advance" className="flex-1">
+              <button disabled={c.available < 1} className="press inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#1a0d08] px-5 text-[14.5px] font-medium text-terra-hi hover:bg-black disabled:opacity-45">Take it</button>
+            </Link>
+            <Link href="/app/get-paid" className="flex-1">
+              <button className="press inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-[#1a0d08]/25 px-5 text-[14.5px] font-medium hover:bg-[#1a0d08]/10"><QrCode className="size-4" /> Get paid</button>
+            </Link>
           </div>
-        </Panel>
+        </div>
 
-        <Panel className="lg:col-span-4">
-          <Label>You owe</Label>
-          <div className="num mt-2 font-mono text-5xl font-semibold text-monad-hi">{fmtUsd(c.owed)}</div>
-          <div className="mt-5 h-2 overflow-hidden rounded-full bg-white/[0.06]">
-            <motion.div className="h-full rounded-full bg-monad" initial={{ scaleX: 0 }} animate={{ scaleX: progress }} style={{ transformOrigin: "left" }} transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }} />
+        <div className="rounded-3xl bg-monad p-6 text-white sm:p-7 lg:col-span-4">
+          <div className="text-[14px] font-medium opacity-75">You owe</div>
+          <div className="num mt-2 font-mono text-5xl font-semibold tracking-tight">{fmtUsd(c.owed)}</div>
+          <div className="mt-5 h-2 overflow-hidden rounded-full bg-white/25">
+            <motion.div className="h-full rounded-full bg-white" initial={{ scaleX: 0 }} animate={{ scaleX: progress }} style={{ transformOrigin: "left" }} transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }} />
           </div>
-          <p className="mt-2.5 text-[13px] text-muted">{c.owed > 0 ? `${activity.shareBps / 100}% of each incoming payment pays this down automatically.` : "Nothing owed. Every payment comes to you in full."}</p>
-          <div className="mt-5 flex justify-between border-t border-line pt-4 text-[14px]">
-            <span className="text-muted">Balance</span><span className="num font-mono">{fmtUsd(activity.balance)}</span>
+          <p className="mt-2.5 text-[13px] opacity-80">{c.owed > 0 ? `${activity.shareBps / 100}% of each incoming payment pays this down automatically.` : "Nothing owed. Every payment comes to you in full."}</p>
+          <div className="mt-5 flex justify-between border-t border-white/25 pt-4 text-[14px]">
+            <span className="opacity-80">Balance</span><span className="num font-mono">{fmtUsd(activity.balance)}</span>
           </div>
-        </Panel>
+        </div>
 
         <ScoreTile />
 

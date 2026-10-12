@@ -15,6 +15,7 @@ export type Deployment = {
   factory: Address;
   agentAdapter: Address;
   creditFiles: Address;
+  kuruMarket?: Address;
 };
 
 const CHAINS: Record<number, { chain: Chain; deployment: Deployment; explorer?: string }> = {

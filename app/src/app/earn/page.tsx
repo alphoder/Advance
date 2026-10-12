@@ -9,6 +9,7 @@ import { D, IS_TESTNET } from "@/lib/chain";
 import { Nav, Footer, Button, Card, ErrorNote, Proof, fmtUsd, Label, Spinner } from "@/components/ui";
 import { SignIn } from "@/components/sign-in";
 import { SharedWithMe } from "@/components/vault";
+import { KuruPanel } from "@/components/kuru";
 
 type Pool = {
   steady: number; boost: number; total: number; lentOut: number; cash: number; feesEarned: number; losses: number;
@@ -46,6 +47,7 @@ export default function Earn() {
             />
           </div>
         )}
+        {data && <KuruPanel nav={data.pool.boostPrice} myShares={data.me?.boost.shares ?? 0} onDone={refresh} />}
         {ready && !session && <div className="pt-4"><SignIn title="Sign in to start earning" /></div>}
         {session && data?.me && <Wallet wallet={data.me.wallet} onDone={refresh} />}
         {session && <SharedWithMe />}

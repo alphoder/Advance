@@ -87,3 +87,11 @@ export const creditFilesAbi = parseAbi([
   "function publish(bytes32 id, string name, bytes blob)",
   "function grant(bytes32 id, address lender, bytes wrappedKey)",
 ]);
+
+export const kuruBookAbi = parseAbi([
+  "function bestBidAsk() view returns (uint256, uint256)",
+  "function placeAndExecuteMarketBuy(uint96 quoteSize, uint256 minAmountOut, bool isMargin, bool isFillOrKill) payable returns (uint256)",
+  "function placeAndExecuteMarketSell(uint96 size, uint256 minAmountOut, bool isMargin, bool isFillOrKill) payable returns (uint256)",
+]);
+/** Advance's Kuru market params (see contracts/script/KuruMarket.s.sol). */
+export const KURU = { pricePrecision: 10_000n, sizePrecision: 1_000_000n } as const;

@@ -159,8 +159,22 @@ function LiveBlock() {
   );
 }
 
+/** m:ss until the 10-minute session ends, ticking every second. */
+function useTimeLeft(expiresAt?: number) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (!expiresAt) return;
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [expiresAt]);
+  if (!expiresAt) return undefined;
+  const s = Math.max(0, Math.round((expiresAt - now) / 1000));
+  return { s, text: `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}` };
+}
+
 function AccountMenu() {
-  const { session, signOut } = useAccount();
+  const { session, signOut, expiresAt } = useAccount();
+  const left = useTimeLeft(expiresAt);
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   if (!session) return <Link href="/app" className="press rounded-full bg-terra px-3.5 py-1.5 text-[13px] font-medium text-[#1a0d08]">Sign in</Link>;
@@ -169,6 +183,7 @@ function AccountMenu() {
       <button onClick={() => setOpen((o) => !o)} className="press flex items-center gap-2 rounded-full bg-white/[0.06] py-1.5 pl-2.5 pr-3 text-[13px] hover:bg-white/[0.09]">
         {session.kind === "passkey" ? <Fingerprint className="size-4 text-terra" weight="duotone" /> : <UserCircle className="size-4 text-muted" />}
         <span className="font-mono">{short(session.address)}</span>
+        {left && left.s <= 120 && <span className="rounded-full bg-terra/20 px-1.5 font-mono text-[11.5px] text-terra">{left.text}</span>}
       </button>
       <AnimatePresence>
         {open && (
@@ -180,6 +195,7 @@ function AccountMenu() {
             <div className="px-3 py-2.5">
               <div className="text-[12px] text-muted">{session.kind === "passkey" ? "Passkey account (Mera)" : "Temporary demo account"}</div>
               <div className="mt-1 break-all font-mono text-[12.5px]">{session.address}</div>
+              {left && <div className="mt-2 text-[12px] text-muted">Session ends in <span className="font-mono text-ink">{left.text}</span>. Sessions last 10 minutes.</div>}
             </div>
             <button
               className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-[13.5px] hover:bg-white/[0.05]"

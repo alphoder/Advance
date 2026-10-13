@@ -32,14 +32,10 @@ type Ctx = {
   signIn: () => Promise<Session | undefined>;
   startDemoAccount: () => Session;
   signOut: () => void;
-  /** When the current session ends (10 minutes after sign-in). */
-  expiresAt?: number;
 };
 
 const CRED = "advance.credential";
 const DEMO = "advance.demoKey";
-const STARTED = "advance.sessionStart";
-const SESSION_MS = 10 * 60_000; // every sign-in lasts at most 10 minutes
 const AccountCtx = createContext<Ctx | null>(null);
 
 /** Mera's documented derivation: PRF output -> BIP-39 entropy -> BIP-44 key. Index 0 = account. */
@@ -91,30 +87,10 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string>();
   const [hasPasskey, setHasPasskey] = useState(false);
 
-  // Every session lasts at most SESSION_MS from sign-in; a reload doesn't reset the clock.
-  const [expiresAt, setExpiresAt] = useState<number>();
-  const begin = useCallback(() => {
-    const at = Date.now() + SESSION_MS;
-    store.set(STARTED, String(at - SESSION_MS));
-    setExpiresAt(at);
-  }, []);
-  useEffect(() => {
-    if (!session || !expiresAt) return;
-    const id = setTimeout(() => {
-      setSession(undefined); // the demo key is kept, so signing back in resumes the same account
-      setExpiresAt(undefined);
-      store.del(STARTED);
-      setError("Your session ended after 10 minutes. Sign in again to continue.");
-    }, Math.max(0, expiresAt - Date.now()));
-    return () => clearTimeout(id);
-  }, [session, expiresAt]);
-
-  // A demo account survives reloads (within its 10 minutes); a passkey session needs Face ID again.
+  // A demo account survives reloads; a passkey session needs Face ID again (keys live in memory only).
   useEffect(() => {
     const demo = store.get(DEMO);
-    const started = Number(store.get(STARTED) ?? 0);
-    if (demo && Date.now() - started < SESSION_MS) {
-      setExpiresAt(started + SESSION_MS);
+    if (demo) {
       const account = privateKeyToAccount(demo as `0x${string}`);
       setSession({ address: account.address, kind: "demo", wallet: walletFor(account), encKey: demoEncKey(demo as Hex), agentKey: demoAgentKey(demo as Hex) });
     }
@@ -128,7 +104,6 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     try {
       const s = await fn();
       setSession(s);
-      begin();
       return s;
     } catch (e) {
       setError(friendly(e));
@@ -136,7 +111,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     } finally {
       setBusy(false);
     }
-  }, [begin]);
+  }, []);
 
   const signUp = useCallback(
     (name: string) =>
@@ -175,20 +150,17 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     const s: Session = { address: account.address, kind: "demo", wallet: walletFor(account), encKey: demoEncKey(key), agentKey: demoAgentKey(key) };
     setSession(s);
     setError(undefined);
-    begin();
     return s;
-  }, [begin]);
+  }, []);
 
   const signOut = useCallback(() => {
     store.del(DEMO);
-    store.del(STARTED);
-    setExpiresAt(undefined);
     setSession(undefined);
   }, []);
 
   const value = useMemo(
-    () => ({ session, ready, busy, error, hasPasskey, signUp, signIn, startDemoAccount, signOut, expiresAt }),
-    [session, ready, busy, error, hasPasskey, signUp, signIn, startDemoAccount, signOut, expiresAt],
+    () => ({ session, ready, busy, error, hasPasskey, signUp, signIn, startDemoAccount, signOut }),
+    [session, ready, busy, error, hasPasskey, signUp, signIn, startDemoAccount, signOut],
   );
   return <AccountCtx.Provider value={value}>{children}</AccountCtx.Provider>;
 }

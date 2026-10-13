@@ -76,7 +76,7 @@ export default function Business() {
             </Reveal>
           ))}
         </div>
-        <p className="mt-4 text-[14px] text-muted">Same $100 of savers&apos; money, one month. The card is a rebate split 90/10 between savers and Advance, exactly like the fee. Even the luckiest card is below the fee, so no one can profit by borrowing just to win.</p>
+        <p className="mt-4 text-[14px] text-muted">Same $100 of savers&apos; money, one month. The card is a rebate split 90/10 between savers and Advance, exactly like the fee.</p>
       </Section>
 
       <Section title="Why it's a good business">

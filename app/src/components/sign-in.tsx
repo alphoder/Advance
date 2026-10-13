@@ -40,10 +40,13 @@ export function SignIn({ title = "Sign in to Advance", subtitle }: { title?: str
 
       <div className="mt-4"><ErrorNote>{error}</ErrorNote></div>
       <div className="mt-6 border-t border-line pt-5">
-        <button onClick={() => startDemoAccount()} className="group flex w-full items-center gap-3 rounded-xl px-1 text-left text-[13.5px] text-muted hover:text-ink">
-          <UserCircle className="size-5" />
-          <span className="flex-1">Passkey not working here? Use a temporary demo account</span>
-          <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+        <button onClick={() => startDemoAccount()} className="press group flex w-full items-center gap-3 rounded-xl border border-line-strong bg-white/[0.03] px-4 py-3 text-left hover:bg-white/[0.06]">
+          <UserCircle className="size-6 shrink-0 text-monad-hi" weight="duotone" />
+          <span className="flex-1">
+            <span className="block text-[14.5px] font-medium text-ink">Just looking or judging? Try it instantly</span>
+            <span className="block text-[12.5px] text-muted">A temporary demo account in this browser. No passkey needed, works everywhere.</span>
+          </span>
+          <ArrowRight className="size-4 text-muted transition-transform duration-200 group-hover:translate-x-0.5" />
         </button>
       </div>
     </Panel>

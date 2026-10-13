@@ -9,6 +9,7 @@ import {
   List, X, SignOut, Copy, Check, Fingerprint, UserCircle, Question, Gift,
 } from "@phosphor-icons/react";
 import { useAccount } from "@/lib/account";
+import { usePoll } from "@/lib/hooks";
 import { AppDataProvider } from "@/lib/app-data";
 import { publicClient, CHAIN_ID } from "@/lib/chain";
 import { ChainToggle, Logo, short } from "@/components/ui";
@@ -82,6 +83,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <AccountMenu />
           </div>
         </header>
+        <FuelNotice />
         <main className="relative flex-1">
           <div className="grid-bg pointer-events-none absolute inset-x-0 top-0 h-96" />
           <div className="relative mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8">{children}</div>
@@ -92,6 +94,19 @@ export function AppShell({ children }: { children: ReactNode }) {
   );
 
   return session ? <AppDataProvider address={session.address}>{body}</AppDataProvider> : body;
+}
+
+/** Shown only when the relayer that pays visitors' network fees is running low. */
+function FuelNotice() {
+  const { data } = usePoll<{ fuelLow?: boolean }>("/api/config", 60_000);
+  if (!data?.fuelLow) return null;
+  return (
+    <div className="mx-auto mt-3 w-full max-w-6xl px-4 sm:px-6">
+      <div className="rounded-xl border border-terra/30 bg-terra/10 px-4 py-2.5 text-[13.5px] text-terra">
+        Lots of people are trying the demo right now, so actions that send transactions may pause for a little while. Browsing works as normal.
+      </div>
+    </div>
+  );
 }
 
 function SideNav({ pathname }: { pathname: string }) {

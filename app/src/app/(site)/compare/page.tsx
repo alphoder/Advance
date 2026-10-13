@@ -13,7 +13,7 @@ const CARD_ROWS: [string, string, string][] = [
   ["Debt trap", "Balance can keep growing for years", "Can't grow: fixed amount, at most half a month of income"],
   ["Who lends", "The bank, privately", "A savers' pool; every advance visible onchain"],
   ["Best for", "Spending at shops: rewards, purchase protection", "Getting your own income early"],
-  ["Rewards", "Points for spending more", "A scratch card for repaying faster, always worth less than the fee"],
+  ["Rewards", "Points for spending more", "A scratch card for repaying faster, drawn onchain"],
 ];
 
 const OTHERS: { name: string; kind: string; does: string; diff: string }[] = [

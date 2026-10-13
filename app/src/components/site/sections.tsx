@@ -352,7 +352,7 @@ export function Explore() {
   ];
   return (
     <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {items.map((i) => (
           <Link key={i.href} href={i.href} className="group block">
             <div className="press h-full rounded-3xl border border-line bg-panel/80 p-6 transition-colors hover:border-line-strong">
@@ -407,7 +407,7 @@ export function Perks() {
       <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
         {[
           ["The Advance card", "A credit card on your limit. It switches on once your income is checked."],
-          ["Scratch cards, onchain", "Win 20% to 90% of your fee back as trust points, convertible to MON. Always less than the fee."],
+          ["Scratch cards, onchain", "Win 20% to 90% of your fee back as trust points, convertible to MON."],
           ["Gift cards and coupons", "Cartwheel, Nimbus Air, Velo, Pixelhaus and more, up to 12% off."],
         ].map(([t, b]) => (
           <div key={t} className="rounded-3xl border border-line bg-panel/80 p-5"><div className="font-semibold">{t}</div><p className="mt-1 text-[14px] text-muted">{b}</p></div>

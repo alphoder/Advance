@@ -37,11 +37,28 @@ export async function send<const abi extends Abi, fn extends ContractFunctionNam
   functionName: fn;
   args: ContractFunctionArgs<abi, "nonpayable" | "payable", fn>;
 }) {
+  await assertFuel();
   const gas = await publicClient.estimateContractGas({ ...req, account: relayer } as never);
   const hash = await wallet.writeContract({ ...req, gas: (gas * 115n) / 100n } as never);
   const receipt = await publicClient.waitForTransactionReceipt({ hash });
   if (receipt.status !== "success") throw new Error(`tx reverted: ${hash}`);
   return { hash, receipt };
+}
+
+/**
+ * The relayer pays every visitor's network fees. Below FUEL_MIN it stops spending and says so in plain
+ * words, instead of letting a demo fail halfway. Balance is re-read at most every 15s.
+ */
+const FUEL_MIN = 150_000_000_000_000_000n; // 0.15 MON
+let fuel: { at: number; low: boolean } | undefined;
+export async function fuelLow() {
+  if (fuel && Date.now() - fuel.at < 15_000) return fuel.low;
+  const bal = await publicClient.getBalance({ address: relayer.address });
+  fuel = { at: Date.now(), low: bal < FUEL_MIN };
+  return fuel.low;
+}
+export async function assertFuel() {
+  if (await fuelLow()) throw new HttpError(503, "The demo is very busy right now. Please try again in a little while.");
 }
 
 /** Deterministic demo wallets (clients, Sybil Sam's helpers). Never hold real value. */

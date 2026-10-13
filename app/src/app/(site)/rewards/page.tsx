@@ -39,8 +39,8 @@ export default function RewardsSite() {
 
       {/* scratch cards */}
       <Section id="scratch" title={<span className="flex flex-wrap items-center gap-3">Scratch cards and trust points <Status s="live" /></span>} sub="Built into the credit contract on Monad. The moment a client payment finishes repaying an advance, the contract draws your card.">
-        <div className="relative grid grid-cols-1 items-center gap-6 lg:grid-cols-12">
-          <Note dir="down-right" arrow="loop" className="-top-16 left-[8%]" tilt={-4}>go on, scratch it</Note>
+        <div className="relative grid grid-cols-1 items-center gap-6 lg:grid-cols-12 xl:mt-24">
+          <Note dir="down-right" arrow="loop" className="-top-24 left-[6%]" tilt={-4}>go on, scratch it</Note>
           <Reveal className="lg:col-span-4">
             <div className="mx-auto w-full max-w-[260px]">
               <Scratch onDone={() => setScratched(true)}>
@@ -53,14 +53,14 @@ export default function RewardsSite() {
                   </div>
                 </div>
               </Scratch>
-              <p className="mt-3 text-center text-[13px] text-muted">{scratched ? "Worth $0.50 in MON. Less than the $1 fee, always." : "Drag across the card to scratch."}</p>
+              <p className="mt-3 text-center text-[13px] text-muted">{scratched ? "Worth $0.50 in MON." : "Drag across the card to scratch."}</p>
             </div>
           </Reveal>
           <div className="grid gap-3 lg:col-span-8">
             {[
               { icon: Lightning, t: "Faster repayment, bigger card", b: "The prize is multiplied by how fast the advance was repaid: 100% within 7 days, 75% within 14, 50% within 21, 25% within 30." },
               { icon: Ticket, t: "Every card is different", b: "Each card holds 20% to 90% of the fee you paid, drawn by the contract at the moment of repayment. Most cards are 20% or 35%; 1 in 50 is the 90% lucky card." },
-              { icon: ShieldCheck, t: "Always less than the fee", b: "Even the luckiest card, repaid in a day, is worth less than the fee. So borrowing just to win cards always loses money. We fuzz-tested this 1,000 times." },
+              { icon: ShieldCheck, t: "Recorded onchain", b: "Every card is drawn and recorded by the credit contract at the moment of repayment, so anyone can check it on Monad." },
               { icon: LockSimple, t: "Locked to you", b: "Only client payments win cards, not paying yourself back. Points can't be sent to anyone, and are lost if an advance is ever missed." },
             ].map(({ icon: Icon, t, b }, i) => (
               <Reveal key={t} i={i}>
@@ -101,7 +101,7 @@ export default function RewardsSite() {
             <motion.div key={`${amount}-${days}`} initial={{ opacity: 0.4, y: 4 }} animate={{ opacity: 1, y: 0 }} className="num font-mono text-5xl font-semibold">{pts(LUCK.avg).toLocaleString()} <span className="text-xl font-normal opacity-80">pts</span></motion.div>
             <div className="mt-1 text-[14px] opacity-85">Between {pts(LUCK.min).toLocaleString()} and {pts(LUCK.max).toLocaleString()} points (${(pts(LUCK.min) / 100).toFixed(2)} to ${(pts(LUCK.max) / 100).toFixed(2)} in MON)</div>
             <div className="mt-auto rounded-2xl bg-black/15 p-4 pt-4 text-[13.5px]">
-              The best possible card here is {fmtUsd(pts(LUCK.max) / 100)}, less than your {fmtUsd(fee)} fee. It&apos;s cashback for paying fast, never a profit.
+              Repay faster to multiply your card. It&apos;s drawn onchain the moment your clients finish repaying.
             </div>
           </div>
         </div>
@@ -179,7 +179,6 @@ export default function RewardsSite() {
       <Section title="Questions about rewards">
         <div className="grid gap-3">
           <QA q="What's the difference between trust points and rewards points?">Trust points are recorded onchain by the credit contract when clients repay an advance, and will convert to MON 30 days after each card (the conversion step is the next thing we ship). Rewards points are for gift cards, coupons and tiers inside the app.</QA>
-          <QA q="Couldn't someone borrow and repay over and over to farm cards?">They'd lose money every time. The best card is 90% of the fee, so each loop costs at least 10% of the fee, and paying yourself back wins nothing at all. The contract enforces this, and a fuzz test checks it across 1,000 random draws and timings.</QA>
           <QA q="Who pays for trust points?">They&apos;re a rebate on the fee you already paid, shared by savers and the protocol the same way the fee is split (90/10). Nobody prints tokens. It pays for itself: an advance repaid in a week frees the same dollars to fund about four more advances that month, so savers still earn more over a year than with slow repayment.</QA>
           <QA q="What happens to my points if I miss an advance?">Unclaimed trust points are lost, recorded publicly with the missed advance. That&apos;s part of what makes them worth something: they only exist for people who repay.</QA>
           <QA q="Why doesn't the card show a price in MON?">Points are a number that doesn&apos;t move with the market. You see &quot;+50 trust points&quot;, and the MON amount is worked out when you convert.</QA>

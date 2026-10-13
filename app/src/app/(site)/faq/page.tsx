@@ -44,7 +44,6 @@ export default function Faq() {
       <Section title="Rewards and the assistant">
         <div className="grid gap-3">
           <QA q="Do I get anything for repaying early?">Yes. When a client payment finishes repaying an advance, you win a scratch card worth 20% to 90% of the fee back as trust points. Repaid within 7 days, the full prize; within 30 days, a quarter of it. <Link href="/rewards" className="text-terra underline underline-offset-4">How scratch cards work</Link>.</QA>
-          <QA q="Can I win more than the fee I paid?">No, never. The best card is 90% of the fee, so borrowing just to win cards always loses money. The contract enforces it.</QA>
           <QA q="What is the Advance card?">A credit card on your Advance limit. It spends what you can borrow and is repaid the same way, from 20% of client payments. It switches on once your income is checked; issuing physical and virtual cards needs a card partner.</QA>
           <QA q="Who answers in the chat bubble?">Ask Advance, an AI assistant. It explains anything on the site, and when you&apos;re signed in it reads your live account to give specific advice, like how to reach your next level. It can&apos;t move money.</QA>
         </div>

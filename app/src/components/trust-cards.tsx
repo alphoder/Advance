@@ -76,7 +76,6 @@ export function TrustCards() {
           <ul className="mt-4 space-y-1.5 text-[13.5px] text-muted">
             <li className="flex gap-2"><Sparkle weight="fill" className="mt-0.5 size-4 shrink-0 text-terra" />Each card holds 20% to 90% of the fee you paid, decided onchain the moment it&apos;s repaid. Faster repayment multiplies it.</li>
             <li className="flex gap-2"><Lightning weight="fill" className="mt-0.5 size-4 shrink-0 text-terra" />Only repayments from client payments count. Raise your repay share to clear advances faster.</li>
-            <li className="flex gap-2"><LockSimple weight="fill" className="mt-0.5 size-4 shrink-0 text-terra" />A card is always worth less than the fee, so borrowing just to win cards never pays.</li>
           </ul>
         </div>
       </div>
@@ -150,55 +149,100 @@ function CardSlot({ e, open, onOpen }: { e: Ev; open: boolean; onOpen: () => voi
   );
 }
 
-/** Scratch-off foil: drag to scratch; once about half is cleared the whole card reveals. */
+/**
+ * Scratch-off foil: drag to scratch. Once 20% is cleared the foil dissolves on its own and the card is
+ * presented: a pop, a shine sweeping across, and a burst of sparkles. onDone fires after the show.
+ */
+const SPARKS = Array.from({ length: 12 }, (_, i) => {
+  const a = (i / 12) * Math.PI * 2 + (i % 2) * 0.25;
+  const d = 90 + (i % 3) * 28;
+  return { x: Math.cos(a) * d, y: Math.sin(a) * d, s: 6 + (i % 3) * 3, c: i % 2 ? "#ffd6c9" : "#c9bfff", delay: (i % 4) * 0.03 };
+});
+
 export function Scratch({ children, onDone }: { children: React.ReactNode; onDone: () => void }) {
   const cv = useRef<HTMLCanvasElement>(null);
   const [gone, setGone] = useState(false);
   const down = useRef(false);
+  const lastCheck = useRef(0);
 
   useEffect(() => {
     const c = cv.current;
     if (!c) return;
     const r = c.getBoundingClientRect();
-    c.width = r.width * devicePixelRatio;
-    c.height = r.height * devicePixelRatio;
+    const k = devicePixelRatio;
+    c.width = r.width * k;
+    c.height = r.height * k;
     const g = c.getContext("2d")!;
+    // silver foil with diagonal sheen stripes
     const grad = g.createLinearGradient(0, 0, c.width, c.height);
-    grad.addColorStop(0, "#c9ced8"); grad.addColorStop(0.5, "#8e95a3"); grad.addColorStop(1, "#d8dce4");
+    grad.addColorStop(0, "#d9dde5"); grad.addColorStop(0.45, "#9aa1ae"); grad.addColorStop(0.55, "#e6e9ef"); grad.addColorStop(1, "#a7adb9");
     g.fillStyle = grad;
     g.fillRect(0, 0, c.width, c.height);
-    g.fillStyle = "rgb(18 22 29 / 0.55)";
-    g.font = `600 ${14 * devicePixelRatio}px system-ui`;
+    g.globalAlpha = 0.18;
+    g.fillStyle = "#ffffff";
+    for (let x = -c.height; x < c.width; x += 26 * k) { g.beginPath(); g.moveTo(x, c.height); g.lineTo(x + 10 * k, c.height); g.lineTo(x + 10 * k + c.height, 0); g.lineTo(x + c.height, 0); g.fill(); }
+    g.globalAlpha = 1;
+    g.fillStyle = "rgb(18 22 29 / 0.6)";
+    g.font = `700 ${15 * k}px system-ui`;
     g.textAlign = "center";
     g.fillText("Scratch here", c.width / 2, c.height / 2);
   }, []);
 
+  const check = () => {
+    const c = cv.current;
+    if (!c || gone) return;
+    const d = c.getContext("2d")!.getImageData(0, 0, c.width, c.height).data;
+    let clear = 0;
+    for (let i = 3; i < d.length; i += 64) if (d[i] < 40) clear++;
+    if (clear / (d.length / 64) > 0.2) { setGone(true); setTimeout(onDone, 1600); } // after the show
+  };
   const scratch = (x: number, y: number) => {
     const c = cv.current;
     if (!c || gone) return;
     const r = c.getBoundingClientRect();
     const g = c.getContext("2d")!;
     g.globalCompositeOperation = "destination-out";
+    g.fillStyle = "#000"; // fully opaque brush, so scratched foil is really gone
     g.beginPath();
-    g.arc((x - r.left) * devicePixelRatio, (y - r.top) * devicePixelRatio, 22 * devicePixelRatio, 0, Math.PI * 2);
+    g.arc((x - r.left) * devicePixelRatio, (y - r.top) * devicePixelRatio, 24 * devicePixelRatio, 0, Math.PI * 2);
     g.fill();
-  };
-  const check = () => {
-    const c = cv.current;
-    if (!c || gone) return;
-    const d = c.getContext("2d")!.getImageData(0, 0, c.width, c.height).data;
-    let clear = 0;
-    for (let i = 3; i < d.length; i += 64) if (d[i] === 0) clear++;
-    if (clear / (d.length / 64) > 0.45) { setGone(true); setTimeout(onDone, 350); }
+    const now = performance.now(); // check while scratching, not only on release
+    if (now - lastCheck.current > 120) { lastCheck.current = now; check(); }
   };
 
   return (
     <div className="relative">
-      {children}
+      <motion.div
+        animate={gone ? { scale: [1, 1.07, 1], rotate: [0, -2.5, 0] } : undefined}
+        transition={{ duration: 0.7, ease: EASE }}
+        className="relative overflow-hidden rounded-2xl"
+      >
+        {children}
+        {gone && (
+          <motion.div
+            aria-hidden className="pointer-events-none absolute inset-0"
+            initial={{ x: "-120%" }} animate={{ x: "120%" }} transition={{ duration: 0.9, delay: 0.15, ease: [0.65, 0, 0.35, 1] }}
+            style={{ background: "linear-gradient(105deg, transparent 30%, rgb(255 255 255 / 0.55) 48%, rgb(255 255 255 / 0.15) 55%, transparent 70%)" }}
+          />
+        )}
+      </motion.div>
+      {gone && (
+        <div aria-hidden className="pointer-events-none absolute left-1/2 top-1/2">
+          {SPARKS.map((p, i) => (
+            <motion.span
+              key={i} className="absolute rounded-full"
+              style={{ width: p.s, height: p.s, background: p.c, boxShadow: `0 0 12px ${p.c}` }}
+              initial={{ x: 0, y: 0, opacity: 0, scale: 0.4 }}
+              animate={{ x: p.x, y: p.y, opacity: [0, 1, 0], scale: [0.4, 1.2, 0.6] }}
+              transition={{ duration: 0.9, delay: 0.1 + p.delay, ease: EASE }}
+            />
+          ))}
+        </div>
+      )}
       <AnimatePresence>
         {!gone && (
           <motion.canvas
-            ref={cv} exit={{ opacity: 0 }} transition={{ duration: 0.3, ease: EASE }}
+            ref={cv} exit={{ opacity: 0, scale: 1.04, filter: "blur(6px)" }} transition={{ duration: 0.35, ease: EASE }}
             className="absolute inset-0 size-full cursor-grab touch-none rounded-2xl"
             onPointerDown={(e) => { down.current = true; e.currentTarget.setPointerCapture(e.pointerId); scratch(e.clientX, e.clientY); }}
             onPointerMove={(e) => down.current && scratch(e.clientX, e.clientY)}

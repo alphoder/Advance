@@ -47,7 +47,7 @@ export default function Save() {
 
       <Section id="protection" title="What happens if borrowers don't repay?" sub="Drag the slider to imagine missed repayments in a $10,000 pool. Watch who absorbs the loss.">
         <div className="relative rounded-3xl border border-line bg-panel/80 p-6 sm:p-8">
-          <Note dir="down-left" arrow="zigzag" className="-top-20 right-[22%]" tilt={4}>drag it and watch Steady stay safe</Note>
+          <Note dir="down-left" arrow="zigzag" className="-top-20 right-[6%]" tilt={4}>drag it and watch Steady stay safe</Note>
           <div className="flex flex-wrap items-baseline justify-between gap-3">
             <div className="text-[14px] text-muted">Missed repayments</div>
             <div className="num font-mono text-4xl font-semibold text-danger">{fmtUsd(loss)}</div>

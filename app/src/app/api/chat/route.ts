@@ -6,7 +6,13 @@ import { POINTS, POINT_VALUE, TIERS, EARN, MISSIONS, BRAND_INFO, tierOf, nextTie
  * Context = product rules + rewards + (if signed in) the user's live onchain data from our own endpoints.
  */
 
-const MODELS = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite"]; // fastest first; the second is the fallback
+// Fastest first. Each model has its own daily quota (lite: 500/day, flash: 20/day), so later ones keep
+// the assistant answering after the first runs out.
+const MODELS = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-3-flash-preview", "gemini-3.6-flash"];
+
+// Signed-out visitors mostly tap the same suggested questions: reuse those answers for 6 hours.
+const answers = new Map<string, { at: number; text: string }>();
+const ANSWER_TTL = 6 * 60 * 60_000;
 const API = "https://generativelanguage.googleapis.com/v1beta/models";
 
 // ponytail: in-memory per-IP limit, fine for one server; move to a shared store if this scales out
@@ -41,7 +47,7 @@ function rewardsText(verified: boolean) {
 - Missions this month: ${MISSIONS.map((m) => `${m.t} (${verified ? m.done : 0}/${m.of}, ${m.reward})`).join("; ")}
 - Gift cards (discount off face value): ${BRAND_INFO.map((b) => `${b.name}, ${b.what}, ${b.off}% off`).join("; ")}
 - The Advance card is a credit card on your Advance limit (starts at $50): spending draws on the limit and is repaid the same way, from 20% of client payments. It only activates once your income is checked. 2 points per $1. Points never change the credit limit.
-TRUST POINTS (onchain, separate from rewards points): every advance fully repaid by client payments wins a scratch card worth 20% to 90% of the fee paid (random, decided onchain), times a speed multiplier: 100% if repaid within 7 days, 75% within 14, 50% within 21, 25% within 30. Self-repayment earns no card. 1 trust point = $0.01; convertible to MON 30 days after the card; can't be transferred; lost if an advance is missed. A card is always worth less than the fee, so it's cashback, not profit. Cards are a rebate on the fee, shared by savers and protocol 90/10 like the fee; it pays for itself because fast repayment lets the same dollars fund more advances. Conversion to MON is the next step being built. Tip: raise your repay share to clear advances faster and win bigger cards.`;
+TRUST POINTS (onchain, separate from rewards points): every advance fully repaid by client payments wins a scratch card worth 20% to 90% of the fee paid (random, decided onchain), times a speed multiplier: 100% if repaid within 7 days, 75% within 14, 50% within 21, 25% within 30. Self-repayment earns no card. 1 trust point = $0.01; convertible to MON 30 days after the card; can't be transferred; lost if an advance is missed. Cards are always worth less than the fee; mention that only if the user asks about cheating or farming rewards. Cards are a rebate on the fee, shared by savers and protocol 90/10 like the fee; it pays for itself because fast repayment lets the same dollars fund more advances. Conversion to MON is the next step being built. Tip: raise your repay share to clear advances faster and win bigger cards.`;
 }
 
 const cache = new Map<string, { at: number; text: string; verified: boolean }>();
@@ -101,6 +107,9 @@ export async function POST(req: Request) {
   if (!messages.length || messages[messages.length - 1].role !== "user") return new Response("Bad request", { status: 400 });
 
   const address = typeof body.address === "string" && isAddress(body.address) ? body.address : undefined;
+  const cacheKey = !address && messages.length === 1 ? messages[0].text.trim().toLowerCase() : undefined;
+  const hit = cacheKey ? answers.get(cacheKey) : undefined;
+  if (hit && Date.now() - hit.at < ANSWER_TTL) return new Response(hit.text, { headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" } });
   const page = typeof body.page === "string" ? body.page.slice(0, 80) : "/";
   const cards = Array.isArray(body.giftCards)
     ? body.giftCards.slice(0, 10).map((c) => (c && typeof c === "object" ? `${String((c as { brand?: unknown }).brand).slice(0, 20)} $${Number((c as { left?: unknown }).left) || 0} left` : "")).filter(Boolean)
@@ -149,6 +158,7 @@ export async function POST(req: Request) {
     async start(ctrl) {
       const enc = new TextEncoder();
       let buf = "";
+      let full = "";
       try {
         for (;;) {
           const { done, value } = await reader.read();
@@ -162,10 +172,11 @@ export async function POST(req: Request) {
             try {
               const j = JSON.parse(line.slice(5));
               const t = (j.candidates?.[0]?.content?.parts ?? []).map((p: { text?: string; thought?: boolean }) => (p.thought ? "" : p.text ?? "")).join("");
-              if (t) ctrl.enqueue(enc.encode(t));
+              if (t) { full += t; ctrl.enqueue(enc.encode(t)); }
             } catch {}
           }
         }
+        if (cacheKey && full.trim()) answers.set(cacheKey, { at: Date.now(), text: full });
       } catch {
         ctrl.enqueue(new TextEncoder().encode("\n\n(The reply was cut off. Try again.)"));
       }

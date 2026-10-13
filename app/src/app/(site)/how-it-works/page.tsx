@@ -73,7 +73,7 @@ export default function HowItWorks() {
             <div className="flex-1">
               <div className="text-[13px] opacity-80">And a bonus</div>
               <h3 className="text-xl font-semibold">Repay fast, win a scratch card</h3>
-              <p className="mt-1 text-[15px] opacity-85">When clients repay your advance within a week, the contract hands you up to 90% of the fee back as trust points. Always less than the fee, so it&apos;s cashback, never a trick.</p>
+              <p className="mt-1 text-[15px] opacity-85">When clients repay your advance within a week, the contract hands you up to 90% of the fee back as trust points.</p>
             </div>
             <span className="text-[15px] font-medium transition-transform group-hover:translate-x-1">How it works →</span>
           </a>

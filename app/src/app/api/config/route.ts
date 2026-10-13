@@ -1,5 +1,5 @@
 import { handler } from "@/server/http";
-import { demoAccount, relayer } from "@/server/relayer";
+import { demoAccount, relayer, fuelLow } from "@/server/relayer";
 import { nansenEnabled } from "@/server/nansen";
 
 export const GET = handler(async () => ({
@@ -8,4 +8,5 @@ export const GET = handler(async () => ({
   relayer: relayer.address,
   nansen: nansenEnabled(),
   indexer: process.env.ENVIO_API_TOKEN ? "Envio HyperSync" : "RPC",
+  fuelLow: await fuelLow().catch(() => false),
 }));

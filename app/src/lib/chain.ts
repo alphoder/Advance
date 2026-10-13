@@ -35,7 +35,14 @@ export const IS_LOCAL = CHAIN_ID === 31337;
 export const IS_TESTNET = CHAIN_ID !== 143;
 export const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || chain.rpcUrls.default.http[0];
 
-export const publicClient = createPublicClient({ chain, transport: http(RPC_URL), pollingInterval: 400 });
+// The public Monad RPC drops some requests under load: fold parallel reads into one Multicall3 call
+// (where the chain has it) and retry the rest.
+export const publicClient = createPublicClient({
+  chain,
+  transport: http(RPC_URL, { retryCount: 5, retryDelay: 250 }),
+  batch: chain.contracts?.multicall3 ? { multicall: true } : undefined,
+  pollingInterval: 400,
+});
 
 export const txUrl = (hash: string) => (entry.explorer ? `${entry.explorer}/tx/${hash}` : undefined);
 export const addressUrl = (a: string) => (entry.explorer ? `${entry.explorer}/address/${a}` : undefined);

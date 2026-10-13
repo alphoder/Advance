@@ -74,6 +74,6 @@ export async function dripGas(to: Address, need = 0n) {
   if (need > 0n ? bal >= need : bal >= base / 2n) return undefined; // already covered: nothing to send
   await assertFuel();
   const hash = await wallet.sendTransaction({ to, value: target - bal, gas: 21_000n, account: relayer, chain: wallet.chain });
-  await publicClient.waitForTransactionReceipt({ hash });
+  await publicClient.waitForTransactionReceipt({ hash, timeout: 30_000 }).catch(() => {}); // the client re-checks the balance itself
   return hash;
 }

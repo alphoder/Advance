@@ -18,7 +18,7 @@ export async function sendTx<const abi extends Abi, fn extends ContractFunctionN
   // ~0.13 MON), so ask the relayer for exactly that, then wait until the node checking us can see it.
   const { maxFeePerGas } = await publicClient.estimateFeesPerGas();
   const need = limit * maxFeePerGas;
-  await api("/api/gas", { address: session.address, need: need.toString() }).catch(() => undefined);
+  await api("/api/gas", { address: session.address, need: need.toString() }, 25_000).catch(() => undefined);
   await untilFunded(session.address, need);
   // Monad's RPC can report a stale transaction count right after a confirmation, so back-to-back
   // transactions (approve then buy, register then link) would reuse a nonce. Track it here too.
@@ -37,7 +37,7 @@ export async function sendTx<const abi extends Abi, fn extends ContractFunctionN
       const m = String((e as Error).message) + String((e as { details?: string }).details ?? "");
       if (attempt >= 5 || !/insufficient (funds|balance)|invalid params|Missing or invalid|nonce/i.test(m)) throw e;
       await new Promise((r) => setTimeout(r, 2000));
-      await api("/api/gas", { address: session.address, need: need.toString() }).catch(() => undefined);
+      await api("/api/gas", { address: session.address, need: need.toString() }, 25_000).catch(() => undefined);
     }
   }
   const receipt = await publicClient.waitForTransactionReceipt({ hash, pollingInterval: 250 });
@@ -54,8 +54,9 @@ async function untilFunded(address: Address, need: bigint) {
   }
 }
 
-export async function api<T = Record<string, unknown>>(path: string, body?: object): Promise<T> {
-  const res = await fetch(path, body ? { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) } : undefined);
+export async function api<T = Record<string, unknown>>(path: string, body?: object, timeoutMs?: number): Promise<T> {
+  const signal = timeoutMs ? AbortSignal.timeout(timeoutMs) : undefined; // a hung request must never freeze the app
+  const res = await fetch(path, body ? { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body), signal } : { signal });
   const json = await res.json().catch(() => ({ error: `Request failed (${res.status})` }));
   if (!res.ok || json.error) throw new Error(json.error ?? `Request failed (${res.status})`);
   return json as T;

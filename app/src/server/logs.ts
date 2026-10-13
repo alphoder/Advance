@@ -1,5 +1,5 @@
-import { toHex, type Address, type Hex } from "viem";
-import { publicClient, CHAIN_ID, IS_LOCAL } from "@/lib/chain";
+import { toHex, toEventSelector, type Address, type Hex } from "viem";
+import { publicClient, CHAIN_ID, IS_LOCAL, D } from "@/lib/chain";
 
 export type RawLog = {
   address: Address;
@@ -24,7 +24,55 @@ const HYPERSYNC = `https://${CHAIN_ID}.hypersync.xyz/query`;
 export async function fetchLogs(q: LogQuery): Promise<RawLog[]> {
   if (IS_LOCAL || process.env.LOGS_VIA_RPC === "1") return rpcLogs(q); // LOGS_VIA_RPC: local forks only
   if (!TOKEN) throw new Error("ENVIO_API_TOKEN is required to read history on Monad");
+  if (CHAIN_ID === 10143 && covered(q)) return (await mirror()).filter((l) => matches(l, q));
   return cachedHypersync(q);
+}
+
+/**
+ * Testnet: HyperSync allows ~15 queries a minute per token, and every dashboard polls. So the whole
+ * protocol's history (its contracts plus every PaymentSplit) is mirrored with ONE incremental query,
+ * refreshed at most every MIRROR_MS, and each request filters that copy. Load no longer grows with users.
+ * Mainnet keeps per-query reads: there AUSD is the real token with a huge history.
+ * ponytail: per-instance memory; move the mirror to a shared store if many server instances run at once.
+ */
+const MIRROR_MS = 6000;
+const SPLIT = toEventSelector("PaymentSplit(address,uint256,uint256,uint256)").toLowerCase();
+const WATCHED = () => [D.creditLine, D.pool, D.creditFiles, D.ausd].map((a) => a.toLowerCase());
+let mir: { logs: RawLog[]; next: number; at: number; pending?: Promise<RawLog[]> } | undefined;
+
+function covered(q: LogQuery) {
+  if (q.fromBlock < D.startBlock) return false;
+  const w = WATCHED();
+  return (q.address?.length && q.address.every((a) => w.includes(a.toLowerCase()))) ||
+    (q.topics[0]?.length === 1 && q.topics[0][0].toLowerCase() === SPLIT);
+}
+
+function matches(l: RawLog, q: LogQuery) {
+  if (l.blockNumber < q.fromBlock) return false;
+  if (q.address?.length && !q.address.some((a) => a.toLowerCase() === l.address.toLowerCase())) return false;
+  return q.topics.every((t, i) => !t || t.some((x) => x.toLowerCase() === l.topics[i]?.toLowerCase()));
+}
+
+function mirror(): Promise<RawLog[]> {
+  if (mir?.pending) return mir.pending;
+  if (mir && Date.now() - mir.at < MIRROR_MS) return Promise.resolve(mir.logs);
+  const prev = mir;
+  const pending = hypersyncLogs({ fromBlock: prev?.next ?? D.startBlock, topics: [] }, [
+    { address: WATCHED(), topics: [] },
+    { address: [], topics: [[SPLIT]] },
+  ])
+    .then(({ logs, next }) => {
+      const all = prev ? prev.logs.concat(logs) : logs;
+      mir = { logs: all, next, at: Date.now() };
+      return all;
+    })
+    .catch((err) => {
+      if (prev) { mir = { ...prev, at: Date.now() }; return prev.logs; } // keep serving the last copy, retry next window
+      mir = undefined;
+      throw err;
+    });
+  mir = { logs: prev?.logs ?? [], next: prev?.next ?? D.startBlock, at: prev?.at ?? 0, pending };
+  return pending;
 }
 
 /**
@@ -88,13 +136,13 @@ type HsLog = {
 };
 type HsBatch = { logs?: HsLog[]; blocks?: { number: number; timestamp: Hex | number }[] };
 
-async function hypersyncLogs(q: LogQuery): Promise<{ logs: RawLog[]; next: number }> {
+async function hypersyncLogs(q: LogQuery, selections?: { address: string[]; topics: string[][] }[]): Promise<{ logs: RawLog[]; next: number }> {
   const out: RawLog[] = [];
   let from = q.fromBlock;
   for (let page = 0; page < 50; page++) {
     const res = await hsFetch({
       from_block: from,
-      logs: [{ address: q.address ?? [], topics: q.topics.map((t) => t ?? []) }],
+      logs: selections ?? [{ address: q.address ?? [], topics: q.topics.map((t) => t ?? []) }],
       field_selection: {
         log: ["address", "topic0", "topic1", "topic2", "topic3", "data", "block_number", "transaction_hash", "log_index"],
         block: ["number", "timestamp"],

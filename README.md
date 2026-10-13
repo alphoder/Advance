@@ -2,151 +2,152 @@
 
 **Get paid today for work you've already done.**
 
-Advance is an onchain credit protocol on Monad. It gives freelancers, small sellers and AI agents an advance against the income they already receive, and gets repaid automatically from every incoming payment. A smart payment address splits each payment in the same transaction: a share repays the advance, the rest reaches the earner. Because repayment happens at the source, by code, lenders can fund small advances without collateral.
+The credit line that repays itself. Advance pays freelancers, sellers and AI agents now against income already on its way, and every client payment settles it automatically: **20% to the advance, 80% to the earner, in one Monad transaction.** No collateral, no chasing, no paperwork.
 
-> Visa and Credit Coop proved this repayment model for businesses: $2.5B financed, zero defaults. Advance brings it to individuals and their agents, which only works on a chain where every payment settles in under a second for a fraction of a cent.
-
-- **Track:** 1, Onchain Finance & Trading (undercollateralised lending priced on onchain credit history)
-- **Live app:** https://advance-monad.vercel.app (Monad testnet) · production deploys from the `release` branch (`git push origin main:release` publishes; pushes to `main` only create previews)
-- **Demo video (≤ 3 min):** _add URL_
+**[Live app](https://advance-monad.vercel.app)** (Monad testnet) · **Demo video:** _add URL_ · **Track 1:** Onchain Finance & Trading
 
 ---
 
-## Try it in 60 seconds
+## The problem
 
-1. Open the app and paste any Monad address into **"What could this address borrow?"**. No sign-in needed. Try **Sybil Sam**, who fakes income by paying himself, and see why he's declined.
-2. Tap **Try it as Priya**. Create an account with Face ID (a Mera passkey; no wallet, no seed phrase). Four real clients pay you onchain, your income is scored, and your limit is written onchain.
-3. Tap **Get $50 now**. The money arrives in under a second.
-4. Tap **Acme Studio pays $100** and watch the payment split: $20 repays the advance, $80 reaches you, in **one transaction**.
-5. Turn on **Show me the chain** (bottom of every page) to see every transaction hash, block and contract.
+- Freelancers finish the work, then wait **30 to 90 days** for the invoice to clear. Rent and payroll don't wait.
+- Banks won't lend against an invoice they can't verify. The fast options cost **7 to 15% for two weeks**.
+- The people hit hardest are the internet's new workforce: paid in stablecoins by clients abroad, with real, regular income and no credit history any lender recognises.
 
-Every number on screen is read from the chain. The only simulated thing is who the demo clients are.
-
-6. When a client payment finishes repaying the advance, a **scratch card** appears in **Rewards**: trust points worth 20% to 90% of the fee, more for faster repayment. Scratch it.
-7. Ask anything in the **Ask Advance** bubble (bottom right). Signed in, it reads your live account and tells you how to reach the next level.
+Their income is already onchain. Advance turns it into credit, and makes repayment impossible to skip.
 
 ## How it works
 
 ```
- Client pays $100 ──▶ ReceivablesAccount (one per earner)
-                        │ same transaction
-                        ├─ 20% ──▶ CreditLine.repay ──▶ AdvancePool (fee to lenders, principal back)
-                        └─ 80% ──▶ earner
+ 1. Sign in        passkey (Face ID / fingerprint). No wallet, no seed phrase.
+ 2. Get scored     payments already received on Monad: how many, how regular, from how many real payers.
+ 3. Get a limit    written onchain. $50 → $200 → $1,000 → $5,000, one level per advance repaid.
+ 4. Take it        flat 2% fee, shown in dollars. Arrives in about a second.
+ 5. Get paid       clients pay your Advance link. Each payment splits in the same transaction:
 
- Lenders ──deposit──▶ AdvancePool ──▶ Steady (senior) / Boost (junior, first-loss) share tokens
-                                         └─ Boost shares trade on a Kuru order book
+    client pays $100 ──▶ ReceivablesAccount ──┬─ $20 ──▶ CreditLine.repay ──▶ AdvancePool (savers)
+                                               └─ $80 ──▶ you
 
- Envio HyperSync ─▶ scoring engine (+ Nansen payer checks) ─▶ Chainlink CRE (DON consensus) ─▶ CreditLine.onReport
+ Savers fund the pool and earn 90% of fees: Steady (protected) or Boost (first loss, higher return).
+ Boost shares trade on a Kuru order book, so savers can exit any time.
 ```
 
-| Contract | What it enforces |
+Repayment happens at the source, enforced by code. That is what lets small advances work without collateral.
+
+## Try it in 2 minutes
+
+1. Open **[advance-monad.vercel.app/app?demo=1](https://advance-monad.vercel.app/app?demo=1)** and press **"Just looking or judging? Try it instantly"**.
+2. The demo runs itself: four clients pay you onchain, your income is scored, a **$50 limit** is written onchain.
+3. **Get money now → Get $50 now.** It lands in about a second.
+4. **Get paid → $250 → Acme Studio pays.** Watch the split: $50 repays, $200 is yours, one transaction. Pay once more to clear the advance.
+5. **Rewards → Trust points.** Your scratch card was drawn onchain. Scratch it.
+6. Ask anything in the **Ask Advance** bubble. It reads your live account.
+
+Also: **Save and earn** (deposit into Boost) · **Sell or buy savings** (Kuru) · **AI agents** (register, get paid, borrow) · **Check any address** (try Sybil Sam) · **Chain** toggle (every contract, transaction and block).
+
+Every number on screen is read from the chain. Every action links to its proof on the explorer.
+
+## What we built
+
+| Part | What it does |
 |---|---|
-| [`AdvancePool`](contracts/src/AdvancePool.sol) | Two tranches. Losses hit Boost (junior) first. 90% of fees go to lenders, 10% to the protocol. Lending is capped at 90% of the pool. Share price is used as NAV. |
-| [`CreditLine`](contracts/src/CreditLine.sol) | Limits are capped per tier ($50 → $200 → $1,000 → $5,000). A flat 2% fee. The fee is repaid before principal. Tiers go up only after full repayment. A missed repayment is recorded publicly after 30 days. Also the Chainlink CRE receiver. **Scratch cards:** when client payments (through the borrower's ReceivablesAccount) finish repaying an advance, it draws a card worth 20–90% of the fee × a speed multiplier (100% ≤ 7 days … 25% ≤ 30 days) × the share repaid by clients, and records trust points. A card is always below the fee, self-repayment earns none, points can't be transferred and are wiped on default. |
-| [`ReceivablesAccount` and `ReceivablesFactory`](contracts/src/Receivables.sol) | The atomic split (at least 20% goes to repayment). Payments via EIP-3009 `payWithAuthorization` (the payer signs, a relayer submits, no gas for the payer) or a permissionless `sweep`. CREATE2 addresses, so an earner can share theirs before it is deployed. Never holds funds after a call. |
-| [`AgentCreditAdapter`](contracts/src/AgentCreditAdapter.sol) | Opts an ERC-8004-registered agent in. Only the agent's owner can do this. |
-| [`CreditFiles`](contracts/src/CreditFiles.sol) | Encrypted credit documents and lender grants, stored as event data. Ciphertext only. |
-| [`TestAUSD`](contracts/src/TestAUSD.sol) | Testnet only: a 6-decimal dollar with real EIP-3009 signatures and a public faucet. Mainnet uses real AUSD. |
+| [`AdvancePool`](contracts/src/AdvancePool.sol) | Two tranches. Losses hit Boost first. 90% of fees to savers. Lending capped at 90% of the pool. |
+| [`CreditLine`](contracts/src/CreditLine.sol) | Tiered limits, flat 2% fee, fee repaid before principal, public default after 30 days. Draws onchain scratch cards for fast repayment. Chainlink CRE receiver. |
+| [`Receivables`](contracts/src/Receivables.sol) | One payment address per earner (CREATE2). Splits every payment atomically. Gasless client payments via EIP-3009. Never holds funds after a call. |
+| [`AgentCreditAdapter`](contracts/src/AgentCreditAdapter.sol) | Credit for ERC-8004-registered AI agents. Only the owner can opt an agent in. |
+| [`CreditFiles`](contracts/src/CreditFiles.sol) | Encrypted invoices onchain, readable only by the lender the borrower chooses. |
+| [`GasTank`](contracts/src/GasTank.sol) | Covers every user's network fees. Nobody ever needs to hold MON. |
+| [Scoring](app/src/server/score.ts) | Reads income history, rejects self-funded and round-trip payers, explains every decision in plain English. |
+| [CRE workflow](cre/advance-score/main.ts) | A Chainlink DON fetches the score, agrees on the limit and writes it onchain. No single key decides who gets credit. |
+| [App](app/src) | Full website (how it works, security, 15 attack scenarios) and dashboard: borrow, get paid, score, history, documents, savings, market, agents, rewards. |
+| [Ask Advance](app/src/app/api/chat/route.ts) | AI assistant that reads the user's live account and tells them exactly how to reach the next level. |
 
-**Tests:** `cd contracts && forge test` runs 16 tests. They include two 1,000-run fuzz tests: *repayment + payout = payment* with the account always ending empty, and *a scratch card is never worth the fee* across random luck, timing and amounts. Plus tests of scratch cards (client repayment earns one, self-repayment earns none, slower earns less, default wipes points), of the loss waterfall (junior first, then senior), EIP-3009 replay and forgery rejection, the CRE receiver, and agent linking. `cd app && pnpm check` verifies the credit-file cryptography.
+## Built with
 
-## Rewards, the card, and the assistant
+| | Used for |
+|---|---|
+| **Monad** | Sub-second, sub-cent transactions make repaying from every $10 payment viable. |
+| **Mera** | Passkey accounts. One passkey derives the wallet, an encryption key for private documents, and the AI agent's wallet. |
+| **Envio HyperSync** | All history: score, activity, pool stats, scratch cards. Monad's public RPC returns only 100 blocks of logs. |
+| **Kuru** | Order book for Boost shares, listed at the pool's fair value. |
+| **Chainlink CRE** | Decentralised limit-setting, proven onchain (see bounties). |
+| **AUSD** | Dollar stablecoin with EIP-3009. Testnet uses a mirror with real signatures. |
+| **Gemini** | Ask Advance. |
+| Foundry · Next.js 16 · viem · Vercel | Contracts, app, hosting. |
 
-- **Scratch cards and trust points (onchain, live):** the reward for repaying fast. Economically it's a fee rebate shared 90/10 by savers and protocol, like the fee itself, and it pays for itself: an advance repaid in 7 days frees the same dollars to fund about four advances a month instead of one. Worked numbers on the [Business page](https://advance-monad.vercel.app/business). Conversion of trust points to MON is the next step.
-- **Rewards in the app:** the Advance card (a credit card on the Advance limit, inactive until income is verified), gift cards from eight brands below face value, coupons, tiers and missions. Card issuing and gift-card fulfilment need partners; today they are product UI.
-- **Ask Advance:** a Gemini assistant (`gemini-3.5-flash-lite`, falling back to `3.1-flash-lite`) that streams replies in about a second. Signed in, it reads the user's live onchain account through our own endpoints and gives specific advice. The key stays server-side, with a per-IP rate limit ([`api/chat`](app/src/app/api/chat/route.ts)).
+## Security
+
+**Contracts**
+- The split is atomic: repayment + payout always equals the payment, and the account always ends empty (1,000-run fuzz test).
+- A scratch card can never be worth the fee (1,000-run fuzz test). Self-repayment earns nothing. Points are non-transferable and wiped on default.
+- Client signatures (EIP-3009) can't be replayed or forged.
+- Losses hit Boost before Steady.
+- Limits rise only after full repayment, so a new bad actor can take at most $50, and the default is public forever.
+- `forge test`: **16 tests, all passing.**
+
+**Fraud.** 15 attack scenarios, each answered on the [Stress tests](https://advance-monad.vercel.app/stress-tests) page: paying yourself, round-tripping money, payer circles, borrow-and-vanish, reward farming, a stolen scorer key.
+
+**Keys and money**
+- Users hold their own keys (passkeys). No custody backend.
+- Invoices are encrypted in the browser (AES-GCM) and shared by ECDH to one lender. Advance itself can't read them.
+- The relayer only pays gas. Fee top-ups come from the GasTank, capped per request and sized to the transaction, with a fuel guard that shows a clear message instead of failing.
+- Server keys never reach the browser. Demo endpoints are rate-limited.
+
+**Open risk.** A borrower could tell clients to pay a different address after borrowing. Small starting limits, repayment-gated tiers, public defaults and Boost's first-loss buffer contain it; payment-app integrations close it.
 
 ## Why Monad
 
-| Monad property | Why Advance needs it |
+| | |
 |---|---|
-| ~0.4 s blocks | The split happens the moment a payment lands. The app shows "settled in 0.4s" with the block number. |
-| Near-zero fees | Repaying from a $10 payment is economic. On most chains the gas would cost more than the repayment. |
-| Parallel execution | Every earner has their own ReceivablesAccount, so payments to different earners don't contend. |
-| EVM compatibility | Standard Solidity, Foundry and viem. AUSD's EIP-3009 works unchanged. |
-| Ecosystem | AUSD, Kuru order books, the ERC-8004 registry, Nansen coverage and Chainlink CRE are all live on Monad. |
+| ~0.4 s blocks | The split lands the instant the client pays. |
+| Sub-cent fees | Repaying from a $10 payment costs less than the repayment. On most chains it wouldn't. |
+| Parallel execution | Every earner has their own payment account, so payments never contend. |
+| EVM | Standard Solidity, Foundry, viem. AUSD's EIP-3009 works unchanged. |
 
-Monad charges the **gas limit you declare**. Every transaction Advance sends estimates gas, then pads it by 15% (see [`app/src/lib/tx.ts`](app/src/lib/tx.ts) and [`app/src/server/relayer.ts`](app/src/server/relayer.ts)).
+## Bounties
 
-## Sponsor bounties
+**Kuru: a new asset class.** First-loss credit exposure, tradable. [`KuruMarket.s.sol`](contracts/script/KuruMarket.s.sol) lists advJR/AUSD and seeds the vault at the pool's onchain share price, so the book opens at fair value. The app shows the book beside fair value and trades with a slippage guard.
+[Market](https://testnet.monadexplorer.com/address/0xc87C44c02Bd90408bd0DB896939aF8aFdFa3b26a) · [vault seeded at NAV](https://testnet.monadexplorer.com/tx/0xe9b38bf4d43e5d32ed1186f74f2890bad6d0d415711d77137871d2fe9bfd3dc0) · [first trade](https://testnet.monadexplorer.com/tx/0x617e1aeac9b4f3f5339489e5c799d7bdda5c2b2298e9f88c0f7105ff21ae08cd)
 
-### Kuru: Bring New Assets and Markets
-- **Requirement:** "Build a new class of tradable markets on Kuru's spot order book, including the infrastructure to make them viable."
-- **How:** Advance's Boost tranche is a new asset class: first-loss credit exposure. [`KuruMarket.s.sol`](contracts/script/KuruMarket.s.sol) lists `advJR/AUSD` on Kuru and seeds the AMM vault at the pool's onchain share price, so the book opens at fair value. The Earn page shows the live book next to that fair value and lets savers buy or sell (`placeAndExecuteMarketBuy/Sell`, with a slippage guard). The script was fork-tested against Kuru's deployed testnet Router.
-- **Proof:** market [`0xc87C…b26a`](https://testnet.monadexplorer.com/address/0xc87C44c02Bd90408bd0DB896939aF8aFdFa3b26a) · vault seeded at NAV [`tx`](https://testnet.monadexplorer.com/tx/0xe9b38bf4d43e5d32ed1186f74f2890bad6d0d415711d77137871d2fe9bfd3dc0) · first trade [`tx`](https://testnet.monadexplorer.com/tx/0x617e1aeac9b4f3f5339489e5c799d7bdda5c2b2298e9f88c0f7105ff21ae08cd)
+**Envio: HyperSync powers the core feature.** [`server/logs.ts`](app/src/server/logs.ts) mirrors the protocol's history with one incremental query, so scoring works across any history length and load stays inside rate limits however many people use the site.
 
-### Nansen
-- **Requirement:** a product experience powered by Nansen data that goes beyond exposing raw data.
-- **How:** [`server/score.ts`](app/src/server/score.ts) calls Nansen `related-wallets` for the borrower and `labels` for every payer. The results drive decisions, not dashboards: a payer Nansen links to the borrower is a hard decline, labelled payers raise the quality score, and every result becomes a plain-English reason ("Nansen links payer 0x9eF6…07b7 to this address"). Responses are cached per payer (100 credits per labels call).
-- **Proof:** a sybil decline shown in the video; the score checker on any mainnet address.
+**Mera: passkeys are the entire account layer.** [`lib/account.tsx`](app/src/lib/account.tsx), [`lib/vault.ts`](app/src/lib/vault.ts). Index 0: wallet. Index 1: encryption key for private invoices. Index 2: the AI agent's wallet. `pnpm check` proves the owner and the chosen lender can decrypt, and a stranger can't.
 
-### Aurora Intents
-- **Requirement:** integrate Aurora Intents into a Monad app for any-chain deposits, swaps, or deposit-and-execute flows.
-- **How:** "Deposit from any chain" on the Earn page ([`components/aurora.tsx`](app/src/components/aurora.tsx)). A saver sends USDC from Base, Arbitrum, Solana and more, and dollars arrive at their passkey account on Monad, ready for Steady or Boost. It uses the external-wallet (QR) path, so no extra wallet connection is needed.
-- **Proof:** mainnet deposit `_tx_`
+**Chainlink CRE: decentralised credit limits.** [`cre/advance-score`](cre/advance-score/main.ts). Simulated with `--broadcast` on Monad testnet: a borrower with no limit got $50 written by the DON report through the CRE forwarder.
+[Onchain write](https://testnet.monadexplorer.com/tx/0xa87e7d1dbf127c79c03ec89057991bd9251acc2a8c8a0221ef15ea4cbe5a91ce) · [simulation log](cre/simulation-broadcast.log). The simulation forwarder doesn't verify signatures, so it was [unset](https://testnet.monadexplorer.com/tx/0xf5165cfcc73728cfed45866f6474138a30428223a261e4a5e69c84edd27b3e19) after the run.
 
-### Chainlink CRE
-- **Requirement:** build, simulate or deploy a CRE workflow used as an orchestration layer.
-- **How:** [`cre/advance-score`](cre/advance-score/main.ts). On a cron trigger, each DON node calls the Advance scoring API, the DON reaches consensus on each borrower's limit (median), and the signed report is written to `CreditLine.onReport` through the CRE forwarder. Limits then no longer depend on one server key.
-- **Proof (simulated with `--broadcast`, writing to Monad testnet):** [simulation log](cre/simulation-broadcast.log) · [onchain write](https://testnet.monadexplorer.com/tx/0xa87e7d1dbf127c79c03ec89057991bd9251acc2a8c8a0221ef15ea4cbe5a91ce). A fresh borrower was paid by four clients but had no limit (`available() = 0`). The workflow fetched their score from the live API, the DON agreed on $50, and the report went through Chainlink's simulation forwarder (`0xB9F7…d192`, set with `setForwarder`) into `CreditLine.onReport`: `available()` became $50. Our server key took no part in setting it. The simulation forwarder doesn't verify DON signatures, so after the run it was unset again ([`setForwarder(0)`](https://testnet.monadexplorer.com/tx/0xf5165cfcc73728cfed45866f6474138a30428223a261e4a5e69c84edd27b3e19)); set it to `0xB9F79d863261869B234c481D1f9A7af84AeAd192` to re-run, or to the production forwarder once deployed.
-- **Run it:** `cd cre/advance-score && bun install && cd .. && cre workflow simulate advance-score --target staging-settings --broadcast` (needs `cre login` and `CRE_ETH_PRIVATE_KEY` in `cre/.env`).
+## Contracts (Monad testnet)
 
-### Mera-Powered UX
-- **Requirement:** Mera is the entire account layer: no seed phrase, no extension, no custody backend.
-- **How:** every account, whether borrower, lender or payer, is a Mera passkey ([`lib/account.tsx`](app/src/lib/account.tsx)). Users never buy gas: a relayer tops up new accounts, and client payments are EIP-3009 signatures relayed by the server. A temporary demo account is offered only when a browser can't do passkey PRF.
+| | |
+|---|---|
+| CreditLine | [`0xef70…4135`](https://testnet.monadexplorer.com/address/0xef70B91F2482D81681A28fA3A81bFaFf4D6D4135) |
+| AdvancePool | [`0xe96c…B8cA`](https://testnet.monadexplorer.com/address/0xe96c7E16D2050017346Fc9EBC1B34647Aa6dB8cA) |
+| ReceivablesFactory | [`0x679A…8CBd`](https://testnet.monadexplorer.com/address/0x679ACa5aBF55Fe38c86E815ac57804F0f5778CBd) |
+| Steady / Boost | [`0xD354…7AE2`](https://testnet.monadexplorer.com/address/0xD3549fb2021C8c82B0EF1121e191B095FDF47AE2) / [`0x6400…103f`](https://testnet.monadexplorer.com/address/0x64000eA22Ce9896fE3BeF07e076439c2f0F8103f) |
+| AgentCreditAdapter | [`0x0729…9F2a`](https://testnet.monadexplorer.com/address/0x07290F0d34FA229F9A6b94F15B1614b3E36F9F2a) |
+| CreditFiles | [`0x9238…3b97`](https://testnet.monadexplorer.com/address/0x9238b3aAdC29017A0b7b02Ad0CaCFFA953633b97) |
+| GasTank | [`0x9a05…9378`](https://testnet.monadexplorer.com/address/0x9a056b971c08293a07C344A604F59A0A0a3f9378) |
+| TestAUSD | [`0xC9f1…D1Fd`](https://testnet.monadexplorer.com/address/0xC9f1484d32aAae11EF9abFE86EDE8BCa1371D1Fd) |
+| Kuru advJR/AUSD | [`0xc87C…b26a`](https://testnet.monadexplorer.com/address/0xc87C44c02Bd90408bd0DB896939aF8aFdFa3b26a) |
 
-### Mera: One Passkey, Many Keys
-- **Requirement:** the most creative non-wallet use of Mera's PRF-derived key material.
-- **How:** from one passkey, BIP-44 index 0 is the wallet key and **index 1 is an encryption key** for a private credit file ([`lib/vault.ts`](app/src/lib/vault.ts)).
-  - Invoices are AES-GCM encrypted in the browser and stored as ciphertext on Monad.
-  - Sharing with a lender wraps the file key via ECDH to *the lender's* passkey-derived public key. Only that lender can open it; Advance never can.
-  - `pnpm check` verifies three things: the owner can open the file, the chosen lender can open it, and a stranger cannot.
+All addresses: [`app/src/deployments/10143.json`](app/src/deployments/10143.json).
 
-### Envio
-- **Requirement:** use HyperIndex, HyperSync or HyperRPC to power real onchain data driving a core feature.
-- **How:** the score, the activity feed, pool statistics and credit files all read history through Envio HyperSync ([`server/logs.ts`](app/src/server/logs.ts)). On Monad the public RPC caps `eth_getLogs` at 100 blocks, so the core feature depends on HyperSync.
-
-## Contract addresses
-
-| | Monad testnet (10143) | Monad mainnet (143) |
-|---|---|---|
-| Deployment file | [`app/src/deployments/10143.json`](app/src/deployments/10143.json) | [`app/src/deployments/143.json`](app/src/deployments/143.json) |
-| CreditLine | [`0xef70…4135`](https://testnet.monadexplorer.com/address/0xef70B91F2482D81681A28fA3A81bFaFf4D6D4135) | |
-| AdvancePool | [`0xe96c…B8cA`](https://testnet.monadexplorer.com/address/0xe96c7E16D2050017346Fc9EBC1B34647Aa6dB8cA) | |
-| ReceivablesFactory | [`0x679A…8CBd`](https://testnet.monadexplorer.com/address/0x679ACa5aBF55Fe38c86E815ac57804F0f5778CBd) | |
-| Steady token | [`0xD354…7AE2`](https://testnet.monadexplorer.com/address/0xD3549fb2021C8c82B0EF1121e191B095FDF47AE2) | |
-| Boost token | [`0x6400…103f`](https://testnet.monadexplorer.com/address/0x64000eA22Ce9896fE3BeF07e076439c2f0F8103f) | |
-| TestAUSD | [`0xC9f1…D1Fd`](https://testnet.monadexplorer.com/address/0xC9f1484d32aAae11EF9abFE86EDE8BCa1371D1Fd) | |
-| CreditFiles | [`0x9238…3b97`](https://testnet.monadexplorer.com/address/0x9238b3aAdC29017A0b7b02Ad0CaCFFA953633b97) | |
-| AgentCreditAdapter | [`0x0729…9F2a`](https://testnet.monadexplorer.com/address/0x07290F0d34FA229F9A6b94F15B1614b3E36F9F2a) | |
-| GasTank (fee top-ups) | [`0x9a05…9378`](https://testnet.monadexplorer.com/address/0x9a056b971c08293a07C344A604F59A0A0a3f9378) | |
-| Kuru advJR/AUSD market | [`0xc87C…b26a`](https://testnet.monadexplorer.com/address/0xc87C44c02Bd90408bd0DB896939aF8aFdFa3b26a) | |
-
-## Run it yourself
+## Run it
 
 ```bash
-# contracts
-cd contracts && forge test
-# local chain + app
+cd contracts && forge test                       # 16 tests
 anvil --block-time 1 &
 forge script script/Deploy.s.sol --rpc-url http://127.0.0.1:8545 --broadcast --private-key <anvil key 0>
 cd ../app && cp .env.example .env.local && pnpm install && pnpm dev
 curl -X POST localhost:3000/api/admin/setup -H 'content-type: application/json' -d '{"secret":"local"}'
-./scripts/local-agents.sh   # optional: AI-agent credit on anvil (stand-in ERC-8004 registry)
 ```
 
-To deploy to Monad testnet, run `./scripts/deploy-testnet.sh`. It needs `PRIVATE_KEY` in `.env`, funded with testnet MON.
+Testnet deploy: `./scripts/deploy-testnet.sh` (needs a funded `PRIVATE_KEY` in `.env`). Production deploys from the `release` branch.
 
-## Honest limits
+## Limits
 
-- **Income redirection:** a borrower can tell clients to pay a different address after borrowing. This is the core open risk of repayment-at-source. We mitigate it with small starting limits, tiers that rise only through repayment, defaults recorded publicly onchain, and Boost absorbing losses first. SDK integrations where the paying app enforces routing are the long-term fix.
-- **Scorer trust:** the CRE workflow runs in simulation (deployment access is pending), so the live app's limits are still set by one scorer key. Tier caps bound the damage, and the scorer can be paused (`setScorer(address(0))`).
-- **Rewards:** scratch cards and trust points are live onchain; converting points to MON is not built yet. The Advance card and gift-card purchases are product UI until a card issuer and gift-card supplier are connected.
-- **Regulation:** this is a testnet build with a tiny mainnet demo. A real launch would go through licensed partners in each market.
+- Live limits are set by one scorer key until the CRE workflow is deployed. Tier caps bound it; the scorer can be paused.
+- Trust points can't be converted to MON yet. The Advance card and gift cards need issuing partners.
+- Nansen payer checks and Aurora any-chain deposits are written but switched off (no API keys).
 
-## Built during Metropolis, and with AI
-
-- **Pre-existing code:** none of our own. Libraries used: OpenZeppelin Contracts, forge-std, Next.js, viem, Mera, the Chainlink CRE SDK, the Aurora Intents widget, and noble-curves/hashes.
-- **AI disclosure:** this project was built with Claude Code (Anthropic) as a pair programmer, covering contracts, tests, app code, research and documentation. All of it was reviewed and directed by the team.
-
-MIT licensed.
+Built during Monad Metropolis with Claude Code as a pair programmer; every change was reviewed and directed by the team. MIT licensed.

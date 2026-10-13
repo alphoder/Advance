@@ -19,6 +19,11 @@ const GLOSSARY: [string, string][] = [
   ["Proof", "A link to the transaction on Monad's public record, so anyone can verify it happened."],
   ["Monad", "The blockchain Advance runs on. Its transactions take under a second and cost under a cent."],
   ["Missed repayment", "An advance with nothing repaid after 30 days. It's recorded publicly and pauses new advances."],
+  ["Scratch card", "What you win when a client payment finishes repaying an advance: 20% to 90% of the fee back, more if repaid faster."],
+  ["Trust points", "The prize on a scratch card, recorded onchain. 1 point = $0.01, convertible to MON. Lost if an advance is missed."],
+  ["Rewards points", "Points for gift cards, coupons and tiers, earned by repaying, using the Advance card and buying gift cards."],
+  ["Advance card", "A credit card on your Advance limit, repaid from your incoming payments. Active once your income is checked."],
+  ["Ask Advance", "The assistant in the bottom-right corner. Ask anything in plain words; signed in, it knows your account."],
 ];
 
 export default function Faq() {
@@ -33,6 +38,15 @@ export default function Faq() {
           <QA q="What does it cost?">A flat 2% of what you take. Take $50, pay back $51. Nothing else, no matter how long it takes.</QA>
           <QA q="Do I need crypto experience?">No. You sign in with Face ID and see dollars. The blockchain is there so everything is verifiable, but you never need to touch it.</QA>
           <QA q="Why do I start at only $50?">Because the score is built from your track record. Every advance you repay in full raises your limit: $200, then $1,000, then $5,000.</QA>
+        </div>
+      </Section>
+
+      <Section title="Rewards and the assistant">
+        <div className="grid gap-3">
+          <QA q="Do I get anything for repaying early?">Yes. When a client payment finishes repaying an advance, you win a scratch card worth 20% to 90% of the fee back as trust points. Repaid within 7 days, the full prize; within 30 days, a quarter of it. <Link href="/rewards" className="text-terra underline underline-offset-4">How scratch cards work</Link>.</QA>
+          <QA q="Can I win more than the fee I paid?">No, never. The best card is 90% of the fee, so borrowing just to win cards always loses money. The contract enforces it.</QA>
+          <QA q="What is the Advance card?">A credit card on your Advance limit. It spends what you can borrow and is repaid the same way, from 20% of client payments. It switches on once your income is checked; issuing physical and virtual cards needs a card partner.</QA>
+          <QA q="Who answers in the chat bubble?">Ask Advance, an AI assistant. It explains anything on the site, and when you&apos;re signed in it reads your live account to give specific advice, like how to reach your next level. It can&apos;t move money.</QA>
         </div>
       </Section>
 

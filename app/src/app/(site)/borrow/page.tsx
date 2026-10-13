@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Mark, Note, Sparkle } from "@/components/site/doodles";
 import { motion } from "motion/react";
 import { PaintBrush, Storefront, VideoCamera, Bicycle, Fingerprint, Wallet, CheckCircle } from "@phosphor-icons/react";
+import Link from "next/link";
 import { PageIntro, Section, Reveal, NextPage, CtaLink, QA } from "@/components/site/kit";
 import { fmtUsd } from "@/components/ui";
 
@@ -99,6 +100,21 @@ export default function Borrow() {
             </Reveal>
           ))}
         </div>
+      </Section>
+
+      <Section title="Repay fast, get some back" sub="When your clients repay an advance quickly, you win a scratch card with part of the fee back.">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          {[["Within 7 days", "up to 90%", true], ["Within 14 days", "up to 68%", false], ["Within 21 days", "up to 45%", false], ["Within 30 days", "up to 23%", false]].map(([k, v, hot]) => (
+            <Reveal key={k as string}>
+              <div className={`rounded-3xl p-5 ${hot ? "bg-terra text-[#1a0d08]" : "border border-line bg-panel/80"}`}>
+                <div className={`text-[13px] ${hot ? "opacity-75" : "text-muted"}`}>Repaid {(k as string).toLowerCase()}</div>
+                <div className="num mt-1 font-mono text-2xl font-semibold">{v as string}</div>
+                <div className={`mt-1 text-[12.5px] ${hot ? "opacity-75" : "text-faint"}`}>of your fee back</div>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+        <p className="mt-4 text-[14.5px] text-muted">Tip: raise your repay share above 20% and each client payment clears the advance faster. <Link href="/rewards" className="text-terra underline underline-offset-4">See how rewards work</Link>.</p>
       </Section>
 
       <Section title="Questions borrowers ask">

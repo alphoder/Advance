@@ -13,6 +13,7 @@ const CARD_ROWS: [string, string, string][] = [
   ["Debt trap", "Balance can keep growing for years", "Can't grow: fixed amount, at most half a month of income"],
   ["Who lends", "The bank, privately", "A savers' pool; every advance visible onchain"],
   ["Best for", "Spending at shops: rewards, purchase protection", "Getting your own income early"],
+  ["Rewards", "Points for spending more", "A scratch card for repaying faster, always worth less than the fee"],
 ];
 
 const OTHERS: { name: string; kind: string; does: string; diff: string }[] = [
@@ -89,7 +90,7 @@ export default function Compare() {
             </table>
           </div>
         </Reveal>
-        <p className="mt-4 text-[14.5px] text-muted">Where they meet: Visa already funds card issuers with this repayment model (via Credit Coop). A card that's paid off from your incoming income is a natural next step for Advance.</p>
+        <p className="mt-4 text-[14.5px] text-muted">Where they meet: Visa already funds card issuers with this repayment model (via Credit Coop). That's the idea behind the Advance card: a credit card on your Advance limit, paid off from the income coming in. It's designed and in the app; issuing real cards needs a card partner.</p>
       </Section>
 
       <Section title="Who else does something like this" sub="Honest about the neighbours. Some are close; none combine everything.">

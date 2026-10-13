@@ -1,6 +1,6 @@
 "use client";
 
-import { Coins, Plugs, Gauge, Globe, Robot, Bank } from "@phosphor-icons/react";
+import { Coins, Plugs, Gauge, Globe, Robot, Bank, Gift, Ticket } from "@phosphor-icons/react";
 import { Mark, Note, Sparkle } from "@/components/site/doodles";
 import { PageIntro, Section, Reveal, NextPage, Status } from "@/components/site/kit";
 
@@ -10,6 +10,7 @@ const STREAMS = [
   { icon: Gauge, t: "Credit score access", b: "Every repayment builds a public credit record. Apps pay per lookup to check an address's score and its reasons.", s: "next" as const },
   { icon: Globe, t: "Any-chain deposit fee", b: "A small cut (about 0.1% to 0.2%) of savers' cross-chain deposits through Aurora.", s: "next" as const },
   { icon: Robot, t: "Agent credit", b: "AI agents are newer and riskier, so their advances can carry a higher fee once there's enough history.", s: "next" as const },
+  { icon: Gift, t: "Gift card margin", b: "Brands sell gift cards below face value. Advance passes most of the discount to users and keeps a slice of each sale.", s: "next" as const },
   { icon: Bank, t: "Managing larger capital", b: "Once loss data builds up, investment funds can supply the Steady side and pay a management fee, like private credit funds.", s: "next" as const },
 ];
 
@@ -41,7 +42,7 @@ export default function Business() {
         </div>
       </Section>
 
-      <Section title="Six ways it earns" sub="Live means it's in the product today; Next means it's designed and coming.">
+      <Section title="Seven ways it earns" sub="Live means it's in the product today; Next means it's designed and coming.">
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
           {STREAMS.map(({ icon: Icon, t, b, s }, i) => (
             <Reveal key={t} i={i % 3}>
@@ -53,6 +54,29 @@ export default function Business() {
             </Reveal>
           ))}
         </div>
+      </Section>
+
+      <Section title="Scratch cards pay for themselves" sub="Borrowers who repay fast win part of their fee back. That costs the pool a little per advance, and earns it more per month.">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {[
+            { t: "Repaid in 30 days", cls: "border border-line bg-panel/80", rows: [["Fee on $100", "$2.00"], ["Average card (8.7% of fee)", "−$0.17"], ["Kept per advance", "$1.83"], ["Advances per month", "1"], ["Savers earn per month", "$1.64"]] },
+            { t: "Repaid in 7 days", cls: "bg-monad text-white", rows: [["Fee on $100", "$2.00"], ["Average card (34.8% of fee)", "−$0.70"], ["Kept per advance", "$1.30"], ["Advances per month", "about 4"], ["Savers earn per month", "$4.69"]] },
+          ].map((c, i) => (
+            <Reveal key={c.t} i={i}>
+              <div className={`h-full rounded-3xl p-6 ${c.cls}`}>
+                <div className="flex items-center gap-2 font-semibold"><Ticket weight="duotone" className={`size-5 ${i ? "" : "text-terra"}`} />{c.t}</div>
+                <dl className="mt-4 space-y-2 text-[14.5px]">
+                  {c.rows.map(([k, v], j) => (
+                    <div key={k} className={`flex justify-between ${j === c.rows.length - 1 ? "border-t pt-2 font-semibold " + (i ? "border-white/25" : "border-line") : ""}`}>
+                      <dt className={j === c.rows.length - 1 ? "" : i ? "opacity-80" : "text-muted"}>{k}</dt><dd className="num font-mono">{v}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+        <p className="mt-4 text-[14px] text-muted">Same $100 of savers&apos; money, one month. The card is a rebate split 90/10 between savers and Advance, exactly like the fee. Even the luckiest card is below the fee, so no one can profit by borrowing just to win.</p>
       </Section>
 
       <Section title="Why it's a good business">

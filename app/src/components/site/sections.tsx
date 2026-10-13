@@ -340,7 +340,8 @@ export function ChoosePath() {
 
 export function Explore() {
   const items = [
-    { href: "/stress-tests", t: "We tried to break it", b: "13 ways to cheat or lose money, and what stops each." },
+    { href: "/stress-tests", t: "We tried to break it", b: "15 ways to cheat or lose money, and what stops each." },
+    { href: "/rewards", t: "Rewards", b: "Scratch cards for repaying early, gift cards and the Advance card." },
     { href: "/compare", t: "How we're different", b: "Advance vs credit cards, Stripe Capital, Credit Coop and more." },
     { href: "/safety", t: "Security", b: "What we've tested, identity checks, and honest risks." },
     { href: "/business", t: "Business model", b: "How Advance makes money, in plain numbers." },
@@ -380,7 +381,7 @@ export function Perks() {
     <section className="mx-auto max-w-6xl overflow-hidden px-4 py-20 sm:px-6">
       <div className="mx-auto max-w-2xl text-center">
         <h2 className="text-4xl font-semibold tracking-[-0.03em] sm:text-5xl">Spend it <span className="text-terra">anywhere.</span></h2>
-        <p className="mt-4 text-lg text-muted">A card for your advance, gift cards from the shops you use for up to 12% less, and coupons that unlock every time you repay on time.</p>
+        <p className="mt-4 text-lg text-muted">A credit card on your Advance limit, gift cards for up to 12% less, and a scratch card every time a client payment repays your advance. Repay faster, win bigger.</p>
       </div>
       <div className="relative mx-auto mt-14 h-[230px] max-w-3xl sm:h-[330px]">
         {FAN.map((f, i) => (
@@ -405,15 +406,15 @@ export function Perks() {
       </div>
       <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
         {[
-          ["The Advance card", "Spend your advance in shops and online the moment it lands."],
-          ["Gift cards for less", "Cartwheel, Nimbus Air, Velo, Pixelhaus and more, up to 12% off."],
-          ["Rewards for repaying", "Points and coupons every time an advance is repaid on time."],
+          ["The Advance card", "A credit card on your limit. It switches on once your income is checked."],
+          ["Scratch cards, onchain", "Win 20% to 90% of your fee back as trust points, convertible to MON. Always less than the fee."],
+          ["Gift cards and coupons", "Cartwheel, Nimbus Air, Velo, Pixelhaus and more, up to 12% off."],
         ].map(([t, b]) => (
           <div key={t} className="rounded-3xl border border-line bg-panel/80 p-5"><div className="font-semibold">{t}</div><p className="mt-1 text-[14px] text-muted">{b}</p></div>
         ))}
       </div>
       <div className="mt-8 text-center">
-        <Link href="/app/rewards" className="inline-flex items-center gap-1.5 text-[15px] text-terra hover:text-terra-hi">See rewards and gift cards <ArrowRight className="size-4" /></Link>
+        <Link href="/rewards" className="inline-flex items-center gap-1.5 text-[15px] text-terra hover:text-terra-hi">How rewards and scratch cards work <ArrowRight className="size-4" /></Link>
       </div>
     </section>
   );

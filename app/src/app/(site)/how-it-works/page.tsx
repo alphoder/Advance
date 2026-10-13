@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarBlank, Fingerprint, ChartLineUp, Lightning, ArrowsSplit } from "@phosphor-icons/react";
+import { CalendarBlank, Fingerprint, ChartLineUp, Lightning, ArrowsSplit, Ticket } from "@phosphor-icons/react";
 import { Mark, Note, Sparkle } from "@/components/site/doodles";
 import { PageIntro, Section, Reveal, NextPage, CtaLink } from "@/components/site/kit";
 import { RepaySimulator, MoneyFlow } from "@/components/site/simulator";
@@ -64,6 +64,20 @@ export default function HowItWorks() {
             </Reveal>
           ))}
         </div>
+      </Section>
+
+      <Section>
+        <Reveal>
+          <a href="/rewards" className="group flex flex-col gap-4 rounded-3xl bg-[radial-gradient(120%_120%_at_0%_0%,#9d8cff,#836ef9_45%,#4c3db0)] p-6 text-white sm:flex-row sm:items-center sm:p-7">
+            <div className="grid size-14 shrink-0 place-items-center rounded-2xl bg-white/15"><Ticket weight="fill" className="size-7" /></div>
+            <div className="flex-1">
+              <div className="text-[13px] opacity-80">And a bonus</div>
+              <h3 className="text-xl font-semibold">Repay fast, win a scratch card</h3>
+              <p className="mt-1 text-[15px] opacity-85">When clients repay your advance within a week, the contract hands you up to 90% of the fee back as trust points. Always less than the fee, so it&apos;s cashback, never a trick.</p>
+            </div>
+            <span className="text-[15px] font-medium transition-transform group-hover:translate-x-1">How it works →</span>
+          </a>
+        </Reveal>
       </Section>
 
       <Section id="simulator" title="Try it yourself" sub="A simulator with pretend money. Take an advance, then press the buttons to have clients pay you. Watch the advance pay itself off.">

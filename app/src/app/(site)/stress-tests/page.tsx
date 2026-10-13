@@ -136,6 +136,34 @@ const GROUPS: { title: string; sub: string; items: Attack[] }[] = [
     ],
   },
   {
+    title: "Gaming the rewards",
+    sub: "Every advance repaid by clients wins a scratch card worth part of the fee back. So we asked how someone would farm it.",
+    items: [
+      {
+        q: "What if I borrow and repay over and over, just to win scratch cards?",
+        how: "Take $50, repay it straight away, collect the card, repeat a hundred times.",
+        today: "Every loop loses money. The best possible card is 90% of the fee, so each round costs at least 10% of the fee. Paying yourself back wins no card at all; only client payments do.",
+        stops: [
+          { s: "live", t: "Card value is capped below the fee, enforced in the credit contract" },
+          { s: "live", t: "Self-repayment earns nothing; only repayments through the client payment link count" },
+          { s: "live", t: "Fuzz test: 1,000 random draws and timings, a card never reaches the fee" },
+        ],
+        verdict: "Always a loss",
+      },
+      {
+        q: "What if friends act as \"clients\" so I win cards, then I walk away with the points?",
+        how: "Set up fake clients to repay advances quickly, pile up trust points, then default on a bigger advance and keep the points.",
+        today: "The fake clients face the same income checks as before, and the moment an advance is missed every unclaimed trust point is wiped, publicly.",
+        stops: [
+          { s: "live", t: "Unclaimed trust points are lost on a missed advance" },
+          { s: "live", t: "Points can't be transferred to another wallet" },
+          { s: "next", t: "Conversion to MON opens 30 days after each card, so a quick grab-and-run gets nothing" },
+        ],
+        verdict: "Points lost",
+      },
+    ],
+  },
+  {
     title: "Attacking the system itself",
     sub: "What if someone goes after the contracts or the servers instead of the rules?",
     items: [

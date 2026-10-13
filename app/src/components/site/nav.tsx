@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Fragment, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { AnimatePresence, motion, useMotionValueEvent, useReducedMotion, useScroll } from "motion/react";
-import { List, X, ArrowRight, CaretDown, Lightning, Vault, Robot } from "@phosphor-icons/react";
+import { List, X, ArrowRight, CaretDown, Lightning, Vault, Robot, Gift } from "@phosphor-icons/react";
 import { Logo, ChainToggle, ContractList, CHAIN_NAME } from "@/components/ui";
 import { useChainView } from "@/components/providers";
 import { publicClient } from "@/lib/chain";
@@ -21,6 +21,7 @@ const LINKS = [
 const PRODUCTS = [
   { href: "/borrow", t: "Borrow", b: "Get paid early on income that's on its way", icon: Lightning, tone: "bg-terra text-[#1a0d08]" },
   { href: "/save", t: "Save", b: "Fund advances and earn from borrower fees", icon: Vault, tone: "bg-monad text-white" },
+  { href: "/rewards", t: "Rewards", b: "Scratch cards for repaying early, gift cards and the Advance card", icon: Gift, tone: "bg-terra/15 text-terra" },
   { href: "/agents", t: "AI agents", b: "Working capital for agents that earn onchain", icon: Robot, tone: "bg-white/10 text-ink" },
 ] as const;
 
@@ -233,7 +234,7 @@ export function SiteFooter() {
           <p className="mt-3 text-[14px] text-muted">Credit for the next billion earners and their agents, repaid at the source. Running on {CHAIN_NAME}.</p>
         </div>
         <div className="grid grid-cols-2 gap-x-12 gap-y-2 text-[14px] sm:grid-cols-3">
-          {[["How it works", "/how-it-works"], ["Borrow", "/borrow"], ["Save", "/save"], ["Agents", "/agents"], ["Compare", "/compare"], ["Business model", "/business"], ["Security", "/safety"], ["Stress tests", "/stress-tests"], ["Technology", "/technology"], ["FAQ", "/faq"], ["Check an address", "/check"], ["Open the app", "/app"]].map(([l, h]) => (
+          {[["How it works", "/how-it-works"], ["Borrow", "/borrow"], ["Save", "/save"], ["Rewards", "/rewards"], ["Agents", "/agents"], ["Compare", "/compare"], ["Business model", "/business"], ["Security", "/safety"], ["Stress tests", "/stress-tests"], ["Technology", "/technology"], ["FAQ", "/faq"], ["Check an address", "/check"], ["Open the app", "/app"]].map(([l, h]) => (
             <Link key={h} href={h} className="text-muted hover:text-ink">{l}</Link>
           ))}
         </div>

@@ -14,6 +14,8 @@ const TESTS: { t: string; b: string; s: "live" | "partial" | "next" }[] = [
   { t: "Document encryption", b: "A self-check proves the owner and the chosen lender can open a file, a stranger can't, and no plain text leaks into what's stored.", s: "live" },
   { t: "Rehearsed on a copy of Monad testnet", b: "Full deployment, the Kuru market, ERC-8004 agent registration, buying and selling, run against the real deployed Kuru and registry contracts.", s: "live" },
   { t: "Every screen clicked through", b: "Sign-up, advance, client payment and split, savings deposit, encrypted sharing and agents tested end to end in a browser.", s: "live" },
+  { t: "Scratch cards can't be farmed", b: "A randomized test draws 1,000 cards with random luck, timing and advance sizes: a card is never worth the fee. Paying yourself back wins nothing; a missed advance wipes unclaimed points.", s: "live" },
+  { t: "Live on Monad testnet", b: "Contracts deployed, Boost listed on Kuru at fair value, and the full demo (four clients pay, score, $50 limit set onchain) run on the public site in 11 seconds.", s: "live" },
   { t: "Independent security audit", b: "Required before any meaningful amount of real money.", s: "next" },
 ];
 
@@ -72,7 +74,7 @@ export default function Safety() {
           </Reveal>
         </div>
         <Link href="/stress-tests" className="mt-4 flex items-center justify-between gap-4 rounded-3xl border border-line bg-panel/80 p-5 transition-colors hover:border-line-strong">
-          <span><b>Friends, family rings, exchange loops, new accounts, bust-outs, job loss…</b> <span className="text-muted">See all 13 scenarios and what stops each.</span></span>
+          <span><b>Friends, family rings, exchange loops, new accounts, bust-outs, job loss…</b> <span className="text-muted">See all 15 scenarios and what stops each.</span></span>
           <ArrowRight className="size-5 shrink-0 text-terra" />
         </Link>
       </Section>

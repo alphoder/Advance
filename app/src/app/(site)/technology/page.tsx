@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Mark, Note, Sparkle } from "@/components/site/doodles";
-import { Fingerprint, Database, MagnifyingGlass, Cpu, ChartLineUp, Globe, IdentificationCard, Lightning } from "@phosphor-icons/react";
+import { Fingerprint, Database, MagnifyingGlass, Cpu, ChartLineUp, Globe, IdentificationCard, Lightning, ChatCircleDots } from "@phosphor-icons/react";
 import { publicClient, CHAIN_ID } from "@/lib/chain";
 import { PageIntro, Section, Reveal, NextPage, CtaLink } from "@/components/site/kit";
 import { ContractList, CHAIN_NAME } from "@/components/ui";
@@ -16,6 +16,7 @@ const STACK = [
   { icon: Globe, name: "Aurora Intents", role: "Any-chain deposits", b: "Savers fund the pool from Base, Arbitrum, Solana and more." },
   { icon: IdentificationCard, name: "ERC-8004", role: "Agent identity", b: "AI agents are registered, so their credit history belongs to a known identity." },
   { icon: Lightning, name: "AUSD", role: "Dollars", b: "A US dollar stablecoin that supports signed payments, so payers never need gas." },
+  { icon: ChatCircleDots, name: "Gemini", role: "Ask Advance", b: "The assistant in the corner. It reads your live onchain account and answers in about a second. The key never leaves the server." },
 ];
 
 function useLiveChain() {
@@ -63,7 +64,7 @@ export default function Technology() {
           <div className="grid grid-cols-1 gap-3 rounded-3xl border border-line bg-panel/80 p-5 sm:p-7 md:grid-cols-4">
             {[
               ["AdvancePool", "Holds savers' dollars in Steady and Boost. Losses hit Boost first."],
-              ["CreditLine", "Each borrower's limit, advance and repayments. Limits rise by level."],
+              ["CreditLine", "Each borrower's limit, advance and repayments. Limits rise by level. Draws a scratch card when clients repay."],
               ["Receivables", "Each borrower's payment address. Splits every payment in the same transaction."],
               ["CreditFiles", "Encrypted documents and who they're shared with. Ciphertext only."],
             ].map(([t, b], i) => (

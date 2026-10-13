@@ -47,7 +47,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const body = (
     <div className="relative flex min-h-[100dvh]">
-      <aside className="sticky top-0 hidden h-[100dvh] w-64 shrink-0 flex-col border-r border-line bg-bg-2/50 px-3 py-5 backdrop-blur lg:flex">
+      <aside className="sticky top-0 hidden h-[100dvh] w-64 shrink-0 flex-col border-r border-line bg-[#161b24]/95 px-3 py-5 backdrop-blur-2xl lg:flex">
         <SideNav pathname={pathname} />
       </aside>
 

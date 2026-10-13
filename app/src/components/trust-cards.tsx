@@ -151,7 +151,7 @@ function CardSlot({ e, open, onOpen }: { e: Ev; open: boolean; onOpen: () => voi
 }
 
 /** Scratch-off foil: drag to scratch; once about half is cleared the whole card reveals. */
-function Scratch({ children, onDone }: { children: React.ReactNode; onDone: () => void }) {
+export function Scratch({ children, onDone }: { children: React.ReactNode; onDone: () => void }) {
   const cv = useRef<HTMLCanvasElement>(null);
   const [gone, setGone] = useState(false);
   const down = useRef(false);

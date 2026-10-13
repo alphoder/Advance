@@ -7,7 +7,7 @@ Advance is an onchain credit protocol on Monad. It gives freelancers, small sell
 > Visa and Credit Coop proved this repayment model for businesses: $2.5B financed, zero defaults. Advance brings it to individuals and their agents, which only works on a chain where every payment settles in under a second for a fraction of a cent.
 
 - **Track:** 1, Onchain Finance & Trading (undercollateralised lending priced on onchain credit history)
-- **Live app:** _add URL_
+- **Live app:** https://advance-monad.vercel.app (Monad testnet)
 - **Demo video (≤ 3 min):** _add URL_
 
 ---
@@ -21,6 +21,9 @@ Advance is an onchain credit protocol on Monad. It gives freelancers, small sell
 5. Turn on **Show me the chain** (bottom of every page) to see every transaction hash, block and contract.
 
 Every number on screen is read from the chain. The only simulated thing is who the demo clients are.
+
+6. When a client payment finishes repaying the advance, a **scratch card** appears in **Rewards**: trust points worth 20% to 90% of the fee, more for faster repayment. Scratch it.
+7. Ask anything in the **Ask Advance** bubble (bottom right). Signed in, it reads your live account and tells you how to reach the next level.
 
 ## How it works
 
@@ -39,13 +42,19 @@ Every number on screen is read from the chain. The only simulated thing is who t
 | Contract | What it enforces |
 |---|---|
 | [`AdvancePool`](contracts/src/AdvancePool.sol) | Two tranches. Losses hit Boost (junior) first. 90% of fees go to lenders, 10% to the protocol. Lending is capped at 90% of the pool. Share price is used as NAV. |
-| [`CreditLine`](contracts/src/CreditLine.sol) | Limits are capped per tier ($50 → $200 → $1,000 → $5,000). A flat 2% fee. The fee is repaid before principal. Tiers go up only after full repayment. A missed repayment is recorded publicly after 30 days. Also the Chainlink CRE receiver. |
+| [`CreditLine`](contracts/src/CreditLine.sol) | Limits are capped per tier ($50 → $200 → $1,000 → $5,000). A flat 2% fee. The fee is repaid before principal. Tiers go up only after full repayment. A missed repayment is recorded publicly after 30 days. Also the Chainlink CRE receiver. **Scratch cards:** when client payments (through the borrower's ReceivablesAccount) finish repaying an advance, it draws a card worth 20–90% of the fee × a speed multiplier (100% ≤ 7 days … 25% ≤ 30 days) × the share repaid by clients, and records trust points. A card is always below the fee, self-repayment earns none, points can't be transferred and are wiped on default. |
 | [`ReceivablesAccount` and `ReceivablesFactory`](contracts/src/Receivables.sol) | The atomic split (at least 20% goes to repayment). Payments via EIP-3009 `payWithAuthorization` (the payer signs, a relayer submits, no gas for the payer) or a permissionless `sweep`. CREATE2 addresses, so an earner can share theirs before it is deployed. Never holds funds after a call. |
 | [`AgentCreditAdapter`](contracts/src/AgentCreditAdapter.sol) | Opts an ERC-8004-registered agent in. Only the agent's owner can do this. |
 | [`CreditFiles`](contracts/src/CreditFiles.sol) | Encrypted credit documents and lender grants, stored as event data. Ciphertext only. |
 | [`TestAUSD`](contracts/src/TestAUSD.sol) | Testnet only: a 6-decimal dollar with real EIP-3009 signatures and a public faucet. Mainnet uses real AUSD. |
 
-**Tests:** `cd contracts && forge test` runs 10 tests. They include a 1,000-run fuzz test proving that *repayment + payout = payment* and that the account always ends empty, plus tests of the loss waterfall (junior first, then senior), EIP-3009 replay and forgery rejection, the CRE receiver, and agent linking. `cd app && pnpm check` verifies the credit-file cryptography.
+**Tests:** `cd contracts && forge test` runs 15 tests. They include two 1,000-run fuzz tests: *repayment + payout = payment* with the account always ending empty, and *a scratch card is never worth the fee* across random luck, timing and amounts. Plus tests of scratch cards (client repayment earns one, self-repayment earns none, slower earns less, default wipes points), of the loss waterfall (junior first, then senior), EIP-3009 replay and forgery rejection, the CRE receiver, and agent linking. `cd app && pnpm check` verifies the credit-file cryptography.
+
+## Rewards, the card, and the assistant
+
+- **Scratch cards and trust points (onchain, live):** the reward for repaying fast. Economically it's a fee rebate shared 90/10 by savers and protocol, like the fee itself, and it pays for itself: an advance repaid in 7 days frees the same dollars to fund about four advances a month instead of one. Worked numbers on the [Business page](https://advance-monad.vercel.app/business). Conversion of trust points to MON is the next step.
+- **Rewards in the app:** the Advance card (a credit card on the Advance limit, inactive until income is verified), gift cards from eight brands below face value, coupons, tiers and missions. Card issuing and gift-card fulfilment need partners; today they are product UI.
+- **Ask Advance:** a Gemini assistant (`gemini-3.5-flash-lite`, falling back to `3.1-flash-lite`) that streams replies in about a second. Signed in, it reads the user's live onchain account through our own endpoints and gives specific advice. The key stays server-side, with a per-IP rate limit ([`api/chat`](app/src/app/api/chat/route.ts)).
 
 ## Why Monad
 
@@ -64,7 +73,7 @@ Monad charges the **gas limit you declare**. Every transaction Advance sends est
 ### Kuru: Bring New Assets and Markets
 - **Requirement:** "Build a new class of tradable markets on Kuru's spot order book, including the infrastructure to make them viable."
 - **How:** Advance's Boost tranche is a new asset class: first-loss credit exposure. [`KuruMarket.s.sol`](contracts/script/KuruMarket.s.sol) lists `advJR/AUSD` on Kuru and seeds the AMM vault at the pool's onchain share price, so the book opens at fair value. The Earn page shows the live book next to that fair value and lets savers buy or sell (`placeAndExecuteMarketBuy/Sell`, with a slippage guard). The script was fork-tested against Kuru's deployed testnet Router.
-- **Proof:** market `_address_` · first trade `_tx_`
+- **Proof:** market [`0xc87C…b26a`](https://testnet.monadexplorer.com/address/0xc87C44c02Bd90408bd0DB896939aF8aFdFa3b26a) · vault seeded at NAV [`tx`](https://testnet.monadexplorer.com/tx/0xe9b38bf4d43e5d32ed1186f74f2890bad6d0d415711d77137871d2fe9bfd3dc0) · first trade [`tx`](https://testnet.monadexplorer.com/tx/0x617e1aeac9b4f3f5339489e5c799d7bdda5c2b2298e9f88c0f7105ff21ae08cd)
 
 ### Nansen
 - **Requirement:** a product experience powered by Nansen data that goes beyond exposing raw data.
@@ -101,6 +110,15 @@ Monad charges the **gas limit you declare**. Every transaction Advance sends est
 | | Monad testnet (10143) | Monad mainnet (143) |
 |---|---|---|
 | Deployment file | [`app/src/deployments/10143.json`](app/src/deployments/10143.json) | [`app/src/deployments/143.json`](app/src/deployments/143.json) |
+| CreditLine | [`0xef70…4135`](https://testnet.monadexplorer.com/address/0xef70B91F2482D81681A28fA3A81bFaFf4D6D4135) | |
+| AdvancePool | [`0xe96c…B8cA`](https://testnet.monadexplorer.com/address/0xe96c7E16D2050017346Fc9EBC1B34647Aa6dB8cA) | |
+| ReceivablesFactory | [`0x679A…8CBd`](https://testnet.monadexplorer.com/address/0x679ACa5aBF55Fe38c86E815ac57804F0f5778CBd) | |
+| Steady token | [`0xD354…7AE2`](https://testnet.monadexplorer.com/address/0xD3549fb2021C8c82B0EF1121e191B095FDF47AE2) | |
+| Boost token | [`0x6400…103f`](https://testnet.monadexplorer.com/address/0x64000eA22Ce9896fE3BeF07e076439c2f0F8103f) | |
+| TestAUSD | [`0xC9f1…D1Fd`](https://testnet.monadexplorer.com/address/0xC9f1484d32aAae11EF9abFE86EDE8BCa1371D1Fd) | |
+| CreditFiles | [`0x9238…3b97`](https://testnet.monadexplorer.com/address/0x9238b3aAdC29017A0b7b02Ad0CaCFFA953633b97) | |
+| AgentCreditAdapter | [`0x0729…9F2a`](https://testnet.monadexplorer.com/address/0x07290F0d34FA229F9A6b94F15B1614b3E36F9F2a) | |
+| Kuru advJR/AUSD market | [`0xc87C…b26a`](https://testnet.monadexplorer.com/address/0xc87C44c02Bd90408bd0DB896939aF8aFdFa3b26a) | |
 
 ## Run it yourself
 
@@ -120,6 +138,7 @@ To deploy to Monad testnet, run `./scripts/deploy-testnet.sh`. It needs `PRIVATE
 
 - **Income redirection:** a borrower can tell clients to pay a different address after borrowing. This is the core open risk of repayment-at-source. We mitigate it with small starting limits, tiers that rise only through repayment, defaults recorded publicly onchain, and Boost absorbing losses first. SDK integrations where the paying app enforces routing are the long-term fix.
 - **Scorer trust:** until the CRE workflow is deployed, one scorer key sets limits. Tier caps bound the damage, and the scorer can be paused (`setScorer(address(0))`).
+- **Rewards:** scratch cards and trust points are live onchain; converting points to MON is not built yet. The Advance card and gift-card purchases are product UI until a card issuer and gift-card supplier are connected.
 - **Regulation:** this is a testnet build with a tiny mainnet demo. A real launch would go through licensed partners in each market.
 
 ## Built during Metropolis, and with AI

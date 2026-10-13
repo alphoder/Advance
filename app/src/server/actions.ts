@@ -64,10 +64,14 @@ export async function demoClientPaysAccount(client: string, borrower: Address, a
 }
 
 /** Gas drip: users never buy MON. Tops a new account up to a small working balance. */
-export async function dripGas(to: Address) {
-  const target = parseEther(IS_TESTNET ? "0.1" : "0.02");
+/** Tops a user up so their next transaction's fee is covered: at least the base amount, at most a cap. */
+export async function dripGas(to: Address, need = 0n) {
+  const base = parseEther(IS_TESTNET ? "0.1" : "0.02");
+  const cap = parseEther(IS_TESTNET ? "0.5" : "0.1"); // bounds what any one request can take from the relayer
+  const wanted = (need * 125n) / 100n;
+  const target = wanted > cap ? cap : wanted > base ? wanted : base;
   const bal = await publicClient.getBalance({ address: to });
-  if (bal >= target / 2n) return undefined;
+  if (need > 0n ? bal >= need : bal >= base / 2n) return undefined; // already covered: nothing to send
   const hash = await wallet.sendTransaction({ to, value: target - bal, gas: 21_000n, account: relayer, chain: wallet.chain });
   await publicClient.waitForTransactionReceipt({ hash });
   return hash;

@@ -12,12 +12,14 @@ export async function sendTx<const abi extends Abi, fn extends ContractFunctionN
   req: { address: Address; abi: abi; functionName: fn; args: ContractFunctionArgs<abi, "nonpayable" | "payable", fn> },
 ) {
   const started = performance.now();
-  await api("/api/gas", { address: session.address }).catch(() => undefined);
   const gas = await publicClient.estimateContractGas({ ...req, account: session.wallet.account } as never);
   const limit = (gas * 115n) / 100n;
-  // Monad executes slightly behind consensus: a fresh fee top-up can be confirmed yet not visible to the
-  // node checking this transaction. Wait until the fee is covered, and retry once if it's still rejected.
-  await untilFunded(session.address, limit * (await publicClient.getGasPrice()) * 2n);
+  // Monad requires gas limit × max fee up front (contract-creating calls like linking an agent need
+  // ~0.13 MON), so ask the relayer for exactly that, then wait until the node checking us can see it.
+  const { maxFeePerGas } = await publicClient.estimateFeesPerGas();
+  const need = limit * maxFeePerGas;
+  await api("/api/gas", { address: session.address, need: need.toString() }).catch(() => undefined);
+  await untilFunded(session.address, need);
   // Monad's RPC can report a stale transaction count right after a confirmation, so back-to-back
   // transactions (approve then buy, register then link) would reuse a nonce. Track it here too.
   const send = async () => {

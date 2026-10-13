@@ -30,10 +30,14 @@ export async function sendTx<const abi extends Abi, fn extends ContractFunctionN
     return h;
   };
   let hash: `0x${string}` | undefined;
+  // The node taking the transaction can lag a few seconds behind the one that confirmed the top-up
+  // ("Signer had insufficient balance"), so keep trying for ~10s, re-asking for the top-up each time.
   for (let attempt = 0; !hash; attempt++) {
     try { hash = await send(); } catch (e) {
-      if (attempt >= 2 || !/invalid params|Missing or invalid|insufficient funds|nonce/i.test(String((e as Error).message))) throw e;
-      await new Promise((r) => setTimeout(r, 1500));
+      const m = String((e as Error).message) + String((e as { details?: string }).details ?? "");
+      if (attempt >= 5 || !/insufficient (funds|balance)|invalid params|Missing or invalid|nonce/i.test(m)) throw e;
+      await new Promise((r) => setTimeout(r, 2000));
+      await api("/api/gas", { address: session.address, need: need.toString() }).catch(() => undefined);
     }
   }
   const receipt = await publicClient.waitForTransactionReceipt({ hash, pollingInterval: 250 });

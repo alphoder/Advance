@@ -6,7 +6,7 @@
 const RULES: [RegExp, string][] = [
   [/transfer amount exceeds balance|ERC20InsufficientBalance/i, "You don't have enough dollars for this. Get test dollars first, then try again."],
   [/user rejected|user denied|NotAllowedError|cancel+ed|aborted by the user/i, "You cancelled the request. Nothing was sent."],
-  [/insufficient funds|exceeds (the )?balance|not enough (balance|funds)|total cost .* exceeds/i, "Your account doesn't have enough to cover this yet. Add test dollars or wait a moment for network fees to arrive, then try again."],
+  [/insufficient (funds|balance)|exceeds (the )?balance|not enough (balance|funds)|total cost .* exceeds/i, "Your account doesn't have enough to cover this yet. Add test dollars or wait a moment for network fees to arrive, then try again."],
   [/allowance|ERC20InsufficientAllowance/i, "The approval didn't go through in time. Please try again."],
   [/OverLimit/i, "That's more than your limit allows right now."],
   [/IsDefaulted/i, "This account has a missed repayment on record, so new advances are paused."],

@@ -209,8 +209,8 @@ export function Bento() {
         <motion.div {...reveal(4)} className="md:col-span-2">
           <div className="h-full rounded-2xl border border-line bg-panel/70 p-7">
             <div className="flex gap-2"><Globe className="size-8 text-terra" weight="duotone" /><Cpu className="size-8 text-monad-hi" weight="duotone" /></div>
-            <h3 className="mt-5 text-xl font-semibold">Any chain in, consensus on top</h3>
-            <p className="mt-2 text-muted">Deposit from Base or Solana with Aurora. Chainlink CRE nodes agree on every credit limit.</p>
+            <h3 className="mt-5 text-xl font-semibold">No single key decides your credit</h3>
+            <p className="mt-2 text-muted">Chainlink CRE nodes agree on a credit limit before it's written onchain, proven on Monad testnet. Deposits from any chain come next.</p>
           </div>
         </motion.div>
       </div>

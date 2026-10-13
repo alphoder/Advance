@@ -92,7 +92,7 @@ export default function Save() {
       <Section title="More ways in and out">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {[
-            { icon: Globe, t: "Deposit from any chain", b: "Have USDC on Base, Arbitrum or Solana? Send it through Aurora Intents and it arrives as dollars on Monad." },
+            { icon: Globe, t: "Deposit from any chain (next)", b: "Have USDC on Base, Arbitrum or Solana? Soon you'll send it through Aurora Intents and it arrives as dollars on Monad." },
             { icon: ChartLineUp, t: "Sell any time on Kuru", b: "Boost shares are a token. Sell them to another saver on the Kuru order book instead of waiting." },
             { icon: Coins, t: "See everything live", b: "Pool size, money lent out, fees earned and missed repayments update with every Monad block." },
           ].map(({ icon: Icon, t, b }, i) => (

@@ -10,10 +10,10 @@ import { ContractList, CHAIN_NAME } from "@/components/ui";
 const STACK = [
   { icon: Fingerprint, name: "Mera", role: "Passkey accounts", b: "Face ID becomes the wallet. The same passkey also derives the encryption key and the agent's wallet." },
   { icon: Database, name: "Envio HyperSync", role: "Payment history", b: "Reads every payment an account has received, fast. The score depends on it." },
-  { icon: MagnifyingGlass, name: "Nansen", role: "Payer checks", b: "Labels and related-wallet data to tell real clients from someone paying themselves." },
-  { icon: Cpu, name: "Chainlink CRE", role: "Trust-minimised scoring", b: "Independent nodes agree on each credit limit before it's written onchain." },
+  { icon: MagnifyingGlass, name: "Nansen", role: "Payer checks", b: "Labels and related-wallet data to tell real clients from someone paying themselves.", next: true },
+  { icon: Cpu, name: "Chainlink CRE", role: "Trust-minimised scoring", b: "Independent nodes agree on each credit limit before it's written onchain. Proven on Monad testnet." },
   { icon: ChartLineUp, name: "Kuru", role: "Credit market", b: "Boost shares trade on a Kuru order book, priced next to their fair value." },
-  { icon: Globe, name: "Aurora Intents", role: "Any-chain deposits", b: "Savers fund the pool from Base, Arbitrum, Solana and more." },
+  { icon: Globe, name: "Aurora Intents", role: "Any-chain deposits", b: "Savers fund the pool from Base, Arbitrum, Solana and more.", next: true },
   { icon: IdentificationCard, name: "ERC-8004", role: "Agent identity", b: "AI agents are registered, so their credit history belongs to a known identity." },
   { icon: Lightning, name: "AUSD", role: "Dollars", b: "A US dollar stablecoin that supports signed payments, so payers never need gas." },
   { icon: ChatCircleDots, name: "Gemini", role: "Ask Advance", b: "The assistant in the corner. It reads your live onchain account and answers in about a second. The key never leaves the server." },
@@ -79,11 +79,11 @@ export default function Technology() {
 
       <Section title="Built with">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {STACK.map(({ icon: Icon, name, role, b }, i) => (
+          {STACK.map(({ icon: Icon, name, role, b, ...rest }, i) => (
             <Reveal key={name} i={i % 4}>
               <div className="h-full rounded-3xl border border-line bg-panel/80 p-5">
                 <Icon className="size-7 text-monad-hi" weight="duotone" />
-                <div className="mt-3 font-semibold">{name}</div>
+                <div className="mt-3 flex items-center gap-2 font-semibold">{name}{"next" in rest && <span className="rounded-full border border-line px-2 py-0.5 text-[11px] font-medium text-faint">Next</span>}</div>
                 <div className="text-[13px] text-terra">{role}</div>
                 <p className="mt-2 text-[14px] text-muted">{b}</p>
               </div>

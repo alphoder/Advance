@@ -72,14 +72,22 @@ function AgentFlow({ owner }: { owner: Session }) {
             <Button
               variant="monad" loading={busy === "reg"}
               onClick={() => run("reg", async () => {
-                const uri = `data:application/json,${encodeURIComponent(JSON.stringify({ name: "Advance demo agent", description: "Sells design reviews to other agents", wallet: agent.address }))}`;
-                const r = await sendTx(owner, { address: ERC8004_REGISTRY, abi: identityRegistryAbi, functionName: "register", args: [uri] });
-                const receipt = await publicClient.getTransactionReceipt({ hash: r.hash });
-                const minted = receipt.logs.map((l) => { try { return decodeEventLog({ abi: identityRegistryAbi, data: l.data, topics: l.topics }); } catch { return null; } })
-                  .find((d) => d?.eventName === "Transfer");
-                if (!minted) throw new Error("Registry didn't return an agent ID");
-                add(`Registered agent #${minted.args.tokenId} in ERC-8004`, r.hash);
-                const l = await sendTx(owner, { address: D.agentAdapter, abi: agentAbi, functionName: "linkAgent", args: [minted.args.tokenId, agent.address] });
+                // If an earlier try registered the agent but the link failed, only finish the link.
+                const key = `advance:agentId:${agent.address}`;
+                let tokenId: bigint | undefined;
+                try { const s = localStorage.getItem(key); if (s) tokenId = BigInt(s); } catch {}
+                if (tokenId === undefined) {
+                  const uri = `data:application/json,${encodeURIComponent(JSON.stringify({ name: "Advance demo agent", description: "Sells design reviews to other agents", wallet: agent.address }))}`;
+                  const r = await sendTx(owner, { address: ERC8004_REGISTRY, abi: identityRegistryAbi, functionName: "register", args: [uri] });
+                  const receipt = await publicClient.getTransactionReceipt({ hash: r.hash });
+                  const minted = receipt.logs.map((l) => { try { return decodeEventLog({ abi: identityRegistryAbi, data: l.data, topics: l.topics }); } catch { return null; } })
+                    .find((d) => d?.eventName === "Transfer");
+                  if (!minted) throw new Error("Registry didn't return an agent ID");
+                  tokenId = minted.args.tokenId;
+                  try { localStorage.setItem(key, String(tokenId)); } catch {}
+                  add(`Registered agent #${tokenId} in ERC-8004`, r.hash);
+                }
+                const l = await sendTx(owner, { address: D.agentAdapter, abi: agentAbi, functionName: "linkAgent", args: [tokenId, agent.address] });
                 add("Linked the agent to Advance (opened its payment address)", l.hash);
               })}
             >

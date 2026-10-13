@@ -18,16 +18,28 @@ export async function sendTx<const abi extends Abi, fn extends ContractFunctionN
   // Monad executes slightly behind consensus: a fresh fee top-up can be confirmed yet not visible to the
   // node checking this transaction. Wait until the fee is covered, and retry once if it's still rejected.
   await untilFunded(session.address, limit * (await publicClient.getGasPrice()) * 2n);
-  const send = () => session.wallet.writeContract({ ...req, gas: limit } as never);
-  const hash = await send().catch(async (e) => {
-    if (!/invalid params|Missing or invalid|insufficient funds/i.test(String((e as Error).message))) throw e;
-    await new Promise((r) => setTimeout(r, 1500));
-    return send();
-  });
+  // Monad's RPC can report a stale transaction count right after a confirmation, so back-to-back
+  // transactions (approve then buy, register then link) would reuse a nonce. Track it here too.
+  const send = async () => {
+    const chainCount = await publicClient.getTransactionCount({ address: session.address, blockTag: "pending" });
+    const nonce = Math.max(chainCount, nextNonce.get(session.address) ?? 0);
+    const h = await session.wallet.writeContract({ ...req, gas: limit, nonce } as never);
+    nextNonce.set(session.address, nonce + 1);
+    return h;
+  };
+  let hash: `0x${string}` | undefined;
+  for (let attempt = 0; !hash; attempt++) {
+    try { hash = await send(); } catch (e) {
+      if (attempt >= 2 || !/invalid params|Missing or invalid|insufficient funds|nonce/i.test(String((e as Error).message))) throw e;
+      await new Promise((r) => setTimeout(r, 1500));
+    }
+  }
   const receipt = await publicClient.waitForTransactionReceipt({ hash, pollingInterval: 250 });
   if (receipt.status !== "success") throw new Error("The transaction was reverted");
   return { hash, block: Number(receipt.blockNumber), ms: Math.round(performance.now() - started) };
 }
+
+const nextNonce = new Map<string, number>();
 
 async function untilFunded(address: Address, need: bigint) {
   for (let i = 0; i < 12; i++) {

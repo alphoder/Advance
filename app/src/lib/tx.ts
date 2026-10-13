@@ -20,7 +20,9 @@ export async function sendTx<const abi extends Abi, fn extends ContractFunctionN
   // 1.5x headroom so a base-fee bump can't strand it; Monad charges the actual price, so this costs nothing extra.
   const fees = await publicClient.estimateFeesPerGas();
   const maxFeePerGas = (fees.maxFeePerGas * 3n) / 2n, maxPriorityFeePerGas = fees.maxPriorityFeePerGas;
-  const need = limit * maxFeePerGas;
+  // x2: right after an earlier transaction, Monad's node still budgets that one's worst-case cost too
+  // ("Signer had insufficient balance" with enough MON for this one alone). Unused fee stays in the account.
+  const need = limit * maxFeePerGas * 2n;
   await api("/api/gas", { address: session.address, need: need.toString() }, 25_000).catch(() => undefined);
   await untilFunded(session.address, need);
   // Monad's RPC can report a stale transaction count right after a confirmation, so back-to-back

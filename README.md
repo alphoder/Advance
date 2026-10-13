@@ -8,13 +8,15 @@ The credit line that repays itself. Advance pays freelancers, sellers and AI age
 
 ---
 
-## The problem
+## Why it's needed
 
-- Freelancers finish the work, then wait **30 to 90 days** for the invoice to clear. Rent and payroll don't wait.
-- Banks won't lend against an invoice they can't verify. The fast options cost **7 to 15% for two weeks**.
-- The people hit hardest are the internet's new workforce: paid in stablecoins by clients abroad, with real, regular income and no credit history any lender recognises.
+**The people.** The World Bank counts **154 to 435 million online gig workers**, up to 12.5% of the global workforce, with demand up 41% since 2016 and 40% of platform traffic from low- and middle-income countries ([AP](https://www.ksl.com/article/news/business/online-gig-work-is-growing-rapidly-but-workers-lack-job-protections-a-world-bank-report-says/50725351), [SIA](https://www.staffingindustry.com/news/global-daily-news/world-bank-estimates-there-are-435-million-online-gig-workers-globally)).
 
-Their income is already onchain. Advance turns it into credit, and makes repayment impossible to skip.
+**The wait.** Across 100,000+ freelancers, **29% of invoices are paid late** ([Bonsai data via Plutio](https://www.plutio.com/freelancer-magazine/late-invoice-payments)). Net-30 terms already mean a month without pay; late invoices add weeks more. In the UK, freelancers waiting on late invoices have turned to payday lenders ([Insider](https://www.insider.co.uk/news/survey-freelancers-turning-payday-lenders-9894632)).
+
+**The gap.** Businesses solve this with invoice factoring, a market that moves **trillions of dollars of receivables a year** ([Market.us](https://market.us/report/invoice-factoring-market/)). Individuals can't: banks don't lend against a freelancer's invoice, and the fast options cost **7 to 15% for two weeks**. The hardest hit are paid in stablecoins by clients abroad, with real, regular income and no credit history any lender recognises.
+
+**The opening.** That income is already onchain, public and verifiable. Advance turns it into credit, and on Monad repayment can come out of every single payment, so it can't be skipped.
 
 ## How it works
 
@@ -53,7 +55,7 @@ Every number on screen is read from the chain. Every action links to its proof o
 |---|---|
 | [`AdvancePool`](contracts/src/AdvancePool.sol) | Two tranches. Losses hit Boost first. 90% of fees to savers. Lending capped at 90% of the pool. |
 | [`CreditLine`](contracts/src/CreditLine.sol) | Tiered limits, flat 2% fee, fee repaid before principal, public default after 30 days. Draws onchain scratch cards for fast repayment. Chainlink CRE receiver. |
-| [`Receivables`](contracts/src/Receivables.sol) | One payment address per earner (CREATE2). Splits every payment atomically. Gasless client payments via EIP-3009. Never holds funds after a call. |
+| [`Receivables`](contracts/src/Receivables.sol) | One payment address per earner (CREATE2, shareable before it exists). Splits every payment atomically. Gasless client payments via EIP-3009. Never holds funds after a call. |
 | [`AgentCreditAdapter`](contracts/src/AgentCreditAdapter.sol) | Credit for ERC-8004-registered AI agents. Only the owner can opt an agent in. |
 | [`CreditFiles`](contracts/src/CreditFiles.sol) | Encrypted invoices onchain, readable only by the lender the borrower chooses. |
 | [`GasTank`](contracts/src/GasTank.sol) | Covers every user's network fees. Nobody ever needs to hold MON. |
@@ -61,6 +63,81 @@ Every number on screen is read from the chain. Every action links to its proof o
 | [CRE workflow](cre/advance-score/main.ts) | A Chainlink DON fetches the score, agrees on the limit and writes it onchain. No single key decides who gets credit. |
 | [App](app/src) | Full website (how it works, security, 15 attack scenarios) and dashboard: borrow, get paid, score, history, documents, savings, market, agents, rewards. |
 | [Ask Advance](app/src/app/api/chat/route.ts) | AI assistant that reads the user's live account and tells them exactly how to reach the next level. |
+
+## Architecture
+
+```
+┌──────────────────────── Browser ────────────────────────┐
+│  Next.js app · Mera passkey derives three keys:         │
+│    0 wallet · 1 document encryption · 2 AI-agent wallet  │
+│  Signs its own txs: draw, deposit, trade, register agent│
+└───────────────┬───────────────────────────┬─────────────┘
+                │ /api                      │ signed txs
+┌───────────────▼───────────────┐           │
+│  Server (Vercel)              │           │
+│  score   ◀── Envio HyperSync  │           │
+│  relayer ─ setLimit, open     │           │
+│            account, relay     │           │
+│            client payments    │           │
+│  GasTank.drip ─ fee top-ups   │           │
+│  chat    ──▶ Gemini           │           │
+└───────────────┬───────────────┘           │
+                ▼                           ▼
+┌─────────────────────────── Monad ────────────────────────────┐
+│  CreditLine ◀──▶ AdvancePool ──▶ Steady / Boost tokens ──▶ Kuru│
+│      ▲                                                        │
+│  ReceivablesAccount (one per earner) · CreditFiles · GasTank  │
+│  AgentCreditAdapter ──▶ ERC-8004 registry                     │
+└──────▲───────────────────────────────────────────────────────┘
+       │ onReport
+ Chainlink CRE DON ── fetches score API ── median consensus ── forwarder
+```
+
+**Flows**
+
+| | Steps |
+|---|---|
+| **Borrow** | `/api/apply` scores the address from HyperSync history → scorer writes `setLimit` (capped by tier) → borrower signs `CreditLine.draw` → pool sends AUSD. |
+| **Repay** | Client signs an EIP-3009 transfer → relayer submits `ReceivablesAccount.payWithAuthorization` → one transaction: ≥20% to `CreditLine.repay` (fee first, then principal) → rest to the earner. Full repayment raises the tier and draws a scratch card. |
+| **Save** | `AdvancePool.deposit` mints Steady or Boost shares. Fees raise the share price. Exit with `withdraw` or sell Boost on Kuru. |
+| **Agents** | Owner registers the agent in ERC-8004 → `linkAgent` opens its payment address → customers pay it → it's scored and draws like any earner. |
+| **Documents** | Encrypted in the browser with key 1 → stored as `CreditFiles` events → shared by ECDH to one lender's passkey key. |
+
+**Who can do what**
+
+| Role | Can | Can't |
+|---|---|---|
+| Borrower | Draw up to their limit, repay faster (raise the split above 20%) | Lower the split, raise their own limit |
+| Scorer key | Set limits, capped by tier | Exceed a tier cap, move funds. Can be paused (`setScorer(0)`) |
+| CRE forwarder | Deliver DON-agreed limits | Anything else |
+| Relayer | Pay gas, submit client-signed payments, call `GasTank.drip` | Move anyone's funds or forge a payment |
+| Owner | Mark a default after 30 days, set scorer, forwarder, treasury | Touch deposits or user balances |
+
+**Repo**
+
+```
+contracts/   Solidity + Foundry tests (src, test, script)
+app/         Next.js: site pages, dashboard, /api routes, server (score, relayer, logs)
+cre/         Chainlink CRE workflow + broadcast simulation log
+scripts/     testnet deploy, local AI-agent setup
+```
+
+## Business model
+
+Revenue is the advance fee: **2% flat**. **90% goes to savers, 10% to Advance**, enforced in the deployed contract.
+
+| On a $100 advance | Repaid in 30 days | Repaid in 7 days |
+|---|---|---|
+| Fee | $2.00 | $2.00 |
+| Average scratch card | −$0.17 | −$0.70 |
+| Advances the same $100 funds per month | 1 | about 4 |
+| Savers earn per month | $1.64 | $4.69 |
+
+Fast repayment costs a bigger reward but turns the same dollars over four times, so scratch cards pay for themselves.
+
+**Next revenue lines:** partner apps that embed "get paid early" and share the fee · paid credit-score lookups from the public repayment record · gift-card margin · higher-fee agent credit · management fees on institutional Steady capital.
+
+**Growth:** start with contributors already paid in AUSD on Monad, then partner with invoicing, payroll and marketplace apps. Limits grow only with repayment, so good borrowers stay.
 
 ## Built with
 

@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { ArrowDown, ArrowUp } from "@phosphor-icons/react";
 import { useAccount } from "@/lib/account";
-import { sendTx } from "@/lib/tx";
+import { sendTx, api } from "@/lib/tx";
 import { erc20Abi, kuruBookAbi, KURU } from "@/lib/abi";
-import { D, publicClient } from "@/lib/chain";
+import { D, publicClient, IS_TESTNET } from "@/lib/chain";
 import { AddressLink, Button, ErrorNote, Label, Panel, Proof, fmtUsd } from "./ui";
 
 /** Boost shares on a Kuru order book; the pool's share value is shown beside it as fair value. */
@@ -53,6 +53,12 @@ export function KuruPanel({ nav, myShares, onDone }: { nav: number; myShares: nu
         setLast(await sendTx(session, { address: market, abi: kuruBookAbi, functionName: "placeAndExecuteMarketSell", args: [(size * KURU.sizePrecision) / 1_000_000n, minOut, false, false] }));
       } else {
         const dollars = BigInt(usd);
+        // Testnet: top up test dollars when short, so a first-time saver can buy straight away.
+        const bal = await publicClient.readContract({ address: D.ausd, abi: erc20Abi, functionName: "balanceOf", args: [session.address] });
+        if (bal < dollars * 1_000_000n) {
+          if (!IS_TESTNET) throw new Error(`You need ${fmtUsd(usd)} in your account to buy this.`);
+          await api("/api/faucet", { address: session.address, amount: 1000 });
+        }
         const minOut = BigInt(Math.floor((usd / book.ask) * 0.97 * 1e6));
         await sendTx(session, { address: D.ausd, abi: erc20Abi, functionName: "approve", args: [market, dollars * 1_000_000n] });
         setLast(await sendTx(session, { address: market, abi: kuruBookAbi, functionName: "placeAndExecuteMarketBuy", args: [dollars * KURU.pricePrecision, minOut, false, false] }));

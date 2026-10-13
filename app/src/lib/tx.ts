@@ -16,7 +16,10 @@ export async function sendTx<const abi extends Abi, fn extends ContractFunctionN
   const limit = (gas * 115n) / 100n;
   // Monad requires gas limit × max fee up front (contract-creating calls like linking an agent need
   // ~0.13 MON), so ask the relayer for exactly that, then wait until the node checking us can see it.
-  const { maxFeePerGas } = await publicClient.estimateFeesPerGas();
+  // Sign with these exact fees: the wallet's own estimate can come out higher than what we topped up for.
+  // 1.5x headroom so a base-fee bump can't strand it; Monad charges the actual price, so this costs nothing extra.
+  const fees = await publicClient.estimateFeesPerGas();
+  const maxFeePerGas = (fees.maxFeePerGas * 3n) / 2n, maxPriorityFeePerGas = fees.maxPriorityFeePerGas;
   const need = limit * maxFeePerGas;
   await api("/api/gas", { address: session.address, need: need.toString() }, 25_000).catch(() => undefined);
   await untilFunded(session.address, need);
@@ -25,7 +28,7 @@ export async function sendTx<const abi extends Abi, fn extends ContractFunctionN
   const send = async () => {
     const chainCount = await publicClient.getTransactionCount({ address: session.address, blockTag: "pending" });
     const nonce = Math.max(chainCount, nextNonce.get(session.address) ?? 0);
-    const h = await session.wallet.writeContract({ ...req, gas: limit, nonce } as never);
+    const h = await session.wallet.writeContract({ ...req, gas: limit, nonce, maxFeePerGas, maxPriorityFeePerGas } as never);
     nextNonce.set(session.address, nonce + 1);
     return h;
   };

@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { plainError } from "./errors";
 import { createWalletClient, http, type Address, type WalletClient, type Account } from "viem";
 import { privateKeyToAccount, generatePrivateKey } from "viem/accounts";
 import { keccak256, concatHex, toHex, hexToBytes, bytesToHex, type Hex } from "viem";
@@ -70,7 +71,7 @@ function friendly(e: unknown) {
         return "Open Advance over https to sign in.";
     }
   }
-  return e instanceof Error ? e.message : "Something went wrong";
+  return plainError(e);
 }
 
 const store = {

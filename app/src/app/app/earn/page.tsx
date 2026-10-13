@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { plainError } from "@/lib/errors";
 import { useState } from "react";
 import { motion } from "motion/react";
 import { ShieldCheck, Rocket, Coins } from "@phosphor-icons/react";
@@ -148,7 +149,7 @@ function TrancheCard({ name, tranche, price, size, blurb, pos, wallet, onDone, a
             </button>
           )}
           {last && <div className="[&_*]:!text-current"><Proof hash={last.hash} block={last.block} ms={last.ms} /></div>}
-          {error && <p role="alert" className="rounded-xl bg-black/25 px-3 py-2 text-[13px]">{error}</p>}
+          {error && <p role="alert" className="rounded-xl bg-black/25 px-3 py-2 text-[13px]">{plainError(error)}</p>}
         </div>
       )}
     </div>

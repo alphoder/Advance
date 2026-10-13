@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { plainError } from "@/lib/errors";
 import type { ButtonHTMLAttributes, PointerEvent, ReactNode } from "react";
 import { ArrowUpRight, CircleNotch, Cube, WarningCircle } from "@phosphor-icons/react";
 import { txUrl, addressUrl, IS_LOCAL, chain, D } from "@/lib/chain";
@@ -124,6 +125,7 @@ export function Logo({ className = "" }: { className?: string }) {
 
 export function ErrorNote({ children }: { children?: ReactNode }) {
   if (!children) return null;
+  if (typeof children === "string") children = plainError(children); // every error on the site reads as plain English
   return (
     <p role="alert" className="flex items-start gap-2 rounded-xl border border-danger/30 bg-danger-soft px-3.5 py-2.5 text-[13.5px] text-danger">
       <WarningCircle className="mt-0.5 size-4 shrink-0" weight="fill" />

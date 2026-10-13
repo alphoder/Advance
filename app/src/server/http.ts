@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAddress, getAddress, type Address } from "viem";
+import { plainError } from "@/lib/errors";
 
 /** Wraps a handler: JSON in/out, readable errors (never stack traces) to the client. */
 export function handler<T>(fn: (req: Request) => Promise<T>) {
@@ -34,10 +35,7 @@ export async function body(req: Request): Promise<Record<string, unknown>> {
   }
 }
 
-function friendly(e: unknown) {
-  const m = e instanceof Error ? (e as { shortMessage?: string }).shortMessage ?? e.message : String(e);
-  return m.split("\n")[0].slice(0, 200);
-}
+const friendly = (e: unknown) => plainError(e);
 
 // ponytail: per-process rate limit; good enough for a single-instance demo deployment.
 const hits = new Map<string, number>();

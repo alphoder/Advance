@@ -48,7 +48,7 @@ Every number on screen is read from the chain. The only simulated thing is who t
 | [`CreditFiles`](contracts/src/CreditFiles.sol) | Encrypted credit documents and lender grants, stored as event data. Ciphertext only. |
 | [`TestAUSD`](contracts/src/TestAUSD.sol) | Testnet only: a 6-decimal dollar with real EIP-3009 signatures and a public faucet. Mainnet uses real AUSD. |
 
-**Tests:** `cd contracts && forge test` runs 15 tests. They include two 1,000-run fuzz tests: *repayment + payout = payment* with the account always ending empty, and *a scratch card is never worth the fee* across random luck, timing and amounts. Plus tests of scratch cards (client repayment earns one, self-repayment earns none, slower earns less, default wipes points), of the loss waterfall (junior first, then senior), EIP-3009 replay and forgery rejection, the CRE receiver, and agent linking. `cd app && pnpm check` verifies the credit-file cryptography.
+**Tests:** `cd contracts && forge test` runs 16 tests. They include two 1,000-run fuzz tests: *repayment + payout = payment* with the account always ending empty, and *a scratch card is never worth the fee* across random luck, timing and amounts. Plus tests of scratch cards (client repayment earns one, self-repayment earns none, slower earns less, default wipes points), of the loss waterfall (junior first, then senior), EIP-3009 replay and forgery rejection, the CRE receiver, and agent linking. `cd app && pnpm check` verifies the credit-file cryptography.
 
 ## Rewards, the card, and the assistant
 
@@ -88,7 +88,8 @@ Monad charges the **gas limit you declare**. Every transaction Advance sends est
 ### Chainlink CRE
 - **Requirement:** build, simulate or deploy a CRE workflow used as an orchestration layer.
 - **How:** [`cre/advance-score`](cre/advance-score/main.ts). On a cron trigger, each DON node calls the Advance scoring API, the DON reaches consensus on each borrower's limit (median), and the signed report is written to `CreditLine.onReport` through the CRE forwarder. Limits then no longer depend on one server key.
-- **Proof:** simulation log `_link_` · onchain write `_tx_`
+- **Proof (simulated with `--broadcast`, writing to Monad testnet):** [simulation log](cre/simulation-broadcast.log) · [onchain write](https://testnet.monadexplorer.com/tx/0xa87e7d1dbf127c79c03ec89057991bd9251acc2a8c8a0221ef15ea4cbe5a91ce). A fresh borrower was paid by four clients but had no limit (`available() = 0`). The workflow fetched their score from the live API, the DON agreed on $50, and the report went through Chainlink's simulation forwarder (`0xB9F7…d192`, set with `setForwarder`) into `CreditLine.onReport`: `available()` became $50. Our server key took no part in setting it.
+- **Run it:** `cd cre/advance-score && bun install && cd .. && cre workflow simulate advance-score --target staging-settings --broadcast` (needs `cre login` and `CRE_ETH_PRIVATE_KEY` in `cre/.env`).
 
 ### Mera-Powered UX
 - **Requirement:** Mera is the entire account layer: no seed phrase, no extension, no custody backend.
@@ -118,6 +119,7 @@ Monad charges the **gas limit you declare**. Every transaction Advance sends est
 | TestAUSD | [`0xC9f1…D1Fd`](https://testnet.monadexplorer.com/address/0xC9f1484d32aAae11EF9abFE86EDE8BCa1371D1Fd) | |
 | CreditFiles | [`0x9238…3b97`](https://testnet.monadexplorer.com/address/0x9238b3aAdC29017A0b7b02Ad0CaCFFA953633b97) | |
 | AgentCreditAdapter | [`0x0729…9F2a`](https://testnet.monadexplorer.com/address/0x07290F0d34FA229F9A6b94F15B1614b3E36F9F2a) | |
+| GasTank (fee top-ups) | [`0x9a05…9378`](https://testnet.monadexplorer.com/address/0x9a056b971c08293a07C344A604F59A0A0a3f9378) | |
 | Kuru advJR/AUSD market | [`0xc87C…b26a`](https://testnet.monadexplorer.com/address/0xc87C44c02Bd90408bd0DB896939aF8aFdFa3b26a) | |
 
 ## Run it yourself
@@ -138,7 +140,7 @@ To deploy to Monad testnet, run `./scripts/deploy-testnet.sh`. It needs `PRIVATE
 ## Honest limits
 
 - **Income redirection:** a borrower can tell clients to pay a different address after borrowing. This is the core open risk of repayment-at-source. We mitigate it with small starting limits, tiers that rise only through repayment, defaults recorded publicly onchain, and Boost absorbing losses first. SDK integrations where the paying app enforces routing are the long-term fix.
-- **Scorer trust:** until the CRE workflow is deployed, one scorer key sets limits. Tier caps bound the damage, and the scorer can be paused (`setScorer(address(0))`).
+- **Scorer trust:** the CRE workflow runs in simulation (deployment access is pending), so the live app's limits are still set by one scorer key. Tier caps bound the damage, and the scorer can be paused (`setScorer(address(0))`).
 - **Rewards:** scratch cards and trust points are live onchain; converting points to MON is not built yet. The Advance card and gift-card purchases are product UI until a card issuer and gift-card supplier are connected.
 - **Regulation:** this is a testnet build with a tiny mainnet demo. A real launch would go through licensed partners in each market.
 

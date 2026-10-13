@@ -1,0 +1,26 @@
+Initializing...
+Loading settings...
+Checking RPC connectivity...
+Compiling workflow...
+✓ Workflow compiled
+✓ Simulation limits enabled
+  HTTP: req=120kb resp=250kb timeout=10s | ConfHTTP: req=125kb resp=500kb timeout=1m30s | Consensus obs=25kb | ChainWrite evm_report=50kb evm_gas=10000000 solana_report=265b solana_cu=300000 | WASM binary=100mb compressed=20mb
+  Binary hash: 178dcfba1f6d8f9fb417ff45f835afdfd9972a913053d2be550f0317ea15468b
+  Config hash: bcd70f46a41d9a6e6b2d375b589164b6ffd367899491473d1b496a184ff9f0a2
+2026-10-14T02:34:57Z [SIMULATION] Simulator Initialized
+
+2026-10-14T02:34:57Z [SIMULATION] Running trigger trigger=cron-trigger@1.0.0
+2026-10-14T02:34:58Z [USER LOG] borrower 0x28daE279Cb24BB9b1bc5D4B32A666Dd4513F10D9: DON-agreed limit 50 AUSD
+2026-10-14T02:35:00Z [USER LOG] limit written onchain: 0xa87e7d1dbf127c79c03ec89057991bd9251acc2a8c8a0221ef15ea4cbe5a91ce
+
+✓ Workflow Simulation Result:
+"0xa87e7d1dbf127c79c03ec89057991bd9251acc2a8c8a0221ef15ea4cbe5a91ce"
+
+2026-10-14T02:35:00Z [SIMULATION] Execution finished signal received
+2026-10-14T02:35:00Z [SIMULATION] Skipping WorkflowEngineV2
+
+╭──────────────────────────────────────────────────────╮
+│ Simulation complete! Ready to deploy your workflow?  │
+│                                                      │
+│ Run cre account access to request deployment access. │
+╰──────────────────────────────────────────────────────╯

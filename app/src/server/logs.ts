@@ -24,7 +24,37 @@ const HYPERSYNC = `https://${CHAIN_ID}.hypersync.xyz/query`;
 export async function fetchLogs(q: LogQuery): Promise<RawLog[]> {
   if (IS_LOCAL || process.env.LOGS_VIA_RPC === "1") return rpcLogs(q); // LOGS_VIA_RPC: local forks only
   if (!TOKEN) throw new Error("ENVIO_API_TOKEN is required to read history on Monad");
-  return hypersyncLogs(q);
+  return cachedHypersync(q);
+}
+
+/**
+ * HyperSync rate-limits (429), and every dashboard polls. So per query: identical requests share one
+ * call, results are reused for FRESH_MS, later calls fetch only blocks after the last one seen, and a
+ * 429 falls back to the last good result instead of an error.
+ * ponytail: per-instance memory; a shared cache (KV) if many server instances hammer the same queries.
+ */
+const FRESH_MS = 2500;
+type Entry = { logs: RawLog[]; next: number; at: number; pending?: Promise<RawLog[]> };
+const seen = new Map<string, Entry>();
+
+function cachedHypersync(q: LogQuery): Promise<RawLog[]> {
+  const key = JSON.stringify(q);
+  const e = seen.get(key);
+  if (e?.pending) return e.pending;
+  if (e && Date.now() - e.at < FRESH_MS) return Promise.resolve(e.logs);
+  const pending = hypersyncLogs({ ...q, fromBlock: e ? e.next : q.fromBlock })
+    .then(({ logs, next }) => {
+      const all = e ? e.logs.concat(logs) : logs;
+      seen.set(key, { logs: all, next, at: Date.now() });
+      return all;
+    })
+    .catch((err) => {
+      if (e) { seen.set(key, { ...e, pending: undefined }); return e.logs; } // stale beats an error
+      seen.delete(key);
+      throw err;
+    });
+  seen.set(key, { logs: e?.logs ?? [], next: e?.next ?? q.fromBlock, at: e?.at ?? 0, pending });
+  return pending;
 }
 
 async function rpcLogs(q: LogQuery): Promise<RawLog[]> {
@@ -58,24 +88,18 @@ type HsLog = {
 };
 type HsBatch = { logs?: HsLog[]; blocks?: { number: number; timestamp: Hex | number }[] };
 
-async function hypersyncLogs(q: LogQuery): Promise<RawLog[]> {
+async function hypersyncLogs(q: LogQuery): Promise<{ logs: RawLog[]; next: number }> {
   const out: RawLog[] = [];
   let from = q.fromBlock;
   for (let page = 0; page < 50; page++) {
-    const res = await fetch(HYPERSYNC, {
-      method: "POST",
-      headers: { "content-type": "application/json", authorization: `Bearer ${TOKEN}` },
-      body: JSON.stringify({
-        from_block: from,
-        logs: [{ address: q.address ?? [], topics: q.topics.map((t) => t ?? []) }],
-        field_selection: {
-          log: ["address", "topic0", "topic1", "topic2", "topic3", "data", "block_number", "transaction_hash", "log_index"],
-          block: ["number", "timestamp"],
-        },
-      }),
-      cache: "no-store",
+    const res = await hsFetch({
+      from_block: from,
+      logs: [{ address: q.address ?? [], topics: q.topics.map((t) => t ?? []) }],
+      field_selection: {
+        log: ["address", "topic0", "topic1", "topic2", "topic3", "data", "block_number", "transaction_hash", "log_index"],
+        block: ["number", "timestamp"],
+      },
     });
-    if (!res.ok) throw new Error(`HyperSync ${res.status}: ${await res.text()}`);
     const body = (await res.json()) as { data: HsBatch[] | HsBatch; next_block: number; archive_height?: number };
     const batches = Array.isArray(body.data) ? body.data : [body.data];
     const times = new Map<number, number>();
@@ -91,11 +115,29 @@ async function hypersyncLogs(q: LogQuery): Promise<RawLog[]> {
           logIndex: Number(l.log_index),
           timestamp: times.get(Number(l.block_number)) ?? 0,
         });
-    if (!body.next_block || (body.archive_height !== undefined && body.next_block >= body.archive_height)) break;
-    if (body.next_block <= from) break;
-    from = body.next_block;
+    const stop = !body.next_block || (body.archive_height !== undefined && body.next_block >= body.archive_height) || body.next_block <= from;
+    if (body.next_block > from) from = body.next_block;
+    if (stop) break;
   }
-  return out.sort((a, b) => a.blockNumber - b.blockNumber || a.logIndex - b.logIndex);
+  return { logs: out.sort((a, b) => a.blockNumber - b.blockNumber || a.logIndex - b.logIndex), next: from };
+}
+
+/** One HyperSync call; on 429 waits (Retry-After, else 1s) and tries once more. */
+async function hsFetch(query: object) {
+  for (let attempt = 0; ; attempt++) {
+    const res = await fetch(HYPERSYNC, {
+      method: "POST",
+      headers: { "content-type": "application/json", authorization: `Bearer ${TOKEN}` },
+      body: JSON.stringify(query),
+      cache: "no-store",
+    });
+    if (res.ok) return res;
+    if (res.status === 429 && attempt === 0) {
+      await new Promise((r) => setTimeout(r, Math.min(3000, Number(res.headers.get("retry-after")) * 1000 || 1000)));
+      continue;
+    }
+    throw new Error(res.status === 429 ? "The history service is busy. Retrying shortly." : `HyperSync ${res.status}: ${await res.text()}`);
+  }
 }
 
 export const addrTopic = (a: Address): Hex => `0x${a.slice(2).toLowerCase().padStart(64, "0")}`;

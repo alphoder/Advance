@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "./tx";
 
 /** Polls a GET endpoint. Monad makes a block every ~0.4s, so 1.5s feels live without hammering the API. */
-export function usePoll<T>(path: string | undefined, ms = 1500) {
+export function usePoll<T>(path: string | undefined, ms = 3000) {
   const [state, setState] = useState<{ path?: string; data?: T; error?: string }>({});
   const current = useRef(path);
   current.current = path;

@@ -130,6 +130,7 @@ anvil --block-time 1 &
 forge script script/Deploy.s.sol --rpc-url http://127.0.0.1:8545 --broadcast --private-key <anvil key 0>
 cd ../app && cp .env.example .env.local && pnpm install && pnpm dev
 curl -X POST localhost:3000/api/admin/setup -H 'content-type: application/json' -d '{"secret":"local"}'
+./scripts/local-agents.sh   # optional: AI-agent credit on anvil (stand-in ERC-8004 registry)
 ```
 
 To deploy to Monad testnet, run `./scripts/deploy-testnet.sh`. It needs `PRIVATE_KEY` in `.env`, funded with testnet MON.

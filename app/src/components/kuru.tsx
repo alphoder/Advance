@@ -64,6 +64,7 @@ export function KuruPanel({ nav, myShares, onDone }: { nav: number; myShares: nu
         setLast(await sendTx(session, { address: market, abi: kuruBookAbi, functionName: "placeAndExecuteMarketBuy", args: [dollars * KURU.pricePrecision, minOut, false, false] }));
       }
       onDone();
+      setTimeout(onDone, 2500); // balances can lag the receipt by a block or two on Monad
     } catch (e) {
       setError((e as Error).message);
     } finally {

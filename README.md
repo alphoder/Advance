@@ -7,7 +7,7 @@ Advance is an onchain credit protocol on Monad. It gives freelancers, small sell
 > Visa and Credit Coop proved this repayment model for businesses: $2.5B financed, zero defaults. Advance brings it to individuals and their agents, which only works on a chain where every payment settles in under a second for a fraction of a cent.
 
 - **Track:** 1, Onchain Finance & Trading (undercollateralised lending priced on onchain credit history)
-- **Live app:** https://advance-monad.vercel.app (Monad testnet)
+- **Live app:** https://advance-monad.vercel.app (Monad testnet) · production deploys from the `release` branch (`git push origin main:release` publishes; pushes to `main` only create previews)
 - **Demo video (≤ 3 min):** _add URL_
 
 ---

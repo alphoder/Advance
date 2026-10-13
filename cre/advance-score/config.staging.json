@@ -1,10 +1,10 @@
 {
   "schedule": "0 */5 * * * *",
-  "scoreApi": "http://localhost:3000/api/score?address=",
-  "borrowers": ["0x0000000000000000000000000000000000000000"],
+  "scoreApi": "https://advance-monad.vercel.app/api/score?address=",
+  "borrowers": ["0x0fb6c90613ff62c8128498ce9eca543edf8260a3"],
   "evm": {
     "chainSelectorName": "monad-testnet",
-    "creditLine": "0x0000000000000000000000000000000000000000",
+    "creditLine": "0xef70B91F2482D81681A28fA3A81bFaFf4D6D4135",
     "gasLimit": "200000"
   }
 }

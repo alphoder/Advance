@@ -16,6 +16,7 @@ export type Deployment = {
   agentAdapter: Address;
   creditFiles: Address;
   kuruMarket?: Address;
+  gasTank?: Address; // holds the MON for visitors' fee top-ups (Monad's 10 MON reserve blocks EOA value sends)
 };
 
 const CHAINS: Record<number, { chain: Chain; deployment: Deployment; explorer?: string }> = {

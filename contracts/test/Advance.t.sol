@@ -8,6 +8,7 @@ import {AgentCreditAdapter} from "../src/AgentCreditAdapter.sol";
 import {AdvancePool} from "../src/AdvancePool.sol";
 import {CreditLine} from "../src/CreditLine.sol";
 import {ReceivablesAccount, ReceivablesFactory} from "../src/Receivables.sol";
+import {GasTank} from "../src/GasTank.sol";
 
 contract AdvanceTest is Test {
     TestAUSD ausd;
@@ -328,4 +329,16 @@ contract MockRegistry is ERC721("Agents", "AGENT") {
         _mint(to, id);
     }
 
+}
+
+contract GasTankTest is Test {
+    function test_GasTank_OnlyOperatorDrips() public {
+        GasTank tank = new GasTank(address(this));
+        vm.deal(address(tank), 1 ether);
+        tank.drip(payable(address(0xBEEF)), 0.3 ether);
+        assertEq(address(0xBEEF).balance, 0.3 ether);
+        vm.prank(address(0xBAD));
+        vm.expectRevert(GasTank.OnlyOperator.selector);
+        tank.drip(payable(address(0xBAD)), 0.1 ether);
+    }
 }

@@ -53,10 +53,19 @@ const FUEL_MIN = 150_000_000_000_000_000n; // 0.15 MON
 let fuel: { at: number; low: boolean } | undefined;
 export async function fuelLow() {
   if (fuel && Date.now() - fuel.at < 15_000) return fuel.low;
-  const bal = await publicClient.getBalance({ address: relayer.address });
-  fuel = { at: Date.now(), low: bal < FUEL_MIN };
+  let bal = await publicClient.getBalance({ address: relayer.address });
+  const tankBal = D.gasTank ? await publicClient.getBalance({ address: D.gasTank }) : 0n;
+  if (D.gasTank && bal < REFILL_BELOW && tankBal >= REFILL) { // the relayer pays its own gas from the tank
+    const hash = await wallet.writeContract({ address: D.gasTank, abi: tankAbi, functionName: "drip", args: [relayer.address, REFILL], gas: 80_000n });
+    await publicClient.waitForTransactionReceipt({ hash, timeout: 30_000 }).catch(() => {});
+    bal += REFILL;
+  }
+  fuel = { at: Date.now(), low: bal < FUEL_MIN || (D.gasTank !== undefined && tankBal < REFILL / 2n) };
   return fuel.low;
 }
+const REFILL = 1_000_000_000_000_000_000n; // 1 MON
+const REFILL_BELOW = 400_000_000_000_000_000n; // 0.4 MON
+export const tankAbi = parseAbi(["function drip(address to, uint256 amount)"]);
 export async function assertFuel() {
   if (await fuelLow()) throw new HttpError(503, "The demo is very busy right now. Please try again in a little while.");
 }

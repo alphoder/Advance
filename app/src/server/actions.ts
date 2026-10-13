@@ -1,7 +1,7 @@
 import { parseEther, parseSignature, type Address, type Hex } from "viem";
 import { D, publicClient, USD, IS_TESTNET } from "@/lib/chain";
 import { ausdAbi, creditAbi, factoryAbi, receivablesAbi, receiveAuthTypes, erc20Abi } from "@/lib/abi";
-import { send, wallet, relayer, demoAccount, signTransferAuth, tokenDomain, randomNonce, assertFuel } from "./relayer";
+import { send, wallet, relayer, demoAccount, signTransferAuth, tokenDomain, randomNonce, assertFuel, tankAbi } from "./relayer";
 import { HttpError } from "./http";
 
 export const dollars = (n: number) => BigInt(Math.round(n * 1e6)) * (USD / 1_000_000n);
@@ -73,7 +73,10 @@ export async function dripGas(to: Address, need = 0n) {
   const bal = await publicClient.getBalance({ address: to });
   if (need > 0n ? bal >= need : bal >= base / 2n) return undefined; // already covered: nothing to send
   await assertFuel();
+  // Through the tank: Monad reverts value sends that take an EOA under its 10 MON reserve. send() throws on a revert.
+  if (D.gasTank) return (await send({ address: D.gasTank, abi: tankAbi, functionName: "drip", args: [to, target - bal] })).hash;
   const hash = await wallet.sendTransaction({ to, value: target - bal, gas: 21_000n, account: relayer, chain: wallet.chain });
-  await publicClient.waitForTransactionReceipt({ hash, timeout: 30_000 }).catch(() => {}); // the client re-checks the balance itself
+  const r = await publicClient.waitForTransactionReceipt({ hash, timeout: 30_000 }).catch(() => undefined); // the client re-checks the balance itself
+  if (r?.status === "reverted") throw new HttpError(503, "The demo is very busy right now. Please try again in a little while.");
   return hash;
 }

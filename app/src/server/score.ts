@@ -47,10 +47,10 @@ function transfers(logs: RawLog[]) {
 
 const cache = new Map<string, { at: number; result: Promise<ScoreResult> }>();
 
-export function scoreAddress(address: Address): Promise<ScoreResult> {
+export function scoreAddress(address: Address, fresh = false): Promise<ScoreResult> {
   const key = address.toLowerCase();
   const hit = cache.get(key);
-  if (hit && Date.now() - hit.at < 5_000) return hit.result;
+  if (!fresh && hit && Date.now() - hit.at < 5_000) return hit.result;
   const result = compute(getAddress(address));
   cache.set(key, { at: Date.now(), result });
   result.catch(() => cache.delete(key));

@@ -75,6 +75,16 @@ function mirror(): Promise<RawLog[]> {
   return pending;
 }
 
+/** Wait (up to ~20s) until the testnet mirror has indexed `block`, so a write just made is visible to the next read. */
+export async function syncedTo(block: number) {
+  if (IS_LOCAL || CHAIN_ID !== 10143 || !TOKEN) return;
+  for (let i = 0; i < 20 && (mir?.next ?? 0) <= block; i++) {
+    if (mir && !mir.pending) mir.at = 0; // skip the MIRROR_MS wait
+    await mirror().catch(() => {});
+    if ((mir?.next ?? 0) <= block) await new Promise((r) => setTimeout(r, 1000));
+  }
+}
+
 /**
  * HyperSync rate-limits (429), and every dashboard polls. So per query: identical requests share one
  * call, results are reused for FRESH_MS, later calls fetch only blocks after the last one seen, and a

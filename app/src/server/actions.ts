@@ -92,8 +92,8 @@ export async function keepKuruAtNav() {
   const market = D.kuruMarket;
   if (!market || Date.now() - lastKeep < 60_000) return;
   lastKeep = Date.now();
-  const STEP = 30_000_000n; // 30 advJR
-  for (let i = 0; i < 4; i++) {
+  const STEP = 10_000_000n; // 10 advJR: the testnet book is shallow, so small steps settle inside the band
+  for (let i = 0; i < 8; i++) {
     const [[bid], nav, inv] = await Promise.all([
       publicClient.readContract({ address: market, abi: kuruBookAbi, functionName: "bestBidAsk" }) as Promise<readonly [bigint, bigint]>,
       publicClient.readContract({ address: D.pool, abi: poolAbi, functionName: "sharePrice", args: [1] }) as Promise<bigint>,

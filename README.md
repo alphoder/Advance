@@ -4,7 +4,7 @@
 
 The credit line that repays itself. Advance pays freelancers, sellers and AI agents now against income already on its way, and every client payment settles it automatically: **20% to the advance, 80% to the earner, in one Monad transaction.** No collateral, no chasing, no paperwork.
 
-**[Live app](https://advance-monad.vercel.app)** (Monad testnet) · **Demo video:** _add URL_ · **Track 1:** Onchain Finance & Trading
+**[Live app](https://advance-monad.vercel.app)** (Monad testnet) · **[Demo video](https://youtu.be/IGWcAsne4Qw)** · **Track 1:** Onchain Finance & Trading
 
 ---
 
@@ -183,14 +183,14 @@ Fast repayment costs a bigger reward but turns the same dollars over four times,
 
 ## Bounties
 
-**Kuru: a new asset class.** First-loss credit exposure, tradable. [`KuruMarket.s.sol`](contracts/script/KuruMarket.s.sol) lists advJR/AUSD and seeds the vault at the pool's onchain share price, so the book opens at fair value. The app shows the book beside fair value and trades with a slippage guard.
+**Kuru: a new asset class.** ([video](https://youtu.be/vBYKXFB0Zp0)) First-loss credit exposure, tradable. [`KuruMarket.s.sol`](contracts/script/KuruMarket.s.sol) lists advJR/AUSD and seeds the vault at the pool's onchain share price, so the book opens at fair value. The app shows the book beside fair value and trades with a slippage guard.
 [Market](https://testnet.monadexplorer.com/address/0xc87C44c02Bd90408bd0DB896939aF8aFdFa3b26a) · [vault seeded at NAV](https://testnet.monadexplorer.com/tx/0xe9b38bf4d43e5d32ed1186f74f2890bad6d0d415711d77137871d2fe9bfd3dc0) · [first trade](https://testnet.monadexplorer.com/tx/0x617e1aeac9b4f3f5339489e5c799d7bdda5c2b2298e9f88c0f7105ff21ae08cd)
 
-**Envio: HyperSync powers the core feature.** [`server/logs.ts`](app/src/server/logs.ts) mirrors the protocol's history with one incremental query, so scoring works across any history length and load stays inside rate limits however many people use the site.
+**Envio: HyperSync powers the core feature.** ([video](https://youtu.be/cVRWSRJOKFc)) [`server/logs.ts`](app/src/server/logs.ts) mirrors the protocol's history with one incremental query, so scoring works across any history length and load stays inside rate limits however many people use the site.
 
-**Mera: passkeys are the entire account layer.** [`lib/account.tsx`](app/src/lib/account.tsx), [`lib/vault.ts`](app/src/lib/vault.ts). Index 0: wallet. Index 1: encryption key for private invoices. Index 2: the AI agent's wallet. `pnpm check` proves the owner and the chosen lender can decrypt, and a stranger can't.
+**Mera: passkeys are the entire account layer.** ([video](https://youtu.be/2my6HGYRwfo)) [`lib/account.tsx`](app/src/lib/account.tsx), [`lib/vault.ts`](app/src/lib/vault.ts). Index 0: wallet. Index 1: encryption key for private invoices. Index 2: the AI agent's wallet. `pnpm check` proves the owner and the chosen lender can decrypt, and a stranger can't.
 
-**Chainlink CRE: decentralised credit limits.** [`cre/advance-score`](cre/advance-score/main.ts). Simulated with `--broadcast` on Monad testnet: a borrower with no limit got $50 written by the DON report through the CRE forwarder.
+**Chainlink CRE: decentralised credit limits.** ([video of a real CLI run](https://youtu.be/rxc3e7_R5Xg)) [`cre/advance-score`](cre/advance-score/main.ts). Simulated with `--broadcast` on Monad testnet: a borrower with no limit got $50 written by the DON report through the CRE forwarder.
 Onchain writes: [run 1](https://testnet.monadexplorer.com/tx/0xa87e7d1dbf127c79c03ec89057991bd9251acc2a8c8a0221ef15ea4cbe5a91ce), [run 2](https://testnet.monadexplorer.com/tx/0xa1ddfe019cae56fdcb02bc26ad98a568db34b4c5c57fc5c0a796fc7dfcf9b3f4) · [simulation log](cre/simulation-broadcast.log). The simulation forwarder doesn't verify signatures, so it was [unset](https://testnet.monadexplorer.com/tx/0xf5165cfcc73728cfed45866f6474138a30428223a261e4a5e69c84edd27b3e19) after the run.
 
 ## Contracts (Monad testnet)

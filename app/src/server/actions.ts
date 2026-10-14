@@ -65,6 +65,9 @@ export async function demoClientPaysAccount(client: string, borrower: Address, a
 
 /** Gas drip: users never buy MON. Tops a new account up to a small working balance. */
 /** Tops a user up so their next transaction's fee is covered: at least the base amount, at most a cap. */
+/** Total MON one server instance may hand out per hour, so even a spread-out attack can't empty the GasTank fast. */
+const DRIP_PER_HOUR = parseEther(IS_TESTNET ? "6" : "1");
+let drips: { at: number; v: bigint }[] = [];
 export async function dripGas(to: Address, need = 0n) {
   const base = parseEther(IS_TESTNET ? "0.05" : "0.02");
   const cap = parseEther(IS_TESTNET ? "0.8" : "0.1"); // bounds what any one request can take from the relayer
@@ -73,6 +76,9 @@ export async function dripGas(to: Address, need = 0n) {
   const bal = await publicClient.getBalance({ address: to });
   if (need > 0n ? bal >= need : bal >= base / 2n) return undefined; // already covered: nothing to send
   await assertFuel();
+  drips = drips.filter((d) => Date.now() - d.at < 3_600_000);
+  if (drips.reduce((s, d) => s + d.v, 0n) + (target - bal) > DRIP_PER_HOUR) throw new HttpError(503, "The demo is very busy right now. Please try again in a little while.");
+  drips.push({ at: Date.now(), v: target - bal });
   // Through the tank: Monad reverts value sends that take an EOA under its 10 MON reserve. send() throws on a revert.
   if (D.gasTank) return (await send({ address: D.gasTank, abi: tankAbi, functionName: "drip", args: [to, target - bal] })).hash;
   const hash = await wallet.sendTransaction({ to, value: target - bal, gas: 21_000n, account: relayer, chain: wallet.chain });

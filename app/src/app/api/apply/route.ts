@@ -1,4 +1,4 @@
-import { handler, addr, body, rateLimit } from "@/server/http";
+import { handler, addr, body, rateLimit, fuelLimit } from "@/server/http";
 import { scoreAddress } from "@/server/score";
 import { syncedTo } from "@/server/logs";
 import { publicClient } from "@/lib/chain";
@@ -6,6 +6,7 @@ import { ensureAccount, setLimit, dripGas } from "@/server/actions";
 
 /** Score the borrower and, if approved, write the limit onchain (scorer key) and open their Advance address. */
 export const POST = handler(async (req) => {
+  fuelLimit(req);
   const borrower = addr((await body(req)).address);
   rateLimit(`apply:${borrower}`, 3_000);
   await syncedTo(Number(await publicClient.getBlockNumber())); // payments made a second ago must count

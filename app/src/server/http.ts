@@ -44,3 +44,18 @@ export function rateLimit(key: string, ms: number) {
   if (Date.now() - last < ms) throw new HttpError(429, "Slow down: try again in a few seconds");
   hits.set(key, Date.now());
 }
+
+const ipHits = new Map<string, number[]>();
+/**
+ * Per-IP budget for the endpoints that spend the demo's MON, so a script with fresh addresses can't drain it.
+ * Generous for a person (a full demo is ~30 calls), tight for a bot.
+ * ponytail: in-memory per server instance; move to a shared store (KV) if abuse spreads across instances.
+ */
+export function ipLimit(req: Request, bucket: string, max: number, windowMs: number) {
+  const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unknown";
+  const key = `${bucket}:${ip}`, now = Date.now();
+  const recent = (ipHits.get(key) ?? []).filter((t) => now - t < windowMs);
+  if (recent.length >= max) throw new HttpError(429, "You're going a bit fast for the demo. Please wait a minute and try again.");
+  recent.push(now); ipHits.set(key, recent);
+}
+export const fuelLimit = (req: Request) => ipLimit(req, "fuel", 80, 10 * 60_000);

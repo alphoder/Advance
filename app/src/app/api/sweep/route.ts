@@ -1,10 +1,11 @@
-import { handler, addr, body } from "@/server/http";
+import { handler, fuelLimit, addr, body } from "@/server/http";
 import { send } from "@/server/relayer";
 import { receivablesAbi, erc20Abi } from "@/lib/abi";
 import { D, publicClient } from "@/lib/chain";
 
 /** Keeper: splits plain transfers that landed on an Advance address. Permissionless onchain. */
 export const POST = handler(async (req) => {
+  fuelLimit(req);
   const account = addr((await body(req)).account, "account");
   const bal = await publicClient.readContract({ address: D.ausd, abi: erc20Abi, functionName: "balanceOf", args: [account] });
   if (bal === 0n) return { hash: null };

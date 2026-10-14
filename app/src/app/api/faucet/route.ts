@@ -1,7 +1,8 @@
-import { handler, addr, body, rateLimit } from "@/server/http";
+import { handler, addr, body, rateLimit, fuelLimit } from "@/server/http";
 import { faucet } from "@/server/actions";
 
 export const POST = handler(async (req) => {
+  fuelLimit(req);
   const b = await body(req);
   const to = addr(b.address);
   rateLimit(`faucet:${to}`, 5_000);

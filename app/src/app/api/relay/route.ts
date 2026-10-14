@@ -1,9 +1,10 @@
-import { handler, addr, body, HttpError } from "@/server/http";
+import { handler, fuelLimit, addr, body, HttpError } from "@/server/http";
 import { relayPayment, ensureAccount } from "@/server/actions";
 import type { Hex } from "viem";
 
 /** Relays a client's signed EIP-3009 payment to a borrower's Advance address. The client pays no gas. */
 export const POST = handler(async (req) => {
+  fuelLimit(req);
   const b = await body(req);
   const hex = (v: unknown) => {
     if (typeof v !== "string" || !/^0x[0-9a-fA-F]+$/.test(v)) throw new HttpError(400, "Invalid signature data");

@@ -2,7 +2,7 @@
   "schedule": "0 */5 * * * *",
   "scoreApi": "https://advance-monad.vercel.app/api/score?address=",
   "borrowers": [
-    "0x28daE279Cb24BB9b1bc5D4B32A666Dd4513F10D9"
+    "0xB63a63A0Dcc6cbF0a3010Ff2DA0209a7d696362a"
   ],
   "evm": {
     "chainSelectorName": "monad-testnet",

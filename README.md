@@ -191,7 +191,7 @@ Fast repayment costs a bigger reward but turns the same dollars over four times,
 **Mera: passkeys are the entire account layer.** [`lib/account.tsx`](app/src/lib/account.tsx), [`lib/vault.ts`](app/src/lib/vault.ts). Index 0: wallet. Index 1: encryption key for private invoices. Index 2: the AI agent's wallet. `pnpm check` proves the owner and the chosen lender can decrypt, and a stranger can't.
 
 **Chainlink CRE: decentralised credit limits.** [`cre/advance-score`](cre/advance-score/main.ts). Simulated with `--broadcast` on Monad testnet: a borrower with no limit got $50 written by the DON report through the CRE forwarder.
-[Onchain write](https://testnet.monadexplorer.com/tx/0xa87e7d1dbf127c79c03ec89057991bd9251acc2a8c8a0221ef15ea4cbe5a91ce) · [simulation log](cre/simulation-broadcast.log). The simulation forwarder doesn't verify signatures, so it was [unset](https://testnet.monadexplorer.com/tx/0xf5165cfcc73728cfed45866f6474138a30428223a261e4a5e69c84edd27b3e19) after the run.
+Onchain writes: [run 1](https://testnet.monadexplorer.com/tx/0xa87e7d1dbf127c79c03ec89057991bd9251acc2a8c8a0221ef15ea4cbe5a91ce), [run 2](https://testnet.monadexplorer.com/tx/0xa1ddfe019cae56fdcb02bc26ad98a568db34b4c5c57fc5c0a796fc7dfcf9b3f4) · [simulation log](cre/simulation-broadcast.log). The simulation forwarder doesn't verify signatures, so it was [unset](https://testnet.monadexplorer.com/tx/0xf5165cfcc73728cfed45866f6474138a30428223a261e4a5e69c84edd27b3e19) after the run.
 
 ## Contracts (Monad testnet)
 

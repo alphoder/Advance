@@ -1,6 +1,6 @@
 import { parseEther, parseSignature, type Address, type Hex } from "viem";
 import { D, publicClient, USD, IS_TESTNET } from "@/lib/chain";
-import { ausdAbi, creditAbi, factoryAbi, receivablesAbi, receiveAuthTypes, erc20Abi } from "@/lib/abi";
+import { ausdAbi, creditAbi, factoryAbi, receivablesAbi, receiveAuthTypes, erc20Abi, kuruBookAbi, poolAbi } from "@/lib/abi";
 import { send, wallet, relayer, demoAccount, signTransferAuth, tokenDomain, randomNonce, assertFuel, tankAbi } from "./relayer";
 import { HttpError } from "./http";
 
@@ -79,4 +79,27 @@ export async function dripGas(to: Address, need = 0n) {
   const r = await publicClient.waitForTransactionReceipt({ hash, timeout: 30_000 }).catch(() => undefined); // the client re-checks the balance itself
   if (r?.status === "reverted") throw new HttpError(503, "The demo is very busy right now. Please try again in a little while.");
   return hash;
+}
+
+/**
+ * Keeps the Kuru advJR book near the pool's NAV. Buyers push the AMM price up and the book is shallow on
+ * testnet, so when the best bid is more than 2% above NAV the relayer sells a little of its seeded Boost
+ * inventory into it: the same mint-at-NAV, sell-on-Kuru arbitrage any saver could do. At most once a minute.
+ * ponytail: sell side only (visitors buy far more than they sell); add a buy side if the book ever trades below NAV.
+ */
+let lastKeep = 0;
+export async function keepKuruAtNav() {
+  const market = D.kuruMarket;
+  if (!market || Date.now() - lastKeep < 60_000) return;
+  lastKeep = Date.now();
+  const STEP = 30_000_000n; // 30 advJR
+  for (let i = 0; i < 4; i++) {
+    const [[bid], nav, inv] = await Promise.all([
+      publicClient.readContract({ address: market, abi: kuruBookAbi, functionName: "bestBidAsk" }) as Promise<readonly [bigint, bigint]>,
+      publicClient.readContract({ address: D.pool, abi: poolAbi, functionName: "sharePrice", args: [1] }) as Promise<bigint>,
+      publicClient.readContract({ address: D.juniorToken, abi: erc20Abi, functionName: "balanceOf", args: [relayer.address] }),
+    ]);
+    if (Number(bid) / 1e18 <= (Number(nav) / 1e6) * 1.02 || inv < STEP) return;
+    await send({ address: market, abi: kuruBookAbi, functionName: "placeAndExecuteMarketSell", args: [STEP, 0n, false, false] });
+  }
 }

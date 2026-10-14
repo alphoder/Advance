@@ -1,5 +1,7 @@
 import { decodeEventLog, toEventSelector, type Hex } from "viem";
+import { after } from "next/server";
 import { handler, addr } from "@/server/http";
+import { keepKuruAtNav } from "@/server/actions";
 import { fetchLogs, addrTopic } from "@/server/logs";
 import { D, publicClient, USD } from "@/lib/chain";
 import { poolAbi, erc20Abi, creditAbi } from "@/lib/abi";
@@ -13,6 +15,7 @@ const read = (functionName: string, args: unknown[] = []) =>
 
 /** Pool health for everyone, plus the caller's position if `lender` is given. */
 export const GET = handler(async (req) => {
+  after(() => keepKuruAtNav().catch(() => {})); // after the response: never slows the page
   const lenderParam = new URL(req.url).searchParams.get("lender");
   const [senior, junior, outstanding, fees, losses, util, seniorPrice, juniorPrice, cash] = await Promise.all([
     read("seniorAssets"), read("juniorAssets"), read("outstanding"), read("totalFeesEarned"), read("totalLosses"),

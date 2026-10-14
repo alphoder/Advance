@@ -1,0 +1,27 @@
+# Keeps the live demo honest: a full end-to-end run after every production deploy, and a cheap health
+# check every 3 hours (catches low fuel or a failing dependency). A failed run emails the repo owner.
+name: Live demo check
+on:
+  push:
+    branches: [release]
+  schedule:
+    - cron: "17 */3 * * *"
+  workflow_dispatch:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm i --no-save viem@2.34.0
+      - name: Wait for the production deploy
+        if: github.event_name == 'push'
+        run: sleep 150
+      - name: Health only (scheduled)
+        if: github.event_name == 'schedule'
+        run: node scripts/smoke.mjs --health-only
+      - name: Full end-to-end (deploys and manual runs)
+        if: github.event_name != 'schedule'
+        run: node scripts/smoke.mjs
